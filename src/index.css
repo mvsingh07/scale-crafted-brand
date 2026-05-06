@@ -53,6 +53,33 @@
 
     --transition-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   }
+
+  .light {
+    --background: 220 30% 98%;
+    --foreground: 230 25% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 230 25% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 230 25% 10%;
+    --primary: 188 85% 38%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 268 70% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 18% 94%;
+    --muted-foreground: 230 12% 38%;
+    --accent: 188 85% 38%;
+    --accent-foreground: 0 0% 100%;
+    --border: 220 18% 88%;
+    --input: 220 18% 88%;
+    --ring: 188 85% 38%;
+    --brand-cyan: 188 85% 42%;
+    --brand-violet: 268 70% 55%;
+    --surface-1: 220 30% 96%;
+    --surface-2: 220 25% 92%;
+    --gradient-text: linear-gradient(135deg, hsl(230 25% 10%) 0%, hsl(230 18% 35%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100% / 0.9) 0%, hsl(220 30% 97% / 0.9) 100%);
+    --shadow-card: 0 1px 0 0 hsl(230 25% 10% / 0.04) inset, 0 30px 60px -30px hsl(230 25% 30% / 0.18);
+  }
 }
 
 @layer base {
