@@ -1,4 +1,4 @@
-import { Boxes, Cpu, Gauge, Radio, Sparkles, Layers } from "lucide-react";
+import { Boxes, Cpu, Gauge, Radio, Sparkles, Layers, Wand2 } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 
 const services = [
@@ -31,6 +31,12 @@ const services = [
     title: "AI Integration",
     desc: "Production-grade LLM, RAG, and voice pipelines (Whisper, ElevenLabs, OpenAI, LLaMA).",
     impact: "Move AI from demo to dependable product feature.",
+  },
+  {
+    icon: Wand2,
+    title: "AI-Powered Frontend Websites",
+    desc: "Ship pixel-perfect, production-ready web experiences using Claude Code, Stitch UI, Emergent, Lovable, Framer Motion, and UI UX Pro Max.",
+    impact: "From idea to live site in days — not months.",
   },
   {
     icon: Cpu,
