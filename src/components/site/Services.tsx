@@ -33,6 +33,12 @@ const services = [
     impact: "Move AI from demo to dependable product feature.",
   },
   {
+    icon: Wand2,
+    title: "AI-Powered Frontend Websites",
+    desc: "Ship pixel-perfect, production-ready web experiences using Claude Code, Stitch UI, Emergent, Lovable, Framer Motion, and UI UX Pro Max.",
+    impact: "From idea to live site in days — not months.",
+  },
+  {
     icon: Cpu,
     title: "Tech Leadership",
     desc: "Architectural reviews, mentoring, and roadmap shaping for product engineering teams.",
