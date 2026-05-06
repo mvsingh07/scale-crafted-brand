@@ -55,10 +55,22 @@ export const Navbar = () => {
             ))}
           </ul>
 
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
             <Button asChild variant="brand" size="sm">
               <a href="#contact">Work With Me</a>
             </Button>
+          </div>
+
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              className="rounded-md p-2 text-foreground"
+              onClick={() => setOpen((s) => !s)}
+              aria-label="Toggle menu"
+            >
+              {open ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
 
           <button
