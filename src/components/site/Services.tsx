@@ -1,4 +1,4 @@
-import { Boxes, Cpu, Gauge, Radio, Sparkles, Layers } from "lucide-react";
+import { Boxes, Cpu, Gauge, Radio, Sparkles, Layers, Wand2 } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 
 const services = [
