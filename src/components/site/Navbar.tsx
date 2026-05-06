@@ -73,13 +73,6 @@ export const Navbar = () => {
             </button>
           </div>
 
-          <button
-            className="md:hidden rounded-md p-2 text-foreground"
-            onClick={() => setOpen((s) => !s)}
-            aria-label="Toggle menu"
-          >
-            {open ? <X size={20} /> : <Menu size={20} />}
-          </button>
         </nav>
 
         {open && (
