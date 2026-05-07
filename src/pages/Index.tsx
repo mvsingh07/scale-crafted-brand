@@ -8,20 +8,24 @@ import { Journey } from "@/components/site/Journey";
 import { Skills } from "@/components/site/Skills";
 import { Contact } from "@/components/site/Contact";
 import { Footer } from "@/components/site/Footer";
+import { PortfolioBackground } from "@/components/site/PortfolioBackground";
 
 const Index = () => {
   return (
-    <main className="relative min-h-screen overflow-hidden">
-      <Navbar />
-      <Hero />
-      <About />
-      <Services />
-      <Atelier />
-      <Projects />
-      <Journey />
-      <Skills />
-      <Contact />
-      <Footer />
+    <main className="relative min-h-screen overflow-hidden bg-background">
+      <PortfolioBackground />
+      <div className="relative z-10">
+        <Navbar />
+        <Hero />
+        <About />
+        <Services />
+        <Atelier />
+        <Projects />
+        <Journey />
+        <Skills />
+        <Contact />
+        <Footer />
+      </div>
     </main>
   );
 };
