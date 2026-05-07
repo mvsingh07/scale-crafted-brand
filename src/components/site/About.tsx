@@ -4,7 +4,7 @@ import { About3DCard } from "./About3DCard";
 export const About = () => (
   <section id="about" className="relative py-24 md:py-32">
     <div className="container">
-      <SectionHeader eyebrow="01 — About" title="The engineer behind the systems." />
+      <SectionHeader eyebrow="01 — The Engineer" title="The engineer behind the systems." />
 
       <div className="mt-12 grid gap-10 lg:grid-cols-12 lg:gap-16">
         <div data-reveal="fade-right" className="lg:col-span-7 space-y-6 text-lg leading-relaxed text-muted-foreground">
@@ -22,6 +22,9 @@ export const About = () => (
             Beyond the code, I lead. I've owned features end-to-end, mentored engineers,
             translated fuzzy product asks into crisp technical roadmaps, shipped demos and walkthroughs for clients, and operated production systems with real observability.
             Ownership isn't a buzzword for me — it's the default mode.
+          </p>
+          <p className="font-editorial italic text-base text-foreground/60">
+            The vision needs an architect.
           </p>
         </div>
 

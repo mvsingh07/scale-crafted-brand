@@ -50,7 +50,7 @@ export const Services = () => (
   <section id="services" className="relative py-24 md:py-32">
     <div className="container">
       <SectionHeader
-        eyebrow="02 — Services"
+        eyebrow="02 — The Craft"
         title="What I build for teams that can't afford to break."
         description="A focused set of services designed for companies serious about scale, reliability, and velocity."
       />

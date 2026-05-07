@@ -68,6 +68,7 @@ export default {
         display: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Space Grotesk"', 'system-ui', 'sans-serif'],
         sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
+        editorial: ['"Fraunces"', 'Georgia', 'serif'],
       },
       backgroundImage: {
         'gradient-brand': 'var(--gradient-brand)',

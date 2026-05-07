@@ -2,24 +2,28 @@ import { SectionHeader } from "./SectionHeader";
 
 const steps = [
   {
+    chapter: "Chapter I",
     year: "2020-2023",
     role: "BCA, Computer Applications",
     org: "Guru Nanak Dev University",
     body: "Built the engineering foundation across programming, databases, and full-stack web development before moving into production software roles.",
   },
   {
+    chapter: "Chapter II",
     year: "2023-2025",
     role: "Software Engineer",
     org: "Turtleneck Systems & Solutions",
     body: "Built JavaScript and Python web applications, secure REST APIs, dashboards, NiFi data pipelines, Docker/Kubernetes deployments, and ELK/OpenSearch monitoring.",
   },
   {
+    chapter: "Chapter III",
     year: "2024-2026",
     role: "MCA, AI & ML",
     org: "Chandigarh University",
     body: "Continuing formal work in AI and ML while applying LLMs, vector databases, and voice AI systems in product-facing projects.",
   },
   {
+    chapter: "Chapter IV",
     year: "2025-Present",
     role: "Senior Software Engineer",
     org: "Vusic Technologies",
@@ -31,7 +35,7 @@ export const Journey = () => (
   <section id="journey" className="relative py-24 md:py-32">
     <div className="container">
       <SectionHeader
-        eyebrow="04 — Journey"
+        eyebrow="04 — The Story"
         title="From writing code to designing systems."
         description="Not a job list — the actual progression of how I think about software."
       />
@@ -49,6 +53,7 @@ export const Journey = () => (
               }`}
             >
               <div className={`md:text-right ${i % 2 === 0 ? "" : "md:text-left"}`}>
+                <div className="font-editorial italic text-xs text-muted-foreground/50 mb-0.5">{s.chapter}</div>
                 <div className="font-mono text-sm text-primary">{s.year}</div>
                 <div className="font-display mt-1 text-2xl font-semibold text-gradient">{s.role}</div>
                 <div className="text-sm text-muted-foreground">{s.org}</div>

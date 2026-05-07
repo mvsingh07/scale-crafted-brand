@@ -44,7 +44,7 @@ export const Contact = () => {
           <div className="relative grid gap-12 lg:grid-cols-12">
             <div className="lg:col-span-6">
               <SectionHeader
-                eyebrow="06 — Contact"
+                eyebrow="06 — Let's Build"
                 title={<>Let's build something<br />scalable.</>}
                 description="Whether it's a system that needs to handle 10× growth, a real-time product on a tight timeline, or AI taken from prototype to production — let's talk."
               />

@@ -223,46 +223,26 @@ export const HeroVisionFrame = () => {
           </div>
 
           {/* Main body */}
-          <div className="grid gap-5 p-4 md:grid-cols-12 md:gap-8 md:p-8 lg:items-end">
+          <div className="grid gap-6 p-5 md:grid-cols-12 md:gap-8 md:p-8 lg:items-end">
 
-            {/* Left — name + thesis + description */}
+            {/* Left — thesis + proof + CTAs */}
             <div className="md:col-span-8">
-              <p className="font-editorial not-italic font-light text-sm md:text-base tracking-wide text-foreground/80 mb-1.5">
-                Manvir Singh
-              </p>
-              <h2 className="font-editorial italic leading-[1.22] text-lg md:text-[1.65rem]">
+              <h2 className="font-editorial italic leading-[1.22] text-xl md:text-[1.65rem]">
                 <span className="text-primary">Visionary Mind: </span>
                 <span className="text-secondary">Igniting Innovation through continuous learning</span>
               </h2>
 
-              <p className="mt-2.5 max-w-lg text-xs leading-relaxed text-muted-foreground md:mt-4 md:text-[0.9rem] hidden md:block">
+              <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground md:mt-4 md:text-[0.9rem]">
                 I design the quiet infrastructure behind ambitious products: scalable distributed
                 systems, real-time platforms, AI workflows, and interfaces that feel intentional
                 — from first click to last deploy.
               </p>
 
-              <div className="mt-4 flex flex-wrap items-center gap-2 md:mt-5">
-                <Button
-                  variant="brand"
-                  size="sm"
-                  onClick={() => scrollTo("work")}
-                  className="gap-1.5 h-8 text-xs md:h-9 md:text-sm"
-                >
-                  Explore work <ArrowRight size={12} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => scrollTo("contact")}
-                  className="text-muted-foreground hover:text-foreground h-8 text-xs md:h-9 md:text-sm"
-                >
-                  Let's talk
-                </Button>
-              </div>
+           
             </div>
 
-            {/* Right — proof points (desktop only) */}
-            <div className="hidden md:flex md:col-span-4 flex-row flex-wrap gap-2 md:flex-col md:items-end">
+            {/* Right — proof points */}
+            <div className="flex flex-row flex-wrap gap-2 md:col-span-4 md:flex-col md:items-end">
               {stats.map((s) => (
                 <div
                   key={s.label}
