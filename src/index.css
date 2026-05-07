@@ -232,6 +232,13 @@
     background-size: 200% 100%;
     animation: shimmer 8s linear infinite;
   }
+  .animate-gradient-shift {
+    background-size: 200% auto;
+    animation: gradient-shift 5s ease infinite;
+  }
+  .animate-mock-float {
+    animation: mock-float 7s ease-in-out infinite;
+  }
 }
 
 @keyframes float {
@@ -249,6 +256,15 @@
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes mock-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-6px) rotate(0.3deg); }
+  66% { transform: translateY(-3px) rotate(-0.2deg); }
 }
 @media (prefers-reduced-motion: reduce) {
   html {

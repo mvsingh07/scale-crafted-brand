@@ -56,7 +56,7 @@ export const Navbar = () => {
           </ul>
 
           <div className="hidden md:flex items-center gap-2">
-            <ThemeToggle />
+            {/* <ThemeToggle /> */}
             <Button asChild variant="brand" size="sm">
               <a href="#contact">Work With Me</a>
             </Button>

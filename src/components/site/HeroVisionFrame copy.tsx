@@ -96,7 +96,6 @@ const stats = [
 
 export const HeroVisionFrame = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const pointerRef = useRef<[number, number]>([0, 0]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -152,17 +151,7 @@ export const HeroVisionFrame = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.max(1, Math.floor(rect.width * dpr));
       canvas.height = Math.max(1, Math.floor(rect.height * dpr));
-      pointerRef.current = [canvas.width * 0.5, canvas.height * 0.5];
       gl.viewport(0, 0, canvas.width, canvas.height);
-    };
-
-    const onPointerMove = (event: PointerEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = canvas.width / Math.max(rect.width, 1);
-      pointerRef.current = [
-        (event.clientX - rect.left) * dpr,
-        canvas.height - (event.clientY - rect.top) * dpr,
-      ];
     };
 
     let frame = 0;
@@ -173,21 +162,19 @@ export const HeroVisionFrame = () => {
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.uniform2f(resolution, canvas.width, canvas.height);
       gl.uniform1f(time, now * 0.001);
-      gl.uniform2f(pointer, pointerRef.current[0], pointerRef.current[1]);
+      gl.uniform2f(pointer, canvas.width * 0.5, canvas.height * 0.5);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       frame = requestAnimationFrame(render);
     };
 
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
-    canvas.addEventListener("pointermove", onPointerMove, { passive: true });
     resize();
     frame = requestAnimationFrame(render);
 
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
-      canvas.removeEventListener("pointermove", onPointerMove);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
       gl.deleteShader(vertexShader);
@@ -223,26 +210,46 @@ export const HeroVisionFrame = () => {
           </div>
 
           {/* Main body */}
-          <div className="grid gap-6 p-5 md:grid-cols-12 md:gap-8 md:p-8 lg:items-end">
+          <div className="grid gap-5 p-4 md:grid-cols-12 md:gap-8 md:p-8 lg:items-end">
 
-            {/* Left — thesis + proof + CTAs */}
+            {/* Left — name + thesis + description */}
             <div className="md:col-span-8">
-              <h2 className="font-editorial italic leading-[1.22] text-xl md:text-[1.65rem]">
+              <p className="font-editorial not-italic font-light text-sm md:text-base tracking-wide text-foreground/80 mb-1.5">
+                Manvir Singh
+              </p>
+              <h2 className="font-editorial italic leading-[1.22] text-lg md:text-[1.65rem]">
                 <span className="text-primary">Visionary Mind: </span>
                 <span className="text-secondary">Igniting Innovation through continuous learning</span>
               </h2>
 
-              <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground md:mt-4 md:text-[0.9rem]">
+              <p className="mt-2.5 max-w-lg text-xs leading-relaxed text-muted-foreground md:mt-4 md:text-[0.9rem] hidden md:block">
                 I design the quiet infrastructure behind ambitious products: scalable distributed
                 systems, real-time platforms, AI workflows, and interfaces that feel intentional
                 — from first click to last deploy.
               </p>
 
-           
+              <div className="mt-4 flex flex-wrap items-center gap-2 md:mt-5">
+                <Button
+                  variant="brand"
+                  size="sm"
+                  onClick={() => scrollTo("work")}
+                  className="gap-1.5 h-8 text-xs md:h-9 md:text-sm"
+                >
+                  Explore work <ArrowRight size={12} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => scrollTo("contact")}
+                  className="text-muted-foreground hover:text-foreground h-8 text-xs md:h-9 md:text-sm"
+                >
+                  Let's talk
+                </Button>
+              </div>
             </div>
 
-            {/* Right — proof points */}
-            <div className="flex flex-row flex-wrap gap-2 md:col-span-4 md:flex-col md:items-end">
+            {/* Right — proof points (desktop only) */}
+            <div className="hidden md:flex md:col-span-4 flex-row flex-wrap gap-2 md:flex-col md:items-end">
               {stats.map((s) => (
                 <div
                   key={s.label}

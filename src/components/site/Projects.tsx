@@ -117,7 +117,7 @@ export const Projects = () => (
               </div>
 
               <h3 className="font-display mt-5 text-3xl font-semibold leading-tight md:text-4xl">
-                <span className={`bg-gradient-to-r ${p.accent} bg-clip-text text-transparent`}>
+                <span className={`animate-gradient-shift bg-gradient-to-r ${p.accent} bg-clip-text text-transparent`}>
                   {p.title}
                 </span>
               </h3>
@@ -146,15 +146,17 @@ export const Projects = () => (
             </div>
 
             <div className="lg:col-span-5">
-              <div className="relative h-full overflow-hidden rounded-2xl border border-border/70 bg-[hsl(var(--surface-2))] p-1">
-                <div className="flex items-center gap-1.5 border-b border-border/70 px-3 py-2">
+              <div className="animate-mock-float relative h-full overflow-hidden rounded-2xl border border-border/70 bg-[hsl(var(--surface-2))] p-1 transition-all duration-500 group-hover:shadow-[0_0_48px_-8px_hsl(var(--brand-cyan)/0.35)] group-hover:border-border">
+                {/* Title bar */}
+                <div className="flex items-center gap-1.5 border-b border-border/70 px-3 py-2 transition-colors duration-300">
                   <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
                   <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
                   <span className="ml-3 font-mono text-[10px] text-muted-foreground">{p.title.toLowerCase().replace(/\s+/g, "-")}.app</span>
                 </div>
                 <div className="p-5">{p.mock}</div>
-                <div className={`pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-br ${p.accent} opacity-[0.06]`} />
+                {/* Accent gradient wash — brightens on hover */}
+                <div className={`pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-br ${p.accent} opacity-[0.06] transition-opacity duration-500 group-hover:opacity-[0.12]`} />
               </div>
             </div>
           </article>

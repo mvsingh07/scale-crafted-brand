@@ -192,7 +192,7 @@ export const HeroVisionFrame = () => {
 
       {/* Identity card — the signal emerging from the nebula */}
       <div className="absolute inset-x-5 bottom-5 md:inset-x-8 md:bottom-8">
-        <div className="rounded-2xl border border-white/[0.08] bg-background/50  md:rounded-3xl overflow-hidden">
+        <div className="rounded-2xl border border-white/[0.08]   md:rounded-3xl overflow-hidden">
 
           {/* Top bar — identity stripe */}
           <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3 md:px-8 md:py-4">
@@ -203,7 +203,7 @@ export const HeroVisionFrame = () => {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
               <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.26em] text-foreground">
-               Engineer · Creator 
+               Engineer · Creator · Storyteller
               </span>
             </div>
             
