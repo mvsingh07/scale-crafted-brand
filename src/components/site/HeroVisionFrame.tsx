@@ -96,7 +96,6 @@ const stats = [
 
 export const HeroVisionFrame = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const pointerRef = useRef<[number, number]>([0, 0]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -152,17 +151,7 @@ export const HeroVisionFrame = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.max(1, Math.floor(rect.width * dpr));
       canvas.height = Math.max(1, Math.floor(rect.height * dpr));
-      pointerRef.current = [canvas.width * 0.5, canvas.height * 0.5];
       gl.viewport(0, 0, canvas.width, canvas.height);
-    };
-
-    const onPointerMove = (event: PointerEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = canvas.width / Math.max(rect.width, 1);
-      pointerRef.current = [
-        (event.clientX - rect.left) * dpr,
-        canvas.height - (event.clientY - rect.top) * dpr,
-      ];
     };
 
     let frame = 0;
@@ -173,21 +162,19 @@ export const HeroVisionFrame = () => {
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.uniform2f(resolution, canvas.width, canvas.height);
       gl.uniform1f(time, now * 0.001);
-      gl.uniform2f(pointer, pointerRef.current[0], pointerRef.current[1]);
+      gl.uniform2f(pointer, canvas.width * 0.5, canvas.height * 0.5);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       frame = requestAnimationFrame(render);
     };
 
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
-    canvas.addEventListener("pointermove", onPointerMove, { passive: true });
     resize();
     frame = requestAnimationFrame(render);
 
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
-      canvas.removeEventListener("pointermove", onPointerMove);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
       gl.deleteShader(vertexShader);
@@ -197,7 +184,7 @@ export const HeroVisionFrame = () => {
 
   return (
     <div className="relative h-full min-h-[520px] overflow-hidden rounded-[2rem] border border-border/70 bg-black shadow-elegant md:min-h-[680px]">
-      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full touch-none" />
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
 
       {/* Depth gradients */}
       <div className="absolute"/>
