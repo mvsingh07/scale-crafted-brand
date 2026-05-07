@@ -3,19 +3,23 @@ import { SectionHeader } from "./SectionHeader";
 const groups = [
   {
     title: "Distributed Systems",
-    items: ["Kafka", "Redis", "RabbitMQ", "WebSockets", "gRPC", "Event Sourcing", "CQRS", "Sharding"],
+    items: ["Kafka", "RabbitMQ", "Redis", "BullMQ", "WebSockets", "gRPC", "Event Sourcing", "CQRS"],
   },
   {
     title: "Backend",
-    items: ["Node.js", "TypeScript", "Python", "FastAPI", "PostgreSQL", "MongoDB", "REST", "GraphQL"],
+    items: ["Node.js", "TypeScript", "NestJS", "Express.js", "Python", "Django", "Flask", "FastAPI"],
+  },
+  {
+    title: "Frontend & Data",
+    items: ["React.js", "Next.js", "Angular", "PostgreSQL", "MongoDB", "MySQL", "Supabase", "Highcharts"],
   },
   {
     title: "DevOps & Infra",
-    items: ["Docker", "Kubernetes", "AWS", "GCP", "Terraform", "CI/CD", "Observability", "Nginx"],
+    items: ["Docker", "Kubernetes", "AWS S3", "AWS ECS", "GitHub Actions", "ELK", "Prometheus", "Grafana"],
   },
   {
-    title: "AI & ML",
-    items: ["OpenAI", "LLaMA", "Whisper", "ElevenLabs", "RAG", "Vector DBs", "LangChain", "Embeddings"],
+    title: "Security & AI",
+    items: ["AES-256", "RSA", "RBAC", "OAuth", "JWT", "OpenAI", "LLaMA", "Vector DBs"],
   },
 ];
 
@@ -30,7 +34,7 @@ export const Skills = () => (
 
       <div className="mt-14 grid gap-5 md:grid-cols-2">
         {groups.map((g) => (
-          <div key={g.title} className="card-premium p-7">
+          <div key={g.title} data-reveal="zoom" className="card-premium p-7">
             <div className="flex items-baseline justify-between">
               <h3 className="font-display text-xl font-semibold text-foreground">{g.title}</h3>
               <span className="font-mono text-xs text-muted-foreground">{g.items.length} tools</span>

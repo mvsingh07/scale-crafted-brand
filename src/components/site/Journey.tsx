@@ -2,28 +2,28 @@ import { SectionHeader } from "./SectionHeader";
 
 const steps = [
   {
-    year: "2019",
-    role: "Software Developer",
-    org: "Building the fundamentals",
-    body: "Started shipping production code on full-stack web apps. Learned the discipline of clean code, testing, and code review by doing — across React, Node, and SQL.",
+    year: "2020-2023",
+    role: "BCA, Computer Applications",
+    org: "Guru Nanak Dev University",
+    body: "Built the engineering foundation across programming, databases, and full-stack web development before moving into production software roles.",
   },
   {
-    year: "2021",
-    role: "Backend Engineer",
-    org: "Going deeper into the stack",
-    body: "Moved server-side. Owned APIs that real users depended on, picked up Postgres internals, message queues, and the joy (and pain) of debugging production at 2 AM.",
+    year: "2023-2025",
+    role: "Software Engineer",
+    org: "Turtleneck Systems & Solutions",
+    body: "Built JavaScript and Python web applications, secure REST APIs, dashboards, NiFi data pipelines, Docker/Kubernetes deployments, and ELK/OpenSearch monitoring.",
   },
   {
-    year: "2023",
-    role: "System Engineer",
-    org: "Scaling beyond a single box",
-    body: "Designed event-driven services on Kafka & Redis, hardened uptime, and started leading small features end-to-end. First real conversations with clients on architecture.",
+    year: "2024-2026",
+    role: "MCA, AI & ML",
+    org: "Chandigarh University",
+    body: "Continuing formal work in AI and ML while applying LLMs, vector databases, and voice AI systems in product-facing projects.",
   },
   {
-    year: "2025",
+    year: "2025-Present",
     role: "Senior Software Engineer",
-    org: "Architecture mindset",
-    body: "Leading 2–3 engineers, owning the architecture for real-time platforms serving 50K+ users, integrating AI into production, and shaping technical roadmaps with stakeholders.",
+    org: "Vusic Technologies",
+    body: "Leading 2-3 engineers, owning architecture for real-time auction and secure file systems, deploying on AWS ECS/Kubernetes, and aligning delivery with client milestones.",
   },
 ];
 
@@ -43,6 +43,7 @@ export const Journey = () => (
           {steps.map((s, i) => (
             <div
               key={s.year}
+              data-reveal={i % 2 === 0 ? "fade-right" : "fade-left"}
               className={`relative grid gap-6 md:grid-cols-2 md:gap-12 ${
                 i % 2 === 0 ? "" : "md:[&>*:first-child]:order-2"
               }`}

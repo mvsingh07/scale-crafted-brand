@@ -254,8 +254,7 @@ export function PrismaticBurst({
     gl.canvas.style.inset = "0";
     gl.canvas.style.width = "100%";
     gl.canvas.style.height = "100%";
-    gl.canvas.style.mixBlendMode =
-      mixBlendMode && mixBlendMode !== "none" ? mixBlendMode : "";
+    gl.canvas.style.mixBlendMode = "";
     container.appendChild(gl.canvas);
 
     const gradientTex = new Texture(gl, {
@@ -277,16 +276,16 @@ export function PrismaticBurst({
       uniforms: {
         uResolution: { value: [1, 1] as [number, number] },
         uTime: { value: 0 },
-        uIntensity: { value: intensity },
-        uSpeed: { value: speed },
+        uIntensity: { value: 1 },
+        uSpeed: { value: 1 },
         uAnimType: { value: 0 },
         uMouse: { value: [0.5, 0.5] as [number, number] },
         uColorCount: { value: 0 },
-        uDistort: { value: distort },
+        uDistort: { value: 0 },
         uOffset: { value: [0, 0] as [number, number] },
         uGradient: { value: gradientTex },
         uNoiseAmount: { value: 0.8 },
-        uRayCount: { value: rayCount },
+        uRayCount: { value: 0 },
       },
     });
     programRef.current = program;

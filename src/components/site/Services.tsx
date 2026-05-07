@@ -5,31 +5,31 @@ const services = [
   {
     icon: Layers,
     title: "Backend & System Architecture",
-    desc: "End-to-end backend design — from data modeling to service boundaries to deployment topology.",
+    desc: "End-to-end backend design from data modeling to NestJS service boundaries and deployment topology.",
     impact: "Foundations that survive 10× growth without a rewrite.",
   },
   {
     icon: Boxes,
     title: "Scalable Microservices",
-    desc: "Right-sized services with clear contracts, async messaging, and observable interfaces.",
+    desc: "Right-sized services with clear contracts, Kafka/RabbitMQ messaging, BullMQ jobs, and observable interfaces.",
     impact: "Independent teams shipping faster, with fewer outages.",
   },
   {
     icon: Gauge,
     title: "Performance & Scaling",
-    desc: "Profile, optimize, cache, and shard. From query plans to infra cost engineering.",
-    impact: "Cut p99 latency by 60–80% and slash cloud spend.",
+    desc: "Profile, optimize, cache, and shard. From Redis-backed hot paths to query plans and infra cost engineering.",
+    impact: "Reduced critical latency from 500ms to 120ms in production systems.",
   },
   {
     icon: Radio,
     title: "Real-time Systems",
-    desc: "Event-driven backbones with Kafka, Redis Streams, WebSockets, and exactly-once semantics.",
+    desc: "Event-driven backbones with Kafka, RabbitMQ, Redis, WebSockets, and resilient async processing.",
     impact: "Live experiences that hold under concurrent load.",
   },
   {
     icon: Sparkles,
     title: "AI Integration",
-    desc: "Production-grade LLM, RAG, and voice pipelines (Whisper, ElevenLabs, OpenAI, LLaMA).",
+    desc: "Production-minded LLM, vector search, accessibility, and voice pipelines using LLaMA, OpenAI and ElevenLabs.",
     impact: "Move AI from demo to dependable product feature.",
   },
   {
@@ -41,7 +41,7 @@ const services = [
   {
     icon: Cpu,
     title: "Tech Leadership",
-    desc: "Architectural reviews, mentoring, and roadmap shaping for product engineering teams.",
+    desc: "Architecture reviews, PR reviews, client requirement analysis, demos, and roadmap shaping.",
     impact: "Lift the whole team's engineering bar — not just the code.",
   },
 ];
@@ -59,7 +59,8 @@ export const Services = () => (
         {services.map((s, i) => (
           <article
             key={s.title}
-            className="card-premium group p-7 animate-fade-up"
+            data-reveal="zoom"
+            className="card-premium group p-7"
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">

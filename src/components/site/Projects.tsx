@@ -7,9 +7,9 @@ const projects = [
     title: "Real-Time Auction Platform",
     tagline: "Live bidding for 50K+ concurrent users.",
     problem: "Auctions where every millisecond matters — bids must be globally consistent, fair, and instantly reflected for every viewer.",
-    solution: "Event-driven core on Kafka with Redis-backed bid state, WebSocket fan-out, and idempotent write paths to guarantee correctness under bursty load.",
-    impact: "Sustained 50K+ concurrent users with sub-200ms bid-to-broadcast latency and zero double-spend incidents.",
-    stack: ["Node.js", "Kafka", "Redis", "WebSocket", "PostgreSQL", "Docker"],
+    solution: "Event-driven core on Kafka and RabbitMQ with Redis-backed bid state, WebSocket fan-out, and idempotent write paths to guarantee correctness under bursty load.",
+    impact: "Supported 50K+ concurrent users while reducing end-to-end latency from 500ms to 120ms.",
+    stack: ["NestJS", "Kafka", "RabbitMQ", "Redis", "Next.js", "Supabase", "AWS S3"],
     accent: "from-[hsl(var(--brand-cyan))] to-[hsl(var(--brand-violet))]",
     mock: (
       <div className="space-y-3">
@@ -37,9 +37,9 @@ const projects = [
     title: "File Processing Microservice",
     tagline: "Encrypted streaming for 1GB+ payloads.",
     problem: "Single-shot uploads of large files were failing, blocking memory, and leaking sensitive data on retries.",
-    solution: "Chunked, resumable uploads with AES-256 encryption at rest and in flight, parallel worker processing, and signed URL delivery.",
-    impact: "Reliable processing of 1GB+ files with constant memory footprint and zero data exposure.",
-    stack: ["Node.js", "AES-256", "S3", "Streams", "Worker Pools", "Postgres"],
+    solution: "Chunked, resumable uploads with AES-256 and RSA encryption, BullMQ background jobs, parallel worker processing, RBAC, and signed URL delivery.",
+    impact: "Reliable processing of 1GB+ encrypted files with constant memory footprint and secure access controls.",
+    stack: ["NestJS", "AES-256", "RSA", "BullMQ", "AWS S3", "RBAC", "Postgres"],
     accent: "from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-pink))]",
     mock: (
       <div className="space-y-4">
@@ -58,7 +58,7 @@ const projects = [
           ))}
         </div>
         <div className="rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-[11px] font-mono text-muted-foreground">
-          🔐 AES-256-GCM · resumable · parallel × 8
+          AES-256-GCM · resumable · parallel x 8
         </div>
       </div>
     ),
@@ -68,15 +68,15 @@ const projects = [
     title: "AI Health Engine",
     tagline: "Voice-first AI for clinical workflows.",
     problem: "Care teams needed instant, contextual answers from health data without typing or navigating dashboards.",
-    solution: "RAG pipeline blending LLaMA + OpenAI, with Whisper for transcription and ElevenLabs for natural voice responses, all behind a hardened API.",
+    solution: "RAG pipeline blending LLaMA and OpenAI with Supabase vector search and ElevenLabs voice interaction behind a hardened API.",
     impact: "Reduced query-to-insight time from minutes to seconds with conversational, multi-modal access.",
-    stack: ["Python", "LLaMA", "OpenAI", "Whisper", "ElevenLabs", "FastAPI", "Vector DB"],
+    stack: ["Python", "LLaMA", "OpenAI", "ElevenLabs", "Supabase", "FastAPI", "Vector DB"],
     accent: "from-[hsl(var(--brand-pink))] to-[hsl(var(--brand-cyan))]",
     mock: (
       <div className="space-y-3">
         <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">AI Session · voice</div>
         <div className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-          🎙️ "Summarize the patient's last lab report."
+          "Summarize the patient's last lab report."
         </div>
         <div className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground">
           Hemoglobin trending down 8% over 3 months. Iron levels flagged.
@@ -106,6 +106,7 @@ export const Projects = () => (
         {projects.map((p, i) => (
           <article
             key={p.title}
+            data-reveal={i % 2 === 0 ? "fade-right" : "fade-left"}
             className="card-premium grid gap-8 p-6 md:p-10 lg:grid-cols-12 lg:gap-12"
           >
             <div className="lg:col-span-7">

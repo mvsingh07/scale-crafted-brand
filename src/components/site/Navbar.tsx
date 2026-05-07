@@ -31,8 +31,8 @@ export const Navbar = () => {
     >
       <div className="container">
         <nav
-          className={`flex items-center justify-between rounded-full px-5 py-3 transition-all duration-500 ${
-            scrolled ? "glass shadow-elegant" : ""
+          className={`glass flex items-center justify-between rounded-full px-5 py-3 shadow-elegant transition-all duration-500 ${
+            scrolled ? "bg-background/72" : "bg-background/48"
           }`}
         >
           <a href="#top" className="flex items-center gap-2 font-display text-lg font-semibold">

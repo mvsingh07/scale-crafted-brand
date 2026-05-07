@@ -11,7 +11,7 @@ export const SectionHeader = ({
   description?: string;
   align?: "left" | "center";
 }) => (
-  <div className={`max-w-3xl ${align === "center" ? "mx-auto text-center" : ""}`}>
+  <div data-reveal className={`max-w-3xl ${align === "center" ? "mx-auto text-center" : ""}`}>
     <div className="chip">
       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
       {eyebrow}

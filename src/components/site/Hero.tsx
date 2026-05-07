@@ -1,62 +1,62 @@
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { HeroVisionFrame } from "./HeroVisionFrame";
 
 export const Hero = () => {
   return (
-    <section id="top" className="relative overflow-hidden pt-36 pb-24 md:pt-44 md:pb-32">
-      <div className="absolute inset-0 bg-grid pointer-events-none" />
-      <div className="glow-orb -top-32 left-1/4 h-[420px] w-[420px] bg-[hsl(var(--brand-violet)/0.45)] animate-pulse-slow" />
-      <div className="glow-orb top-20 right-10 h-[360px] w-[360px] bg-[hsl(var(--brand-cyan)/0.35)] animate-pulse-slow" style={{ animationDelay: "1.5s" }} />
+    <section id="top" className="relative min-h-screen overflow-hidden pt-28 md:pt-32">
+      <div className="absolute inset-x-0 top-24 mx-auto h-64 max-w-4xl rounded-full bg-primary/15 blur-[110px]" />
 
       <div className="container relative">
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-4 py-1.5 text-xs font-mono text-muted-foreground backdrop-blur">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-            </span>
-            Available for senior engineering roles & consulting
+        <div className="grid min-h-[700px] items-center gap-12 py-10 md:grid-cols-[0.86fr_1.14fr] md:gap-10 lg:min-h-[760px]">
+          <div className="relative z-10 max-w-xl animate-fade-up">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/35 px-3.5 py-1.5 text-[11px] font-medium text-muted-foreground shadow-card backdrop-blur-2xl">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-70" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              </span>
+              Senior Software Engineer for teams building at scale
+            </div>
+
+            <h1 className="font-display mt-7 max-w-[560px] text-balance text-4xl font-semibold leading-[1.02] sm:text-5xl lg:text-6xl">
+              <span className="text-gradient">Manvir Singh</span>
+              <span className="block text-gradient">builds software</span>
+              <span className="block bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+                with product-grade polish.
+              </span>
+            </h1>
+
+            <p className="mt-6 max-w-[500px] text-sm leading-7 text-muted-foreground md:text-base">
+              I design the quiet infrastructure behind ambitious products: scalable distributed systems,
+              real-time platforms, AI workflows, and interfaces that feel intentional from first click to last deploy.
+            </p>
+
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Button asChild variant="brand" size="lg">
+                <a href="#work" className="group">
+                  See selected work
+                  <ArrowRight className="ml-1 transition-transform group-hover:translate-x-1" size={16} />
+                </a>
+              </Button>
+              <Button asChild variant="ghostBrand" size="lg">
+                <a href="#contact">
+                  <Sparkles size={15} />
+                  Start a conversation
+                </a>
+              </Button>
+            </div>
+
+            <div className="mt-10 flex max-w-lg flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+              <span>Distributed systems</span>
+              <span className="h-1 w-1 self-center rounded-full bg-muted-foreground/50" />
+              <span>AI products</span>
+              <span className="h-1 w-1 self-center rounded-full bg-muted-foreground/50" />
+              <span>Real-time infrastructure</span>
+            </div>
           </div>
 
-          <h1 className="font-display mt-6 text-5xl font-semibold leading-[1.05] sm:text-6xl md:text-7xl lg:text-8xl animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            <span className="text-gradient">Manvir Singh.</span>
-            <br />
-            <span className="text-brand">Engineering systems</span>
-            <br />
-            <span className="text-gradient">that scale.</span>
-          </h1>
-
-          <p className="mx-auto mt-8 max-w-2xl text-lg text-muted-foreground md:text-xl animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            Senior Software Engineer crafting <span className="text-foreground">scalable, high-performance distributed systems</span>, real-time platforms and AI-powered products that move the needle for millions of users.
-          </p>
-
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row animate-fade-up" style={{ animationDelay: "0.3s" }}>
-            <Button asChild variant="brand" size="xl">
-              <a href="#work" className="group">
-                View Projects
-                <ArrowRight className="ml-1 transition-transform group-hover:translate-x-1" size={18} />
-              </a>
-            </Button>
-            <Button asChild variant="ghostBrand" size="xl">
-              <a href="#contact">
-                <Sparkles size={16} />
-                Work With Me
-              </a>
-            </Button>
-          </div>
-
-          <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4 animate-fade-up" style={{ animationDelay: "0.4s" }}>
-            {[
-              { k: "50K+", v: "Concurrent Users" },
-              { k: "1GB+", v: "Files Processed" },
-              { k: "99.99%", v: "Uptime SLA" },
-              { k: "5+ yrs", v: "Building at Scale" },
-            ].map((s) => (
-              <div key={s.v} className="glass rounded-2xl p-4 text-left">
-                <div className="font-display text-2xl font-semibold text-brand">{s.k}</div>
-                <div className="mt-1 text-xs text-muted-foreground">{s.v}</div>
-              </div>
-            ))}
+          <div className="animate-fade-up" style={{ animationDelay: "0.12s" }}>
+            <HeroVisionFrame />
           </div>
         </div>
       </div>

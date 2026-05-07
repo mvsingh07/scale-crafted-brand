@@ -1,28 +1,43 @@
 import { useState } from "react";
-import { ArrowRight, Github, Linkedin, Mail } from "lucide-react";
+import { ArrowRight, Github, Linkedin, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { SectionHeader } from "./SectionHeader";
+import { supabase } from "@/lib/supabase";
 
 export const Contact = () => {
   const [sending, setSending] = useState(false);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSending(true);
-    setTimeout(() => {
-      setSending(false);
-      toast.success("Message ready", { description: "Drop me a note at hello@manvir.dev — I'll get back within 24h." });
-      (e.target as HTMLFormElement).reset();
-    }, 700);
+
+    const form = e.target as HTMLFormElement;
+    const data = new FormData(form);
+
+    const { error } = await supabase.from("contact_submissions").insert({
+      name: data.get("name") as string,
+      email: data.get("email") as string,
+      project_role: (data.get("project_role") as string) || null,
+      message: data.get("message") as string,
+    });
+
+    setSending(false);
+
+    if (error) {
+      toast.error("Failed to send", { description: "Something went wrong. Try emailing me directly at manvirsinghashat@gmail.com" });
+    } else {
+      toast.success("Message sent", { description: "I'll get back to you within 24h." });
+      form.reset();
+    }
   };
 
   return (
     <section id="contact" className="relative py-24 md:py-32">
       <div className="container">
-        <div className="card-premium relative overflow-hidden p-8 md:p-14">
+        <div data-reveal className="card-premium relative overflow-hidden p-8 md:p-14">
           <div className="glow-orb -top-20 -left-10 h-[280px] w-[280px] bg-[hsl(var(--brand-violet)/0.4)]" />
           <div className="glow-orb -bottom-20 -right-10 h-[280px] w-[280px] bg-[hsl(var(--brand-cyan)/0.35)]" />
 
@@ -36,9 +51,10 @@ export const Contact = () => {
 
               <div className="mt-10 space-y-3">
                 {[
-                  { icon: Mail, label: "hello@manvir.dev", href: "mailto:hello@manvir.dev" },
-                  { icon: Linkedin, label: "linkedin.com/in/manvirsingh", href: "https://linkedin.com" },
-                  { icon: Github, label: "github.com/manvirsingh", href: "https://github.com" },
+                  { icon: Phone, label: "+91 62838 49317", href: "tel:+916283849317" },
+                  { icon: Mail, label: "manvirsinghashat@gmail.com", href: "mailto:manvirsinghashat@gmail.com" },
+                  { icon: Linkedin, label: "linkedin.com/mvsingh02", href: "https://linkedin.com/in/mvsingh02" },
+                  { icon: Github, label: "github.com/mvsingh07", href: "https://github.com/mvsingh07" },
                 ].map((c) => (
                   <a
                     key={c.label}
@@ -61,20 +77,20 @@ export const Contact = () => {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Name</label>
-                  <Input required placeholder="Your name" className="mt-2 h-11 bg-muted/30" />
+                  <Input name="name" required placeholder="Your name" className="mt-2 h-11 bg-muted/30" />
                 </div>
                 <div>
                   <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Email</label>
-                  <Input required type="email" placeholder="you@company.com" className="mt-2 h-11 bg-muted/30" />
+                  <Input name="email" required type="email" placeholder="you@company.com" className="mt-2 h-11 bg-muted/30" />
                 </div>
               </div>
               <div>
                 <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Project / Role</label>
-                <Input placeholder="e.g. Real-time platform · Senior backend role" className="mt-2 h-11 bg-muted/30" />
+                <Input name="project_role" placeholder="e.g. Real-time platform · Senior backend role" className="mt-2 h-11 bg-muted/30" />
               </div>
               <div>
                 <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Message</label>
-                <Textarea required rows={5} placeholder="Tell me about the system you're building…" className="mt-2 bg-muted/30" />
+                <Textarea name="message" required rows={5} placeholder="Tell me about the system you're building…" className="mt-2 bg-muted/30" />
               </div>
 
               <Button type="submit" variant="brand" size="lg" className="w-full" disabled={sending}>
