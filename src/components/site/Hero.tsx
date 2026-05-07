@@ -17,7 +17,7 @@ export const Hero = () => (
     <div className="pointer-events-none absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_80%_60%_at_70%_20%,hsl(var(--brand-cyan)/0.10),transparent_70%)]" />
     <div className="pointer-events-none absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_50%_50%_at_80%_10%,hsl(var(--brand-violet)/0.07),transparent_70%)]" />
 
-    <div className="container relative pt-20 md:pt-24 pb-5 md:pb-8">
+    <div className="container relative pt-28 md:pt-32 pb-5 md:pb-8">
       <div className="w-full rounded-2xl border border-white/[0.08] bg-background/50 md:rounded-3xl overflow-hidden">
 
         {/* Top bar — identity stripe */}
@@ -94,7 +94,7 @@ export const Hero = () => (
           </div>
 
           {/* Right — HeroVisionFrame canvas */}
-          <div className="md:col-span-4 h-[180px] md:h-[240px] lg:h-auto min-h-[200px]">
+          <div className="md:col-span-4 h-[200px] md:h-[300px] lg:h-auto min-h-[200px]">
             <HeroVisionFrame />
           </div>
 

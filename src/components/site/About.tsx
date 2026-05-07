@@ -2,7 +2,7 @@ import { SectionHeader } from "./SectionHeader";
 import { About3DCard } from "./About3DCard";
 
 export const About = () => (
-  <section id="about" className="relative py-24 md:py-32">
+  <section id="about" className="relative py-16 md:py-20">
     <div className="container">
       <SectionHeader eyebrow="01 — The Engineer" title="The engineer behind the systems." />
 
