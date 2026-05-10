@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { motion } from "motion/react";
 
 export const SectionHeader = ({
   eyebrow,
@@ -11,7 +12,13 @@ export const SectionHeader = ({
   description?: string;
   align?: "left" | "center";
 }) => (
-  <div data-reveal className={`max-w-3xl ${align === "center" ? "mx-auto text-center" : ""}`}>
+  <motion.div
+    initial={{ opacity: 0, y: 28 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-8%" }}
+    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+    className={`max-w-3xl ${align === "center" ? "mx-auto text-center" : ""}`}
+  >
     <div className="chip">
       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
       {eyebrow}
@@ -22,5 +29,5 @@ export const SectionHeader = ({
     {description && (
       <p className="mt-4 text-lg text-muted-foreground">{description}</p>
     )}
-  </div>
+  </motion.div>
 );

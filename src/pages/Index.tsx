@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
 import { About } from "@/components/site/About";
@@ -9,40 +8,30 @@ import { Skills } from "@/components/site/Skills";
 import { Contact } from "@/components/site/Contact";
 import { Footer } from "@/components/site/Footer";
 import { PortfolioBackground } from "@/components/site/PortfolioBackground";
+import { useProfile } from "@/hooks/useProfile";
 
 const Index = () => {
-  useEffect(() => {
-    const revealEls = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-    if (!revealEls.length) return;
+  const { data } = useProfile("manvir");
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
-    );
-
-    revealEls.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+  // If DB has data, use it; otherwise all components fall back to their hardcoded defaults.
+  const profile = data?.profile;
+  const services = data?.services;
+  const projects = data?.projects;
+  const steps = data?.steps;
+  const skillGroups = data?.skillGroups;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background">
       <PortfolioBackground />
       <div className="relative z-10">
         <Navbar />
-        <Hero />
-        <About />
-        <Services />
-        <Projects />
-        <Journey />
-        <Skills />
-        <Contact />
+        <Hero profile={profile} />
+        <About paragraphs={profile?.about_paragraphs} />
+        <Services services={services} />
+        <Projects projects={projects} />
+        <Journey steps={steps} />
+        <Skills skillGroups={skillGroups} />
+        <Contact profile={profile} />
         <Footer />
       </div>
     </main>

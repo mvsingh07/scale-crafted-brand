@@ -1,0 +1,493 @@
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { AdminGuard } from "@/components/AdminGuard";
+import {
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  Trash2,
+  Upload,
+  Save,
+  ArrowLeft,
+  LogOut,
+} from "lucide-react";
+import type { Profile, Service, Project, CareerStep, SkillGroup } from "@/lib/supabase";
+import { Hero } from "@/components/site/Hero";
+import { About } from "@/components/site/About";
+import { Services } from "@/components/site/Services";
+import { Projects } from "@/components/site/Projects";
+import { Journey } from "@/components/site/Journey";
+import { Skills } from "@/components/site/Skills";
+import { Contact } from "@/components/site/Contact";
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const field = (label: string, children: React.ReactNode) => (
+  <div className="space-y-1">
+    <label className="block font-mono text-[10px] uppercase tracking-widest text-white/30">{label}</label>
+    {children}
+  </div>
+);
+
+const input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+  <input
+    {...props}
+    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/20 outline-none focus:border-white/30 transition-colors"
+  />
+);
+
+const textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
+  <textarea
+    {...props}
+    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/20 outline-none focus:border-white/30 transition-colors resize-y min-h-[80px]"
+  />
+);
+
+const sectionToggle = (label: string, open: boolean, toggle: () => void) => (
+  <button
+    type="button"
+    onClick={toggle}
+    className="flex w-full items-center justify-between py-3 text-left font-mono text-[10px] uppercase tracking-widest text-white/50 hover:text-white/80 transition-colors"
+  >
+    <span>{label}</span>
+    {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+  </button>
+);
+
+// ── Section collapse state ────────────────────────────────────────────────────
+type Sections = "hero" | "about" | "services" | "projects" | "journey" | "skills" | "contact";
+
+// ── Main editor component ─────────────────────────────────────────────────────
+const EditProfilePage = () => {
+  const navigate = useNavigate();
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Profile top-level fields
+  const [profile, setProfile] = useState<Partial<Profile>>({});
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Related data
+  const [services, setServices] = useState<Partial<Service>[]>([]);
+  const [projects, setProjects] = useState<Partial<Project>[]>([]);
+  const [steps, setSteps] = useState<Partial<CareerStep>[]>([]);
+  const [skillGroups, setSkillGroups] = useState<Partial<SkillGroup>[]>([]);
+
+  // About paragraphs stored as a newline-joined string for easy editing
+  const [aboutText, setAboutText] = useState("");
+
+  // UI state
+  const [open, setOpen] = useState<Record<Sections, boolean>>({
+    hero: true, about: false, services: false, projects: false,
+    journey: false, skills: false, contact: false,
+  });
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [saveMsg, setSaveMsg] = useState("");
+
+  const toggle = (s: Sections) => setOpen((o) => ({ ...o, [s]: !o[s] }));
+
+  // ── Load existing profile ─────────────────────────────────────────────────
+  useEffect(() => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setUserId(user.id);
+
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (p) {
+        setProfile(p);
+        setProfileId(p.id);
+        setAboutText(
+          Array.isArray(p.about_paragraphs)
+            ? (p.about_paragraphs as string[]).join("\n\n")
+            : ""
+        );
+
+        // Load related data
+        const [{ data: sv }, { data: pr }, { data: cs }, { data: sg }] = await Promise.all([
+          supabase.from("services").select("*").eq("profile_id", p.id).order("ord"),
+          supabase.from("projects").select("*").eq("profile_id", p.id).order("ord"),
+          supabase.from("career_steps").select("*").eq("profile_id", p.id).order("ord"),
+          supabase.from("skill_groups").select("*").eq("profile_id", p.id).order("ord"),
+        ]);
+        setServices(sv ?? []);
+        setProjects(pr ?? []);
+        setSteps(cs ?? []);
+        setSkillGroups(sg ?? []);
+      }
+    };
+    load();
+  }, []);
+
+  // ── Save all ──────────────────────────────────────────────────────────────
+  const save = async () => {
+    if (!userId) return;
+    setSaving(true);
+
+    const aboutParagraphs = aboutText.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+    const payload = { ...profile, about_paragraphs: aboutParagraphs, user_id: userId };
+
+    let pid = profileId;
+
+    if (!pid) {
+      // First save — insert profile
+      const { data, error } = await supabase.from("profiles").insert(payload).select().single();
+      if (!error && data) { pid = data.id; setProfileId(pid); }
+    } else {
+      await supabase.from("profiles").update(payload).eq("id", pid);
+    }
+
+    if (!pid) { setSaving(false); return; }
+
+    // Upsert related tables
+    await Promise.all([
+      upsertList("services", services, pid),
+      upsertList("projects", projects, pid),
+      upsertList("career_steps", steps, pid),
+      upsertList("skill_groups", skillGroups, pid),
+    ]);
+
+    setSaving(false);
+    setSaveMsg("Saved");
+    setTimeout(() => setSaveMsg(""), 2500);
+  };
+
+  const upsertList = async (table: string, items: Partial<{ id: string; profile_id: string }>[], pid: string) => {
+    for (const item of items) {
+      const row = { ...item, profile_id: pid };
+      if (row.id) {
+        await supabase.from(table).update(row).eq("id", row.id);
+      } else {
+        await supabase.from(table).insert(row);
+      }
+    }
+  };
+
+  // ── Resume upload ─────────────────────────────────────────────────────────
+  const uploadResume = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !userId) return;
+    setUploading(true);
+
+    const path = `${userId}/resume.pdf`;
+    const { error } = await supabase.storage.from("resumes").upload(path, file, { upsert: true });
+
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from("resumes").getPublicUrl(path);
+      setProfile((p) => ({ ...p, resume_url: publicUrl }));
+    }
+    setUploading(false);
+  };
+
+  // ── List helpers ──────────────────────────────────────────────────────────
+  const updateItem = <T,>(setter: React.Dispatch<React.SetStateAction<Partial<T>[]>>, idx: number, patch: Partial<T>) =>
+    setter((arr) => arr.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
+
+  const removeItem = async <T extends { id?: string }>(
+    table: string,
+    setter: React.Dispatch<React.SetStateAction<Partial<T>[]>>,
+    idx: number,
+    id?: string
+  ) => {
+    if (id) await supabase.from(table).delete().eq("id", id);
+    setter((arr) => arr.filter((_, i) => i !== idx));
+  };
+
+  const signOut = async () => { await supabase.auth.signOut(); navigate("/forge"); };
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  return (
+    <div className="flex h-screen overflow-hidden bg-[#0a0a0a] text-white">
+
+      {/* ── LEFT: Editor ── */}
+      <div className="flex w-1/2 flex-col border-r border-white/10">
+        {/* Header */}
+        <header className="flex flex-shrink-0 items-center justify-between border-b border-white/10 px-5 py-3">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate("/forge/dashboard")} className="text-white/30 hover:text-white transition-colors">
+              <ArrowLeft size={14} />
+            </button>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-white/30">The Forge</p>
+              <h1 className="text-sm font-semibold text-white">Edit Profile</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {saveMsg && <span className="font-mono text-[10px] text-emerald-400">{saveMsg}</span>}
+            <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={uploadResume} />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-white/50 transition-colors hover:border-white/20 hover:text-white disabled:opacity-40"
+            >
+              <Upload size={10} />
+              {uploading ? "Uploading…" : "Resume"}
+            </button>
+            <button
+              type="button"
+              onClick={save}
+              disabled={saving}
+              className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              <Save size={10} />
+              {saving ? "Saving…" : "Save"}
+            </button>
+            <button onClick={signOut} className="text-white/20 hover:text-white transition-colors">
+              <LogOut size={14} />
+            </button>
+          </div>
+        </header>
+
+        {/* Form body */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-0 divide-y divide-white/[0.06]">
+
+          {/* Hero */}
+          <div>
+            {sectionToggle("Hero", open.hero, () => toggle("hero"))}
+            {open.hero && (
+              <div className="space-y-3 pb-4">
+                {/* Username — drives the portfolio URL */}
+                <div className="space-y-1">
+                  <label className="block font-mono text-[10px] uppercase tracking-widest text-white/30">
+                    Username <span className="text-[hsl(var(--brand-cyan))/0.7]">· your portfolio URL</span>
+                  </label>
+                  <div className="flex overflow-hidden rounded-lg border border-white/10 bg-white/5 focus-within:border-white/30 transition-colors">
+                    <span className="flex items-center border-r border-white/10 bg-white/[0.04] px-3 font-mono text-[11px] text-white/25 shrink-0">
+                      {window.location.origin}/
+                    </span>
+                    <input
+                      value={profile.username ?? ""}
+                      onChange={(e) => setProfile((p) => ({ ...p, username: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") }))}
+                      placeholder="yourname"
+                      className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder-white/20 outline-none"
+                    />
+                  </div>
+                  {profile.username && (
+                    <p className="font-mono text-[9px] text-emerald-400/70">
+                      /{profile.username} · save to activate
+                    </p>
+                  )}
+                </div>
+                {field("Name", input({ value: profile.name ?? "", onChange: (e) => setProfile((p) => ({ ...p, name: e.target.value })), placeholder: "Manvir Singh" }))}
+                {field("Identity Stripe", input({ value: profile.identity_stripe ?? "", onChange: (e) => setProfile((p) => ({ ...p, identity_stripe: e.target.value })), placeholder: "Engineer · Creator · Storyteller" }))}
+                {field("Tagline", input({ value: profile.tagline ?? "", onChange: (e) => setProfile((p) => ({ ...p, tagline: e.target.value })), placeholder: "Visionary Mind: …" }))}
+                {field("Hero Description", textarea({ value: profile.hero_description ?? "", onChange: (e) => setProfile((p) => ({ ...p, hero_description: e.target.value })), placeholder: "I design the quiet infrastructure behind ambitious products…" }))}
+              </div>
+            )}
+          </div>
+
+          {/* About */}
+          <div>
+            {sectionToggle("About", open.about, () => toggle("about"))}
+            {open.about && (
+              <div className="pb-4">
+                {field("Paragraphs (separate with blank line)",
+                  textarea({ value: aboutText, onChange: (e) => setAboutText(e.target.value), rows: 10, placeholder: "First paragraph…\n\nSecond paragraph…" })
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Services */}
+          <div>
+            {sectionToggle("Services", open.services, () => toggle("services"))}
+            {open.services && (
+              <div className="space-y-3 pb-4">
+                {services.map((s, i) => (
+                  <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-white/30">Service {i + 1}</span>
+                      <button type="button" onClick={() => removeItem("services", setServices, i, s.id)} className="text-white/20 hover:text-red-400 transition-colors">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                    {field("Title", input({ value: s.title ?? "", onChange: (e) => updateItem(setServices, i, { title: e.target.value } as Partial<Service>), placeholder: "Backend & System Architecture" }))}
+                    {field("Description", textarea({ value: s.description ?? "", onChange: (e) => updateItem(setServices, i, { description: e.target.value } as Partial<Service>), rows: 2 }))}
+                    {field("Impact", input({ value: s.impact ?? "", onChange: (e) => updateItem(setServices, i, { impact: e.target.value } as Partial<Service>) }))}
+                    {field("Icon name (Lucide)", input({ value: s.icon_name ?? "", onChange: (e) => updateItem(setServices, i, { icon_name: e.target.value } as Partial<Service>), placeholder: "Layers" }))}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setServices((a) => [...a, { title: "", description: "", impact: "", icon_name: "Layers", accent: "from-[hsl(var(--brand-cyan))] to-[hsl(var(--brand-violet))]", ord: a.length }])}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/10 py-2.5 font-mono text-[10px] uppercase tracking-widest text-white/30 hover:border-white/20 hover:text-white/60 transition-colors"
+                >
+                  <Plus size={10} /> Add Service
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Projects */}
+          <div>
+            {sectionToggle("Projects", open.projects, () => toggle("projects"))}
+            {open.projects && (
+              <div className="space-y-3 pb-4">
+                {projects.map((p, i) => (
+                  <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-white/30">Project {i + 1}</span>
+                      <button type="button" onClick={() => removeItem("projects", setProjects, i, p.id)} className="text-white/20 hover:text-red-400 transition-colors">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                    {field("Title", input({ value: p.title ?? "", onChange: (e) => updateItem(setProjects, i, { title: e.target.value } as Partial<Project>) }))}
+                    {field("Tagline", input({ value: p.tagline ?? "", onChange: (e) => updateItem(setProjects, i, { tagline: e.target.value } as Partial<Project>) }))}
+                    {field("Problem", textarea({ value: p.problem ?? "", onChange: (e) => updateItem(setProjects, i, { problem: e.target.value } as Partial<Project>), rows: 2 }))}
+                    {field("Solution", textarea({ value: p.solution ?? "", onChange: (e) => updateItem(setProjects, i, { solution: e.target.value } as Partial<Project>), rows: 2 }))}
+                    {field("Impact", textarea({ value: p.impact ?? "", onChange: (e) => updateItem(setProjects, i, { impact: e.target.value } as Partial<Project>), rows: 2 }))}
+                    {field("Stack tags (comma-separated)", input({ value: Array.isArray(p.stack_tags) ? (p.stack_tags as string[]).join(", ") : "", onChange: (e) => updateItem(setProjects, i, { stack_tags: e.target.value.split(",").map((t) => t.trim()) } as Partial<Project>) }))}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setProjects((a) => [...a, { number: `0${a.length + 1}`, title: "", tagline: "", problem: "", solution: "", impact: "", stack_tags: [], accent: "from-[hsl(var(--brand-cyan))] to-[hsl(var(--brand-violet))]", ord: a.length }])}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/10 py-2.5 font-mono text-[10px] uppercase tracking-widest text-white/30 hover:border-white/20 hover:text-white/60 transition-colors"
+                >
+                  <Plus size={10} /> Add Project
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Journey */}
+          <div>
+            {sectionToggle("Journey", open.journey, () => toggle("journey"))}
+            {open.journey && (
+              <div className="space-y-3 pb-4">
+                {steps.map((s, i) => (
+                  <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-white/30">Chapter {i + 1}</span>
+                      <button type="button" onClick={() => removeItem("career_steps", setSteps, i, s.id)} className="text-white/20 hover:text-red-400 transition-colors">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                    {field("Chapter label", input({ value: s.chapter ?? "", onChange: (e) => updateItem(setSteps, i, { chapter: e.target.value } as Partial<CareerStep>), placeholder: "Chapter I" }))}
+                    {field("Year", input({ value: s.year ?? "", onChange: (e) => updateItem(setSteps, i, { year: e.target.value } as Partial<CareerStep>), placeholder: "2023 — 2025" }))}
+                    {field("Role", input({ value: s.role ?? "", onChange: (e) => updateItem(setSteps, i, { role: e.target.value } as Partial<CareerStep>) }))}
+                    {field("Organisation", input({ value: s.org ?? "", onChange: (e) => updateItem(setSteps, i, { org: e.target.value } as Partial<CareerStep>) }))}
+                    {field("Description", textarea({ value: s.body ?? "", onChange: (e) => updateItem(setSteps, i, { body: e.target.value } as Partial<CareerStep>), rows: 3 }))}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setSteps((a) => [...a, { chapter: "", year: "", role: "", org: "", body: "", ord: a.length }])}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/10 py-2.5 font-mono text-[10px] uppercase tracking-widest text-white/30 hover:border-white/20 hover:text-white/60 transition-colors"
+                >
+                  <Plus size={10} /> Add Chapter
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Skills */}
+          <div>
+            {sectionToggle("Skills", open.skills, () => toggle("skills"))}
+            {open.skills && (
+              <div className="space-y-3 pb-4">
+                {skillGroups.map((g, i) => (
+                  <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-white/30">Group {i + 1}</span>
+                      <button type="button" onClick={() => removeItem("skill_groups", setSkillGroups, i, g.id)} className="text-white/20 hover:text-red-400 transition-colors">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                    {field("Cluster", input({ value: g.cluster ?? "", onChange: (e) => updateItem(setSkillGroups, i, { cluster: e.target.value } as Partial<SkillGroup>), placeholder: "Foundation / Infrastructure / Interface" }))}
+                    {field("Title", input({ value: g.title ?? "", onChange: (e) => updateItem(setSkillGroups, i, { title: e.target.value } as Partial<SkillGroup>) }))}
+                    {field("Skills (comma-separated)", input({ value: Array.isArray(g.items) ? (g.items as string[]).join(", ") : "", onChange: (e) => updateItem(setSkillGroups, i, { items: e.target.value.split(",").map((t) => t.trim()) } as Partial<SkillGroup>) }))}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setSkillGroups((a) => [...a, { cluster: "Foundation", title: "", items: [], ord: a.length }])}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/10 py-2.5 font-mono text-[10px] uppercase tracking-widest text-white/30 hover:border-white/20 hover:text-white/60 transition-colors"
+                >
+                  <Plus size={10} /> Add Skill Group
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Contact */}
+          <div>
+            {sectionToggle("Contact Info", open.contact, () => toggle("contact"))}
+            {open.contact && (
+              <div className="space-y-3 pb-4">
+                {field("Email", input({ type: "email", value: profile.email ?? "", onChange: (e) => setProfile((p) => ({ ...p, email: e.target.value })) }))}
+                {field("Phone", input({ value: profile.phone ?? "", onChange: (e) => setProfile((p) => ({ ...p, phone: e.target.value })), placeholder: "+91 62838 49317" }))}
+                {field("LinkedIn URL", input({ value: profile.linkedin_url ?? "", onChange: (e) => setProfile((p) => ({ ...p, linkedin_url: e.target.value })) }))}
+                {field("GitHub URL", input({ value: profile.github_url ?? "", onChange: (e) => setProfile((p) => ({ ...p, github_url: e.target.value })) }))}
+                {profile.resume_url && (
+                  <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                    <p className="font-mono text-[10px] text-emerald-400/80">Resume uploaded</p>
+                    <a href={profile.resume_url} target="_blank" rel="noreferrer" className="mt-1 block truncate font-mono text-[10px] text-white/30 hover:text-white/60">
+                      {profile.resume_url}
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── RIGHT: Live portfolio preview ── */}
+      <div className="flex w-1/2 flex-col bg-background">
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-white/[0.06] px-5 py-3">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/40">Live Preview</p>
+          <span className="rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2 py-0.5 font-mono text-[9px] text-emerald-400/60">
+            Live
+          </span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto relative">
+          {/* Subtle background gradient approximating the portfolio atmosphere */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_40%_at_50%_0%,hsl(var(--brand-cyan)/0.07),transparent_65%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_30%_at_80%_10%,hsl(var(--brand-violet)/0.05),transparent_60%)]" />
+
+          <div className="relative z-10">
+            <Hero
+              profile={profile as Pick<Profile, "name" | "identity_stripe" | "tagline" | "hero_description">}
+            />
+            <About
+              paragraphs={aboutText.split(/\n\n+/).filter(Boolean)}
+            />
+            <Services
+              services={services.length > 0 ? (services as Service[]) : undefined}
+            />
+            <Projects
+              projects={projects.length > 0 ? (projects as Project[]) : undefined}
+            />
+            <Journey
+              steps={steps.length > 0 ? (steps as CareerStep[]) : undefined}
+            />
+            <Skills
+              skillGroups={skillGroups.length > 0 ? (skillGroups as SkillGroup[]) : undefined}
+            />
+            <Contact
+              profile={profile as Pick<Profile, "email" | "phone" | "linkedin_url" | "github_url">}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ForgeEditProfile = () => (
+  <AdminGuard>
+    <EditProfilePage />
+  </AdminGuard>
+);
+
+export default ForgeEditProfile;

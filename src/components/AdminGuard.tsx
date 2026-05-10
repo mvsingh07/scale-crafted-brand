@@ -27,7 +27,7 @@ export const AdminGuard = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  if (!authed) return <Navigate to="/wishmebest" replace />;
+  if (!authed) return <Navigate to="/forge" replace />;
 
   return <>{children}</>;
 };
