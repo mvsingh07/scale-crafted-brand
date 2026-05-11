@@ -1,0 +1,2 @@
+Clients can list all files in this bucket
+A broad SELECT policy on storage.objects allows clients to retrieve a full list of files. Public buckets don’t need this and it may expose more data than intended.

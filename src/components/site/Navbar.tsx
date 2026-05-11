@@ -6,6 +6,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { supabase } from "@/lib/supabase";
 
 const SPRING = { type: "spring" as const, stiffness: 500, damping: 30 };
+const PILL_SPRING = { type: "spring" as const, stiffness: 380, damping: 28 };
 
 const links = [
   { href: "#about", label: "About" },
@@ -24,6 +25,8 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [fetchedResumeUrl, setFetchedResumeUrl] = useState<string | null>(null);
+  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+  const [hoveredMobileLink, setHoveredMobileLink] = useState<string | null>(null);
 
   const resumeUrl = resumeUrlProp !== undefined ? resumeUrlProp : fetchedResumeUrl;
 
@@ -62,6 +65,7 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
             scrolled ? "bg-background/72" : "bg-background/48"
           }`}
         >
+          {/* Logo */}
           <motion.a
             href="#top"
             className="flex items-center gap-2 font-display text-lg font-semibold"
@@ -75,14 +79,44 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
             <span>Manvir<span className="text-muted-foreground">.dev</span></span>
           </motion.a>
 
-          <ul className="hidden items-center gap-1 md:flex">
+          {/* Desktop nav links */}
+          <ul
+            className="hidden items-center gap-0.5 md:flex"
+            onMouseLeave={() => setHoveredLink(null)}
+          >
             {links.map((l) => (
-              <li key={l.href}>
+              <li key={l.href} className="relative">
+                {/* Sliding gradient pill — shared layoutId makes it glide between items */}
+                <AnimatePresence>
+                  {hoveredLink === l.href && (
+                    <motion.span
+                      layoutId="nav-hover-pill"
+                      className="pointer-events-none absolute inset-0 rounded-full"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={PILL_SPRING}
+                      style={{
+                        background:
+                          "linear-gradient(120deg, hsl(199 100% 64% / 0.14) 0%, hsl(256 92% 76% / 0.12) 100%)",
+                        boxShadow:
+                          "inset 0 0 0 1px hsl(199 100% 64% / 0.2), 0 0 20px -5px hsl(199 100% 64% / 0.28)",
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
+
                 <motion.a
                   href={l.href}
-                  className="rounded-full px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
-                  whileHover={{ y: -1 }}
-                  whileTap={{ y: 0, scale: 0.95 }}
+                  className="relative z-10 block rounded-full px-4 py-2 text-sm"
+                  onHoverStart={() => setHoveredLink(l.href)}
+                  animate={{
+                    color:
+                      hoveredLink === l.href
+                        ? "hsl(var(--foreground))"
+                        : "hsl(var(--muted-foreground))",
+                  }}
+                  whileTap={{ scale: 0.95 }}
                   transition={SPRING}
                 >
                   {l.label}
@@ -91,13 +125,14 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
             ))}
           </ul>
 
+          {/* Desktop right actions */}
           <div className="hidden md:flex items-center gap-2">
             {resumeUrl && (
               <motion.a
                 href={resumeUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-border hover:text-foreground"
+                className="flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
                 whileHover={{ scale: 1.04, y: -1 }}
                 whileTap={{ scale: 0.96 }}
                 transition={SPRING}
@@ -117,6 +152,7 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
             </motion.div>
           </div>
 
+          {/* Mobile toggle */}
           <div className="md:hidden flex items-center gap-2">
             <ThemeToggle />
             <motion.button
@@ -132,6 +168,7 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
           </div>
         </nav>
 
+        {/* Mobile menu */}
         <AnimatePresence>
           {open && (
             <motion.div
@@ -141,15 +178,42 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
               transition={{ duration: 0.2, ease: "easeOut" }}
               style={{ originY: 0 }}
               className="glass mt-2 rounded-2xl p-4 md:hidden"
+              onMouseLeave={() => setHoveredMobileLink(null)}
             >
-              <ul className="flex flex-col gap-1">
+              <ul className="flex flex-col gap-0.5">
                 {links.map((l) => (
-                  <li key={l.href}>
+                  <li key={l.href} className="relative">
+                    {/* Mobile gradient highlight */}
+                    <AnimatePresence>
+                      {hoveredMobileLink === l.href && (
+                        <motion.span
+                          layoutId="mobile-nav-pill"
+                          className="pointer-events-none absolute inset-0 rounded-lg"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={PILL_SPRING}
+                          style={{
+                            background:
+                              "linear-gradient(90deg, hsl(199 100% 64% / 0.12) 0%, hsl(256 92% 76% / 0.08) 100%)",
+                            boxShadow: "inset 0 0 0 1px hsl(199 100% 64% / 0.15)",
+                          }}
+                        />
+                      )}
+                    </AnimatePresence>
+
                     <motion.a
                       href={l.href}
                       onClick={() => setOpen(false)}
-                      className="block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-                      whileHover={{ x: 4 }}
+                      className="relative z-10 block rounded-lg px-3 py-2 text-sm"
+                      onHoverStart={() => setHoveredMobileLink(l.href)}
+                      animate={{
+                        color:
+                          hoveredMobileLink === l.href
+                            ? "hsl(var(--foreground))"
+                            : "hsl(var(--muted-foreground))",
+                        x: hoveredMobileLink === l.href ? 4 : 0,
+                      }}
                       transition={SPRING}
                     >
                       {l.label}
@@ -163,7 +227,7 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
                       target="_blank"
                       rel="noreferrer"
                       onClick={() => setOpen(false)}
-                      className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                      className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
                       whileHover={{ x: 4 }}
                       transition={SPRING}
                     >

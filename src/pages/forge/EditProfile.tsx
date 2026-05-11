@@ -12,7 +12,14 @@ import {
   ArrowLeft,
   LogOut,
 } from "lucide-react";
-import type { Profile, Service, Project, CareerStep, SkillGroup } from "@/lib/supabase";
+import type { Profile, Theme, Service, Project, CareerStep, SkillGroup } from "@/lib/supabase";
+
+const THEMES: { key: Theme; label: string; bg: string; dot: string }[] = [
+  { key: "dark",      label: "Dark",      bg: "#0d0f14", dot: "#4a9eff" },
+  { key: "light",     label: "Light",     bg: "#f4f5f7", dot: "#2563eb" },
+  { key: "mono-grey", label: "Grey",      bg: "#121212", dot: "#cccccc" },
+  { key: "mono-blue", label: "Blue",      bg: "#080d1a", dot: "#5ba4ff" },
+];
 import { Hero } from "@/components/site/Hero";
 import { About } from "@/components/site/About";
 import { Services } from "@/components/site/Services";
@@ -86,6 +93,16 @@ const EditProfilePage = () => {
   const [saveMsg, setSaveMsg] = useState("");
 
   const toggle = (s: Sections) => setOpen((o) => ({ ...o, [s]: !o[s] }));
+
+  // ── Apply theme live so the preview panel reflects it ─────────────────────
+  useEffect(() => {
+    const root = document.documentElement;
+    const THEME_CLASSES = ["light", "mono-grey", "mono-blue"];
+    THEME_CLASSES.forEach((c) => root.classList.remove(c));
+    const t = profile.theme;
+    if (t && t !== "dark") root.classList.add(t);
+    return () => THEME_CLASSES.forEach((c) => root.classList.remove(c));
+  }, [profile.theme]);
 
   // ── Load existing profile ─────────────────────────────────────────────────
   useEffect(() => {
@@ -220,6 +237,33 @@ const EditProfilePage = () => {
           </div>
           <div className="flex items-center gap-2">
             {saveMsg && <span className="font-mono text-[10px] text-emerald-400">{saveMsg}</span>}
+
+            {/* Theme swatches */}
+            <div className="flex items-center gap-1 border-r border-white/10 pr-2 mr-1">
+              {THEMES.map((t) => {
+                const active = (profile.theme ?? "dark") === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    type="button"
+                    title={t.label}
+                    onClick={() => setProfile((p) => ({ ...p, theme: t.key }))}
+                    className="relative flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all duration-150"
+                    style={{
+                      background: t.bg,
+                      borderColor: active ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.12)",
+                      transform: active ? "scale(1.15)" : "scale(1)",
+                    }}
+                  >
+                    <span
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{ background: t.dot }}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+
             <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={uploadResume} />
             <button
               type="button"

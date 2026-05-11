@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
+import { isTrialExpired } from "@/lib/supabase";
 import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
 import { About } from "@/components/site/About";
@@ -11,31 +12,23 @@ import { Skills } from "@/components/site/Skills";
 import { Contact } from "@/components/site/Contact";
 import { Footer } from "@/components/site/Footer";
 import { PortfolioBackground } from "@/components/site/PortfolioBackground";
+import NotFound from "@/pages/NotFound";
+import PortfolioExpired from "@/pages/PortfolioExpired";
+
+const THEME_CLASSES = ["light", "mono-grey", "mono-blue"] as const;
 
 const Portfolio = () => {
   const { username } = useParams<{ username: string }>();
-  const { data, loading, error } = useProfile(username ?? "");
+  const { data, loading } = useProfile(username ?? "");
 
+  // Apply theme class to <html> and clean up on unmount
   useEffect(() => {
-    if (!data) return;
-    const revealEls = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-    if (!revealEls.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
-    );
-
-    revealEls.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [data]);
+    const root = document.documentElement;
+    THEME_CLASSES.forEach((c) => root.classList.remove(c));
+    const theme = data?.profile?.theme;
+    if (theme && theme !== "dark") root.classList.add(theme);
+    return () => THEME_CLASSES.forEach((c) => root.classList.remove(c));
+  }, [data?.profile?.theme]);
 
   if (loading) {
     return (
@@ -45,11 +38,11 @@ const Portfolio = () => {
     );
   }
 
-  if (error || !data) {
-    return <Navigate to="/" replace />;
-  }
+  if (!data) return <NotFound />;
 
   const { profile, services, projects, steps, skillGroups } = data;
+
+  if (isTrialExpired(profile)) return <PortfolioExpired ownerName={profile.name} />;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background">
