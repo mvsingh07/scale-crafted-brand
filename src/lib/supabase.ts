@@ -20,6 +20,18 @@ export type ContactSubmission = {
 export type Theme = "dark" | "light" | "mono-grey" | "mono-blue";
 export type SubscriptionStatus = "trial" | "active" | "expired";
 export type Plan = "monthly" | "halfyearly" | "annual";
+export type ResumeVisibility = "public" | "private";
+export type StoryMode = "brief" | "detailed";
+
+export type FontSetting = { family: string; size: number; color: string };
+export type FontConfig = {
+  heading: FontSetting;
+  subheading: FontSetting;
+  body: FontSetting;
+};
+
+export type PersonalDetail = { label: string; value: string };
+export type StoryDetailSection = { section_name: string; points: string[] };
 
 export type Profile = {
   id: string;
@@ -36,6 +48,13 @@ export type Profile = {
   github_url: string | null;
   resume_url: string | null;
   theme: Theme | null;
+  dashboard_theme: Theme | null;
+  resume_visibility: ResumeVisibility | null;
+  story_mode: StoryMode | null;
+  font_config: FontConfig | null;
+  personal_image_url: string | null;
+  personal_headline: string | null;
+  personal_details: PersonalDetail[] | null;
   subscription_status: SubscriptionStatus;
   trial_ends_at: string | null;
   razorpay_sub_id: string | null;
@@ -116,6 +135,7 @@ export type CareerStep = {
   role: string;
   org: string;
   body: string;
+  story_details: StoryDetailSection[];
   ord: number;
 };
 

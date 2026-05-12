@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "motion/react";
+import { toast } from "sonner";
 import { supabase, trialDaysLeft, isTrialExpired } from "@/lib/supabase";
 import type { SubscriptionStatus, Plan } from "@/lib/supabase";
 import { AdminGuard } from "@/components/AdminGuard";
@@ -83,11 +84,13 @@ const DashboardPage = () => {
     if (!portfolioUrl) return;
     navigator.clipboard.writeText(portfolioUrl);
     setCopied(true);
+    toast.success("Portfolio URL copied");
     setTimeout(() => setCopied(false), 2000);
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    toast.success("Signed out");
     navigate("/forge");
   };
 

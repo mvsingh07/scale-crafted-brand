@@ -4,6 +4,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { isTrialExpired } from "@/lib/supabase";
 import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
+import { Personal } from "@/components/site/Personal";
 import { About } from "@/components/site/About";
 import { Services } from "@/components/site/Services";
 import { Projects } from "@/components/site/Projects";
@@ -21,14 +22,47 @@ const Portfolio = () => {
   const { username } = useParams<{ username: string }>();
   const { data, loading } = useProfile(username ?? "");
 
-  // Apply theme class to <html> and clean up on unmount
+  const profile = data?.profile;
+
+  // Apply portfolio theme class to <html>
   useEffect(() => {
     const root = document.documentElement;
     THEME_CLASSES.forEach((c) => root.classList.remove(c));
-    const theme = data?.profile?.theme;
+    const theme = profile?.theme;
     if (theme && theme !== "dark") root.classList.add(theme);
     return () => THEME_CLASSES.forEach((c) => root.classList.remove(c));
-  }, [data?.profile?.theme]);
+  }, [profile?.theme]);
+
+  // Inject font config as a scoped <style> tag
+  useEffect(() => {
+    const fontConfig = profile?.font_config;
+    const styleId = "portfolio-font-override";
+    const existing = document.getElementById(styleId);
+    if (existing) existing.remove();
+    if (!fontConfig) return;
+
+    const style = document.createElement("style");
+    style.id = styleId;
+    style.textContent = `
+      #portfolio-root h1, #portfolio-root h2 {
+        font-family: ${fontConfig.heading.family} !important;
+        font-size: ${fontConfig.heading.size}px !important;
+        color: ${fontConfig.heading.color} !important;
+      }
+      #portfolio-root h3 {
+        font-family: ${fontConfig.subheading.family} !important;
+        font-size: ${fontConfig.subheading.size}px !important;
+        color: ${fontConfig.subheading.color} !important;
+      }
+      #portfolio-root p {
+        font-family: ${fontConfig.body.family} !important;
+        font-size: ${fontConfig.body.size}px !important;
+        color: ${fontConfig.body.color} !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => style.remove();
+  }, [profile?.font_config]);
 
   if (loading) {
     return (
@@ -38,22 +72,32 @@ const Portfolio = () => {
     );
   }
 
-  if (!data) return <NotFound />;
+  if (!data || !profile) return <NotFound />;
 
-  const { profile, services, projects, steps, skillGroups } = data;
+  const { services, projects, steps, skillGroups } = data;
 
   if (isTrialExpired(profile)) return <PortfolioExpired ownerName={profile.name} />;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background">
+    <main id="portfolio-root" className="relative min-h-screen overflow-hidden bg-background">
       <PortfolioBackground />
       <div className="relative z-10">
-        <Navbar resumeUrl={profile.resume_url} />
+        <Navbar
+          resumeUrl={profile.resume_url}
+          resumeVisibility={profile.resume_visibility ?? "public"}
+          ownerEmail={profile.email}
+          ownerName={profile.name}
+        />
         <Hero profile={profile} />
+        <Personal
+          imageUrl={profile.personal_image_url}
+          headline={profile.personal_headline}
+          details={profile.personal_details}
+        />
         <About paragraphs={profile.about_paragraphs} />
         <Services services={services} />
         <Projects projects={projects} />
-        <Journey steps={steps} />
+        <Journey steps={steps} storyMode={profile.story_mode} />
         <Skills skillGroups={skillGroups} />
         <Contact profile={profile} />
         <Footer />

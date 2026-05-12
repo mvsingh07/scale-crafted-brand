@@ -90,7 +90,7 @@ const AdminLogin = () => {
               <h1 className="text-base font-semibold text-white">Sign in</h1>
               <p className="mt-1 text-xs leading-relaxed text-white/35">
                 A magic link will be sent to{" "}
-                <span className="font-mono text-white/55 break-all">{ADMIN_EMAIL}</span>
+                <span className="font-mono text-white/55 break-all">ADMIN</span>
               </p>
             </div>
 

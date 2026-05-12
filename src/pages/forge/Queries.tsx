@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { supabase, type ContactSubmission } from "@/lib/supabase";
 import { AdminGuard } from "@/components/AdminGuard";
 
@@ -24,9 +25,17 @@ const QueriesPage = () => {
   useEffect(() => { fetchSubmissions(); }, []);
 
   const markRead = async (id: string) => {
-    await supabase.from("contact_submissions").update({ is_read: true }).eq("id", id);
+    const { error } = await supabase
+      .from("contact_submissions")
+      .update({ is_read: true })
+      .eq("id", id);
+    if (error) {
+      toast.error("Failed to mark as read");
+      return;
+    }
     setSubmissions((prev) => prev.map((s) => (s.id === id ? { ...s, is_read: true } : s)));
     setSelected((prev) => (prev?.id === id ? { ...prev, is_read: true } : prev));
+    toast.success("Marked as read");
   };
 
   const onRowClick = (s: ContactSubmission) => {
@@ -36,6 +45,7 @@ const QueriesPage = () => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    toast.success("Signed out");
     navigate("/forge");
   };
 

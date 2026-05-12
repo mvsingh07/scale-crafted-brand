@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Menu, X, Download } from "lucide-react";
+import { Menu, X, Download, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
@@ -19,9 +19,17 @@ const links = [
 
 interface NavbarProps {
   resumeUrl?: string | null;
+  resumeVisibility?: "public" | "private" | null;
+  ownerEmail?: string | null;
+  ownerName?: string | null;
 }
 
-export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
+export const Navbar = ({
+  resumeUrl: resumeUrlProp,
+  resumeVisibility = "public",
+  ownerEmail,
+  ownerName,
+}: NavbarProps = {}) => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [fetchedResumeUrl, setFetchedResumeUrl] = useState<string | null>(null);
@@ -29,6 +37,10 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
   const [hoveredMobileLink, setHoveredMobileLink] = useState<string | null>(null);
 
   const resumeUrl = resumeUrlProp !== undefined ? resumeUrlProp : fetchedResumeUrl;
+
+  const requestCvHref = ownerEmail
+    ? `mailto:${ownerEmail}?subject=CV%20Request${ownerName ? `%20%E2%80%94%20${encodeURIComponent(ownerName)}` : ""}&body=Hi%2C%0A%0AI%20came%20across%20your%20portfolio%20and%20would%20love%20to%20see%20your%20CV.%20Could%20you%20please%20share%20it%3F%0A%0AThanks!`
+    : "#contact";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -127,28 +139,30 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
 
           {/* Desktop right actions */}
           <div className="hidden md:flex items-center gap-2">
-            {resumeUrl && (
-              <motion.a
-                href={resumeUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-                whileHover={{ scale: 1.04, y: -1 }}
-                whileTap={{ scale: 0.96 }}
-                transition={SPRING}
-              >
-                <Download size={11} />
-                Resume
-              </motion.a>
-            )}
             <motion.div
               whileHover={{ scale: 1.04, y: -1 }}
               whileTap={{ scale: 0.96 }}
               transition={SPRING}
             >
-              <Button asChild variant="brand" size="sm">
-                <a href="#contact">Work With Me</a>
-              </Button>
+              {resumeUrl && resumeVisibility === "public" ? (
+                <Button asChild variant="brand" size="sm">
+                  <a href={resumeUrl} target="_blank" rel="noreferrer">
+                    <Download size={13} className="mr-1" />
+                    Download CV
+                  </a>
+                </Button>
+              ) : resumeUrl && resumeVisibility === "private" ? (
+                <Button asChild variant="brand" size="sm">
+                  <a href={requestCvHref}>
+                    <Mail size={13} className="mr-1" />
+                    Request CV
+                  </a>
+                </Button>
+              ) : (
+                <Button asChild variant="brand" size="sm">
+                  <a href="#contact">Work With Me</a>
+                </Button>
+              )}
             </motion.div>
           </div>
 
@@ -220,27 +234,27 @@ export const Navbar = ({ resumeUrl: resumeUrlProp }: NavbarProps = {}) => {
                     </motion.a>
                   </li>
                 ))}
-                {resumeUrl && (
-                  <li>
-                    <motion.a
-                      href={resumeUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-                      whileHover={{ x: 4 }}
-                      transition={SPRING}
-                    >
-                      <Download size={13} />
-                      Resume
-                    </motion.a>
-                  </li>
-                )}
                 <li className="pt-2">
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} transition={SPRING}>
-                    <Button asChild variant="brand" size="sm" className="w-full">
-                      <a href="#contact" onClick={() => setOpen(false)}>Work With Me</a>
-                    </Button>
+                    {resumeUrl && resumeVisibility === "public" ? (
+                      <Button asChild variant="brand" size="sm" className="w-full">
+                        <a href={resumeUrl} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
+                          <Download size={13} className="mr-1" />
+                          Download CV
+                        </a>
+                      </Button>
+                    ) : resumeUrl && resumeVisibility === "private" ? (
+                      <Button asChild variant="brand" size="sm" className="w-full">
+                        <a href={requestCvHref} onClick={() => setOpen(false)}>
+                          <Mail size={13} className="mr-1" />
+                          Request CV
+                        </a>
+                      </Button>
+                    ) : (
+                      <Button asChild variant="brand" size="sm" className="w-full">
+                        <a href="#contact" onClick={() => setOpen(false)}>Work With Me</a>
+                      </Button>
+                    )}
                   </motion.div>
                 </li>
               </ul>
