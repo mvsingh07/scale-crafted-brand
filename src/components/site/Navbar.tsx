@@ -73,7 +73,7 @@ export const Navbar = ({
     >
       <div className="container">
         <nav
-          className={`glass flex items-center justify-between rounded-full px-5 py-3 shadow-elegant transition-all duration-500 ${
+          className={`glass flex items-center justify-between rounded-2xl px-5 py-3 shadow-elegant transition-all duration-500 ${
             scrolled ? "bg-background/72" : "bg-background/48"
           }`}
         >
@@ -148,19 +148,15 @@ export const Navbar = ({
                 <Button asChild variant="brand" size="sm">
                   <a href={resumeUrl} target="_blank" rel="noreferrer">
                     <Download size={13} className="mr-1" />
-                    Download CV
-                  </a>
-                </Button>
-              ) : resumeUrl && resumeVisibility === "private" ? (
-                <Button asChild variant="brand" size="sm">
-                  <a href={requestCvHref}>
-                    <Mail size={13} className="mr-1" />
-                    Request CV
+                    Download Resume
                   </a>
                 </Button>
               ) : (
                 <Button asChild variant="brand" size="sm">
-                  <a href="#contact">Work With Me</a>
+                  <a href={requestCvHref}>
+                    <Mail size={13} className="mr-1" />
+                    Request Resume
+                  </a>
                 </Button>
               )}
             </motion.div>
@@ -240,19 +236,15 @@ export const Navbar = ({
                       <Button asChild variant="brand" size="sm" className="w-full">
                         <a href={resumeUrl} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
                           <Download size={13} className="mr-1" />
-                          Download CV
-                        </a>
-                      </Button>
-                    ) : resumeUrl && resumeVisibility === "private" ? (
-                      <Button asChild variant="brand" size="sm" className="w-full">
-                        <a href={requestCvHref} onClick={() => setOpen(false)}>
-                          <Mail size={13} className="mr-1" />
-                          Request CV
+                          Download Resume
                         </a>
                       </Button>
                     ) : (
                       <Button asChild variant="brand" size="sm" className="w-full">
-                        <a href="#contact" onClick={() => setOpen(false)}>Work With Me</a>
+                        <a href={requestCvHref} onClick={() => setOpen(false)}>
+                          <Mail size={13} className="mr-1" />
+                          Request Resume
+                        </a>
                       </Button>
                     )}
                   </motion.div>

@@ -112,7 +112,8 @@ const Landing = () => {
 
         <h1
           ref={heroRef}
-          className="font-editorial mb-6 text-[clamp(2.4rem,6vw,5rem)] font-light leading-[1.08] tracking-tight text-white opacity-0 transition-opacity duration-700"
+          data-reveal
+          className="font-editorial mb-6 text-[clamp(2.4rem,6vw,5rem)] font-light leading-[1.08] tracking-tight text-white"
         >
           Your portfolio,
           <br />
