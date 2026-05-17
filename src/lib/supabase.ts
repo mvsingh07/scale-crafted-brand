@@ -28,6 +28,8 @@ export type FontConfig = {
   heading: FontSetting;
   subheading: FontSetting;
   body: FontSetting;
+  title?: FontSetting;
+  subtitle?: FontSetting;
 };
 
 export type PersonalDetail = { label: string; value: string };
@@ -40,6 +42,8 @@ export type Profile = {
   name: string;
   tagline: string;
   identity_stripe: string;
+  hero_title: string | null;
+  hero_subtitle: string | null;
   hero_description: string;
   about_paragraphs: string[];
   email: string;

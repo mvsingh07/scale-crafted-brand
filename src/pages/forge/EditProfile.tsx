@@ -31,6 +31,7 @@ import type {
   FontConfig,
 } from "@/lib/supabase";
 import { Hero } from "@/components/site/Hero";
+import { Navbar } from "@/components/site/Navbar";
 import { Personal } from "@/components/site/Personal";
 import { About } from "@/components/site/About";
 import { Services } from "@/components/site/Services";
@@ -59,6 +60,8 @@ const DEFAULT_FONT_CONFIG: FontConfig = {
   heading:    { family: "Space Grotesk, sans-serif", size: 48, color: "#ffffff" },
   subheading: { family: "Inter, sans-serif",          size: 18, color: "#94a3b8" },
   body:       { family: "Inter, sans-serif",          size: 16, color: "#94a3b8" },
+  title:      { family: "Space Grotesk, sans-serif", size: 52, color: "#ffffff" },
+  subtitle:   { family: "Inter, sans-serif",          size: 24, color: "#94a3b8" },
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -453,7 +456,9 @@ const EditProfilePage = () => {
                 </div>
                 {field("Name", input({ value: profile.name ?? "", onChange: (e) => setProfile((p) => ({ ...p, name: e.target.value })), placeholder: "Manvir Singh" }))}
                 {field("Identity Stripe", input({ value: profile.identity_stripe ?? "", onChange: (e) => setProfile((p) => ({ ...p, identity_stripe: e.target.value })), placeholder: "Engineer · Creator · Storyteller" }))}
-                {field("Tagline", input({ value: profile.tagline ?? "", onChange: (e) => setProfile((p) => ({ ...p, tagline: e.target.value })), placeholder: "Visionary Mind: …" }))}
+                <div className="h-px bg-white/[0.06] my-1" />
+                {field("Hero Title", input({ value: profile.hero_title ?? "", onChange: (e) => setProfile((p) => ({ ...p, hero_title: e.target.value })), placeholder: profile.name || "Manvir Singh" }))}
+                {field("Hero Subtitle", input({ value: profile.hero_subtitle ?? "", onChange: (e) => setProfile((p) => ({ ...p, hero_subtitle: e.target.value })), placeholder: profile.tagline || "Visionary Mind: Igniting Innovation…" }))}
                 {field("Hero Description", textarea({ value: profile.hero_description ?? "", onChange: (e) => setProfile((p) => ({ ...p, hero_description: e.target.value })), placeholder: "I design the quiet infrastructure behind ambitious products…" }))}
               </div>
             )}
@@ -944,16 +949,32 @@ const EditProfilePage = () => {
                     </label>
                   </div>
 
-                  {(["heading", "subheading", "body"] as const).map((level) => (
+                  {(["title", "subtitle", "heading", "subheading", "body"] as const).map((level) => {
+                    const levelCfg = fontConfig[level] ?? DEFAULT_FONT_CONFIG[level]!;
+                    const LABELS = {
+                      title: "Hero Title",
+                      subtitle: "Hero Subtitle",
+                      heading: "Heading",
+                      subheading: "Subheading",
+                      body: "Body Text",
+                    };
+                    const PREVIEWS = {
+                      title: profile.hero_title || profile.name || "Manvir Singh",
+                      subtitle: profile.hero_subtitle || profile.tagline || "Visionary Mind",
+                      heading: "Section Heading",
+                      subheading: "Section Subheading",
+                      body: "Building systems at scale, one commit at a time.",
+                    };
+                    return (
                     <div key={level} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 space-y-2">
                       <p className="font-mono text-[9px] uppercase tracking-widest text-white/25">
-                        {level === "heading" ? "Headings" : level === "subheading" ? "Subheadings" : "Body Text"}
+                        {LABELS[level]}
                       </p>
                       <div className="grid grid-cols-3 gap-2">
                         <div className="space-y-1 col-span-1">
                           <label className="block font-mono text-[9px] uppercase tracking-widest text-white/20">Family</label>
                           <select
-                            value={fontConfig[level].family}
+                            value={levelCfg.family}
                             onChange={(e) => updateFont(level, "family", e.target.value)}
                             className="w-full rounded-lg border border-white/10 bg-[#0a0a0a] px-2 py-1.5 text-xs text-white outline-none focus:border-white/30"
                           >
@@ -967,8 +988,8 @@ const EditProfilePage = () => {
                           <input
                             type="number"
                             min={8}
-                            max={96}
-                            value={fontConfig[level].size}
+                            max={120}
+                            value={levelCfg.size}
                             onChange={(e) => updateFont(level, "size", Number(e.target.value))}
                             className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white outline-none focus:border-white/30"
                           />
@@ -978,13 +999,13 @@ const EditProfilePage = () => {
                           <div className="flex items-center gap-1.5">
                             <input
                               type="color"
-                              value={fontConfig[level].color}
+                              value={levelCfg.color}
                               onChange={(e) => updateFont(level, "color", e.target.value)}
                               className="h-8 w-8 cursor-pointer rounded border border-white/10 bg-transparent p-0.5"
                             />
                             <input
                               type="text"
-                              value={fontConfig[level].color}
+                              value={levelCfg.color}
                               onChange={(e) => updateFont(level, "color", e.target.value)}
                               className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 font-mono text-[10px] text-white outline-none focus:border-white/30"
                               maxLength={7}
@@ -996,19 +1017,16 @@ const EditProfilePage = () => {
                       <div
                         className="mt-1 rounded-lg border border-white/[0.05] bg-black/20 px-3 py-1.5 truncate"
                         style={{
-                          fontFamily: fontConfig[level].family,
-                          fontSize: `${Math.min(fontConfig[level].size, 20)}px`,
-                          color: fontConfig[level].color,
+                          fontFamily: levelCfg.family,
+                          fontSize: `${Math.min(levelCfg.size, 20)}px`,
+                          color: levelCfg.color,
                         }}
                       >
-                        {level === "heading"
-                          ? "The quick brown fox"
-                          : level === "subheading"
-                          ? "Over the lazy dog — 2025"
-                          : "Building systems at scale, one commit at a time."}
+                        {PREVIEWS[level]}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
               </div>
@@ -1032,8 +1050,15 @@ const EditProfilePage = () => {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_30%_at_80%_10%,hsl(var(--brand-violet)/0.05),transparent_60%)]" />
 
           <div className="relative z-10">
+            <Navbar
+              resumeUrl={profile.resume_url}
+              resumeVisibility={profile.resume_visibility ?? "public"}
+              ownerEmail={profile.email}
+              ownerName={profile.name}
+              contained
+            />
             <Hero
-              profile={profile as Pick<Profile, "name" | "identity_stripe" | "tagline" | "hero_description">}
+              profile={profile as Pick<Profile, "name" | "identity_stripe" | "tagline" | "hero_description" | "hero_title" | "hero_subtitle" | "font_config">}
             />
             <Personal
               imageUrl={profile.personal_image_url}

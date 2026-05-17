@@ -41,10 +41,21 @@ const Portfolio = () => {
     if (existing) existing.remove();
     if (!fontConfig) return;
 
+    const titleCfg    = (fontConfig as typeof fontConfig & { title?: { family: string; size: number; color: string }; subtitle?: { family: string; size: number; color: string } }).title    ?? fontConfig.heading;
+    const subtitleCfg = (fontConfig as typeof fontConfig & { title?: { family: string; size: number; color: string }; subtitle?: { family: string; size: number; color: string } }).subtitle ?? fontConfig.subheading;
+
     const style = document.createElement("style");
     style.id = styleId;
     style.textContent = `
-      #portfolio-root h1, #portfolio-root h2 {
+      #portfolio-root [data-font="hero-title"] {
+        font-family: ${titleCfg.family} !important;
+        color: ${titleCfg.color} !important;
+      }
+      #portfolio-root [data-font="hero-subtitle"] {
+        font-family: ${subtitleCfg.family} !important;
+        color: ${subtitleCfg.color} !important;
+      }
+      #portfolio-root h1:not([data-font]), #portfolio-root h2:not([data-font]) {
         font-family: ${fontConfig.heading.family} !important;
         font-size: ${fontConfig.heading.size}px !important;
         color: ${fontConfig.heading.color} !important;
@@ -54,7 +65,7 @@ const Portfolio = () => {
         font-size: ${fontConfig.subheading.size}px !important;
         color: ${fontConfig.subheading.color} !important;
       }
-      #portfolio-root p {
+      #portfolio-root p:not([data-font]) {
         font-family: ${fontConfig.body.family} !important;
         font-size: ${fontConfig.body.size}px !important;
         color: ${fontConfig.body.color} !important;

@@ -22,6 +22,7 @@ interface NavbarProps {
   resumeVisibility?: "public" | "private" | null;
   ownerEmail?: string | null;
   ownerName?: string | null;
+  contained?: boolean;
 }
 
 export const Navbar = ({
@@ -29,6 +30,7 @@ export const Navbar = ({
   resumeVisibility = "public",
   ownerEmail,
   ownerName,
+  contained = false,
 }: NavbarProps = {}) => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -67,7 +69,7 @@ export const Navbar = ({
       initial={{ y: -16, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+      className={`${contained ? "sticky top-0" : "fixed inset-x-0 top-0"} z-50 transition-all duration-500 ${
         scrolled ? "py-3" : "py-5"
       }`}
     >
