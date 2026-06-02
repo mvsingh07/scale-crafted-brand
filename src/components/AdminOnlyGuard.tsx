@@ -1,27 +1,33 @@
+"use client";
 import { useEffect, useState, type ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 const ADMIN_EMAIL = "manvirsinghashat@gmail.com";
 
 export const AdminOnlyGuard = ({ children }: { children: ReactNode }) => {
+  const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const email = data.session?.user?.email ?? "";
-      setAllowed(!!data.session && email === ADMIN_EMAIL);
+      const ok = !!data.session && email === ADMIN_EMAIL;
+      setAllowed(ok);
+      if (!ok) router.replace("/admin");
       setChecking(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
       const email = session?.user?.email ?? "";
-      setAllowed(!!session && email === ADMIN_EMAIL);
+      const ok = !!session && email === ADMIN_EMAIL;
+      setAllowed(ok);
+      if (!ok) router.replace("/admin");
     });
 
     return () => listener.subscription.unsubscribe();
-  }, []);
+  }, [router]);
 
   if (checking) {
     return (
@@ -31,7 +37,7 @@ export const AdminOnlyGuard = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  if (!allowed) return <Navigate to="/admin" replace />;
+  if (!allowed) return null;
 
   return <>{children}</>;
 };

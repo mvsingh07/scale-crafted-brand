@@ -15,6 +15,15 @@ export default {
     },
     extend: {
       colors: {
+        // Hub ecosystem tokens — map CSS vars so `text-gold`, `bg-bg-primary` etc. work
+        'bg-primary':     'var(--bg-primary)',
+        'bg-secondary':   'var(--bg-secondary)',
+        gold:             'var(--gold-primary)',
+        'gold-highlight': 'var(--gold-highlight)',
+        'gold-border':    'var(--gold-border)',
+        silver:           'var(--silver)',
+        'text-site':      'var(--text-primary)',
+        'text-site-muted':'var(--text-muted)',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -69,6 +78,8 @@ export default {
         sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
         editorial: ['"Fraunces"', 'Georgia', 'serif'],
+        cinzel: ['var(--font-cinzel)', 'Cinzel', 'serif'],
+        inter: ['var(--font-inter)', 'Inter', 'sans-serif'],
       },
       backgroundImage: {
         'gradient-brand': 'var(--gradient-brand)',

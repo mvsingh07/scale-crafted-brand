@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -77,6 +77,51 @@ export type Transaction = {
   amount_paise: number;
   status: "captured" | "failed" | "refunded";
   created_at: string;
+};
+
+// ── Ecosystem & Identity ───────────────────────────────────────────────────────
+export type EcosystemTheme = {
+  id: string;
+  username: string;
+  bg_primary: string;
+  bg_secondary: string;
+  gold_primary: string;
+  gold_highlight: string;
+  gold_border: string;
+  silver: string;
+  text_primary: string;
+  text_muted: string;
+  font_heading: string;
+  font_body: string;
+  border_radius: string;
+  default_mode: "dark" | "light";
+  created_at: string;
+  updated_at: string;
+};
+
+export type NavLink = { label: string; href: string; order: number };
+export type HubTextState = { title: string; subtitle: string };
+
+export type IdentityProfile = {
+  id: string;
+  username: string;
+  display_name: string;
+  tagline: string;
+  logo_dark_url: string | null;
+  logo_light_url: string | null;
+  favicon_url: string | null;
+  site_url: string;
+  meta_title: string;
+  meta_description: string | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+  twitter_url: string | null;
+  instagram_url: string | null;
+  nav_links: NavLink[];
+  hub_text_states: HubTextState[];
+  footer_text: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export function isTrialExpired(

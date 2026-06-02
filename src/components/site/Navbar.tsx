@@ -1,21 +1,79 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { Menu, X, Download, Mail } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
-import { supabase } from "@/lib/supabase";
+import { useIdentity } from "@/context/identity";
 
-const SPRING = { type: "spring" as const, stiffness: 500, damping: 30 };
-const PILL_SPRING = { type: "spring" as const, stiffness: 380, damping: 28 };
+type Lang = "EN" | "HI" | "PA";
 
-const links = [
-  { href: "#about", label: "About" },
-  { href: "#services", label: "Services" },
-  { href: "#work", label: "Work" },
-  { href: "#journey", label: "Journey" },
-  { href: "#skills", label: "Skills" },
-  { href: "#contact", label: "Contact" },
+const LANG_LABELS: Record<Lang, string> = { EN: "EN", HI: "हिंदी", PA: "ਪੰਜਾਬੀ" };
+
+const FALLBACK_LINKS = [
+  { label: "About",     href: "/about",     order: 1 },
+  { label: "Portfolio", href: "/portfolio", order: 2 },
+  { label: "Services",  href: "/services",  order: 3 },
+  { label: "Blog",      href: "/blog",      order: 4 },
+  { label: "Contact",   href: "/contact",   order: 5 },
 ];
+
+const PORTFOLIO_SECTIONS = [
+  { label: "About",    href: "?section=about",    order: 1 },
+  { label: "Services", href: "?section=services", order: 2 },
+  { label: "Work",     href: "?section=work",     order: 3 },
+  { label: "Journey",  href: "?section=journey",  order: 4 },
+  { label: "Skills",   href: "?section=skills",   order: 5 },
+  { label: "Contact",  href: "?section=contact",  order: 6 },
+];
+
+function useLogoSrc(darkFallback: string, lightFallback: string) {
+  const { identity } = useIdentity();
+  const dark  = identity?.logo_dark_url  ?? darkFallback;
+  const light = identity?.logo_light_url ?? lightFallback;
+  const [src, setSrc] = useState(dark);
+  useEffect(() => {
+    const update = () =>
+      setSrc(document.documentElement.getAttribute("data-theme") === "light" ? light : dark);
+    update();
+    const obs = new MutationObserver(update);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => obs.disconnect();
+  }, [dark, light]);
+  return src;
+}
+
+function useLiveTime() {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    const tick = () =>
+      setTime(new Date().toLocaleTimeString("en-IN", {
+        hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata",
+      }));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return time;
+}
+
+function useDayDate() {
+  const [label, setLabel] = useState("");
+  useEffect(() => {
+    const update = () => {
+      const d = new Date();
+      const day  = d.toLocaleDateString("en-IN", { weekday: "short" });
+      const date = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      setLabel(`${day}, ${date}`);
+    };
+    update();
+    const id = setInterval(update, 60_000);
+    return () => clearInterval(id);
+  }, []);
+  return label;
+}
 
 interface NavbarProps {
   resumeUrl?: string | null;
@@ -23,239 +81,261 @@ interface NavbarProps {
   ownerEmail?: string | null;
   ownerName?: string | null;
   contained?: boolean;
+  mode?: "main" | "portfolio";
+  lang?: Lang;
+  onLangChange?: (l: Lang) => void;
 }
 
 export const Navbar = ({
-  resumeUrl: resumeUrlProp,
-  resumeVisibility = "public",
-  ownerEmail,
   ownerName,
   contained = false,
+  mode = "main",
+  lang,
+  onLangChange,
 }: NavbarProps = {}) => {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [fetchedResumeUrl, setFetchedResumeUrl] = useState<string | null>(null);
-  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-  const [hoveredMobileLink, setHoveredMobileLink] = useState<string | null>(null);
-
-  const resumeUrl = resumeUrlProp !== undefined ? resumeUrlProp : fetchedResumeUrl;
-
-  const requestCvHref = ownerEmail
-    ? `mailto:${ownerEmail}?subject=CV%20Request${ownerName ? `%20%E2%80%94%20${encodeURIComponent(ownerName)}` : ""}&body=Hi%2C%0A%0AI%20came%20across%20your%20portfolio%20and%20would%20love%20to%20see%20your%20CV.%20Could%20you%20please%20share%20it%3F%0A%0AThanks!`
-    : "#contact";
+  const { identity } = useIdentity();
+  const logoSrc = useLogoSrc("/dark_mode_logo.png", "/light_mode_logo.png");
+  const time = useLiveTime();
+  const dayDate = useDayDate();
+  const displayName = identity?.display_name ?? ownerName ?? "MV Singh";
+  const showLang = lang !== undefined && onLangChange !== undefined;
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Lock body scroll when mobile menu is open
   useEffect(() => {
-    if (resumeUrlProp !== undefined) return;
-    supabase
-      .from("profiles")
-      .select("resume_url")
-      .not("resume_url", "is", null)
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.resume_url) setFetchedResumeUrl(data.resume_url);
-      });
-  }, [resumeUrlProp]);
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
+
+  const links = mode === "portfolio"
+    ? PORTFOLIO_SECTIONS
+    : (identity?.nav_links
+        ? [...identity.nav_links].sort((a, b) => a.order - b.order)
+        : FALLBACK_LINKS);
+
+  const navStyle: React.CSSProperties = {
+    position: contained ? "sticky" : "fixed",
+    top: 0, left: 0, right: 0, zIndex: 50,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: scrolled ? "10px 32px" : "14px 32px",
+    background: "var(--bg-nav)",
+    backdropFilter: "blur(16px)",
+    WebkitBackdropFilter: "blur(16px)",
+    borderBottom: "1px solid var(--nav-border)",
+    transition: "padding 0.3s ease",
+  };
+
+  const linkStyle: React.CSSProperties = {
+    fontFamily: "var(--font-inter), Inter, sans-serif",
+    fontSize: 13,
+    letterSpacing: "0.1em",
+    color: "var(--text-primary)",
+    textDecoration: "none",
+    transition: "color 0.2s",
+  };
+
+  const mutedStyle: React.CSSProperties = {
+    fontFamily: "var(--font-inter), Inter, sans-serif",
+    fontSize: 11,
+    letterSpacing: "0.08em",
+    color: "var(--text-muted)",
+    whiteSpace: "nowrap",
+  };
 
   return (
-    <motion.header
-      initial={{ y: -16, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className={`${contained ? "sticky top-0" : "fixed inset-x-0 top-0"} z-50 transition-all duration-500 ${
-        scrolled ? "py-3" : "py-5"
-      }`}
-    >
-      <div className="container">
-        <nav
-          className={`glass flex items-center justify-between rounded-2xl px-5 py-3 shadow-elegant transition-all duration-500 ${
-            scrolled ? "bg-background/72" : "bg-background/48"
-          }`}
-        >
-          {/* Logo */}
-          <motion.a
-            href="#top"
-            className="flex items-center gap-2 font-display text-lg font-semibold"
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            transition={SPRING}
-          >
-            <span className="grid h-7 w-7 place-items-center rounded-md bg-gradient-brand text-primary-foreground font-bold">
-              M
-            </span>
-            <span>Manvir<span className="text-muted-foreground">.dev</span></span>
-          </motion.a>
+    <>
+      <nav style={{ position: "relative", ...navStyle }}>
+        {/* Scroll shadow */}
+        <div style={{
+          position: "absolute", inset: "100% 0 auto", height: 32,
+          background: "linear-gradient(to bottom, color-mix(in srgb, var(--bg-primary) 40%, transparent), transparent)",
+          opacity: scrolled ? 1 : 0, transition: "opacity 0.3s ease", pointerEvents: "none",
+        }} aria-hidden />
 
-          {/* Desktop nav links */}
-          <ul
-            className="hidden items-center gap-0.5 md:flex"
-            onMouseLeave={() => setHoveredLink(null)}
-          >
-            {links.map((l) => (
-              <li key={l.href} className="relative">
-                {/* Sliding gradient pill — shared layoutId makes it glide between items */}
-                <AnimatePresence>
-                  {hoveredLink === l.href && (
-                    <motion.span
-                      layoutId="nav-hover-pill"
-                      className="pointer-events-none absolute inset-0 rounded-full"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={PILL_SPRING}
-                      style={{
-                        background:
-                          "linear-gradient(120deg, hsl(199 100% 64% / 0.14) 0%, hsl(256 92% 76% / 0.12) 100%)",
-                        boxShadow:
-                          "inset 0 0 0 1px hsl(199 100% 64% / 0.2), 0 0 20px -5px hsl(199 100% 64% / 0.28)",
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
+        {/* Left: Logo + Day/Date */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+            <Image src={logoSrc} alt={displayName} width={140} height={48} priority
+              style={{ objectFit: "contain", height: 34, width: "auto" }} />
+          </Link>
+          <span suppressHydrationWarning style={{
+            ...mutedStyle,
+            fontSize: 11,
+            borderLeft: "1px solid color-mix(in srgb, var(--gold-border) 30%, transparent)",
+            paddingLeft: 14,
+          }}>
+            {dayDate}
+          </span>
+        </div>
 
-                <motion.a
-                  href={l.href}
-                  className="relative z-10 block rounded-full px-4 py-2 text-sm"
-                  onHoverStart={() => setHoveredLink(l.href)}
-                  animate={{
-                    color:
-                      hoveredLink === l.href
-                        ? "hsl(var(--foreground))"
-                        : "hsl(var(--muted-foreground))",
+        {/* Center: Desktop nav links */}
+        <div className="hidden md:flex" style={{ alignItems: "center", gap: 36 }}>
+          {links.map((l) => (
+            <Link key={l.href} href={l.href} style={linkStyle}
+              onMouseEnter={e => (e.currentTarget.style.color = "var(--gold-primary)")}
+              onMouseLeave={e => (e.currentTarget.style.color = "var(--text-primary)")}>
+              {l.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Right: Time+Location | Language (landing only) | Theme */}
+        <div className="hidden md:flex" style={{ alignItems: "center", gap: 12 }}>
+          {/* Time + country */}
+          <span suppressHydrationWarning style={mutedStyle}>
+            🇮🇳&nbsp;India&nbsp;·&nbsp;{time}
+          </span>
+
+          {/* Language toggle — landing page only */}
+          {showLang && (
+            <div style={{ display: "flex", alignItems: "center", gap: 2, padding: "2px", border: "1px solid color-mix(in srgb, var(--gold-border) 30%, transparent)", borderRadius: 8 }}>
+              {(["EN", "HI", "PA"] as Lang[]).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => onLangChange(l)}
+                  style={{
+                    fontFamily: "var(--font-inter), Inter, sans-serif",
+                    fontSize: 11,
+                    letterSpacing: "0.06em",
+                    padding: "3px 9px",
+                    borderRadius: 6,
+                    border: "none",
+                    cursor: "pointer",
+                    background: lang === l
+                      ? "color-mix(in srgb, var(--gold-primary) 18%, transparent)"
+                      : "transparent",
+                    color: lang === l ? "var(--gold-primary)" : "var(--text-muted)",
+                    transition: "background 0.15s, color 0.15s",
+                    fontWeight: lang === l ? 500 : 400,
                   }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={SPRING}
                 >
-                  {l.label}
-                </motion.a>
-              </li>
-            ))}
-          </ul>
-
-          {/* Desktop right actions */}
-          <div className="hidden md:flex items-center gap-2">
-            <motion.div
-              whileHover={{ scale: 1.04, y: -1 }}
-              whileTap={{ scale: 0.96 }}
-              transition={SPRING}
-            >
-              {resumeUrl && resumeVisibility === "public" ? (
-                <Button asChild variant="brand" size="sm">
-                  <a href={resumeUrl} target="_blank" rel="noreferrer">
-                    <Download size={13} className="mr-1" />
-                    Download Resume
-                  </a>
-                </Button>
-              ) : (
-                <Button asChild variant="brand" size="sm">
-                  <a href={requestCvHref}>
-                    <Mail size={13} className="mr-1" />
-                    Request Resume
-                  </a>
-                </Button>
-              )}
-            </motion.div>
-          </div>
-
-          {/* Mobile toggle */}
-          <div className="md:hidden flex items-center gap-2">
-            <ThemeToggle />
-            <motion.button
-              className="rounded-md p-2 text-foreground"
-              onClick={() => setOpen((s) => !s)}
-              aria-label="Toggle menu"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.88 }}
-              transition={SPRING}
-            >
-              {open ? <X size={20} /> : <Menu size={20} />}
-            </motion.button>
-          </div>
-        </nav>
-
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ opacity: 0, y: -8, scaleY: 0.97 }}
-              animate={{ opacity: 1, y: 0, scaleY: 1 }}
-              exit={{ opacity: 0, y: -8, scaleY: 0.97 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              style={{ originY: 0 }}
-              className="glass mt-2 rounded-2xl p-4 md:hidden"
-              onMouseLeave={() => setHoveredMobileLink(null)}
-            >
-              <ul className="flex flex-col gap-0.5">
-                {links.map((l) => (
-                  <li key={l.href} className="relative">
-                    {/* Mobile gradient highlight */}
-                    <AnimatePresence>
-                      {hoveredMobileLink === l.href && (
-                        <motion.span
-                          layoutId="mobile-nav-pill"
-                          className="pointer-events-none absolute inset-0 rounded-lg"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={PILL_SPRING}
-                          style={{
-                            background:
-                              "linear-gradient(90deg, hsl(199 100% 64% / 0.12) 0%, hsl(256 92% 76% / 0.08) 100%)",
-                            boxShadow: "inset 0 0 0 1px hsl(199 100% 64% / 0.15)",
-                          }}
-                        />
-                      )}
-                    </AnimatePresence>
-
-                    <motion.a
-                      href={l.href}
-                      onClick={() => setOpen(false)}
-                      className="relative z-10 block rounded-lg px-3 py-2 text-sm"
-                      onHoverStart={() => setHoveredMobileLink(l.href)}
-                      animate={{
-                        color:
-                          hoveredMobileLink === l.href
-                            ? "hsl(var(--foreground))"
-                            : "hsl(var(--muted-foreground))",
-                        x: hoveredMobileLink === l.href ? 4 : 0,
-                      }}
-                      transition={SPRING}
-                    >
-                      {l.label}
-                    </motion.a>
-                  </li>
-                ))}
-                <li className="pt-2">
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} transition={SPRING}>
-                    {resumeUrl && resumeVisibility === "public" ? (
-                      <Button asChild variant="brand" size="sm" className="w-full">
-                        <a href={resumeUrl} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
-                          <Download size={13} className="mr-1" />
-                          Download Resume
-                        </a>
-                      </Button>
-                    ) : (
-                      <Button asChild variant="brand" size="sm" className="w-full">
-                        <a href={requestCvHref} onClick={() => setOpen(false)}>
-                          <Mail size={13} className="mr-1" />
-                          Request Resume
-                        </a>
-                      </Button>
-                    )}
-                  </motion.div>
-                </li>
-              </ul>
-            </motion.div>
+                  {LANG_LABELS[l]}
+                </button>
+              ))}
+            </div>
           )}
-        </AnimatePresence>
-      </div>
-    </motion.header>
+
+          <ThemeToggle />
+        </div>
+
+        {/* Mobile: hamburger */}
+        <button
+          className="md:hidden"
+          onClick={() => setMenuOpen(v => !v)}
+          aria-label="Toggle menu"
+          style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-primary)", padding: 4, zIndex: 201 }}
+        >
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </nav>
+
+      {/* Full-screen mobile menu — slides down from top */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ y: "-100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "-100%" }}
+            transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              position: "fixed", inset: 0, zIndex: 200,
+              background: "var(--bg-primary)",
+              display: "flex", flexDirection: "column",
+              padding: "22px 28px 40px",
+            }}
+          >
+            {/* Top row */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 40 }}>
+              <Link href="/" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center" }}>
+                <Image src={logoSrc} alt={displayName} width={140} height={48} priority
+                  style={{ objectFit: "contain", height: 34, width: "auto" }} />
+              </Link>
+              <button
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close menu"
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-primary)", padding: 4 }}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Nav links — large */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+              {links.map((l, i) => (
+                <motion.div
+                  key={l.href}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.35, delay: 0.1 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Link
+                    href={l.href}
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      fontFamily: "var(--font-cinzel), Cinzel, serif",
+                      fontSize: "clamp(22px, 6vw, 30px)",
+                      fontWeight: 400,
+                      letterSpacing: "0.04em",
+                      color: "var(--text-primary)",
+                      textDecoration: "none",
+                      display: "block",
+                      padding: "10px 0",
+                      borderBottom: "1px solid color-mix(in srgb, var(--gold-border) 12%, transparent)",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "var(--gold-primary)")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "var(--text-primary)")}
+                  >
+                    {l.label}
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Bottom: lang + time + theme */}
+            <div style={{ borderTop: "1px solid color-mix(in srgb, var(--gold-border) 20%, transparent)", paddingTop: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+              {/* Language toggle (landing only) */}
+              {showLang && (
+                <div style={{ display: "flex", gap: 6 }}>
+                  {(["EN", "HI", "PA"] as Lang[]).map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => onLangChange(l)}
+                      style={{
+                        fontFamily: "var(--font-inter), Inter, sans-serif",
+                        fontSize: 12,
+                        padding: "5px 14px",
+                        borderRadius: 8,
+                        border: `1px solid ${lang === l ? "var(--gold-primary)" : "color-mix(in srgb, var(--gold-border) 30%, transparent)"}`,
+                        background: lang === l ? "color-mix(in srgb, var(--gold-primary) 12%, transparent)" : "transparent",
+                        color: lang === l ? "var(--gold-primary)" : "var(--text-muted)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {LANG_LABELS[l]}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span suppressHydrationWarning style={mutedStyle}>
+                  🇮🇳&nbsp;India&nbsp;·&nbsp;{time}
+                </span>
+                <ThemeToggle />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };

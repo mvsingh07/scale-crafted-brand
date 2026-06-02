@@ -1,23 +1,28 @@
+"use client";
 import { useEffect, useState, type ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export const AdminGuard = ({ children }: { children: ReactNode }) => {
+  const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      setAuthed(!!data.session);
+      const ok = !!data.session;
+      setAuthed(ok);
+      if (!ok) router.replace("/admin");
       setChecking(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthed(!!session);
+      if (!session) router.replace("/admin");
     });
 
     return () => listener.subscription.unsubscribe();
-  }, []);
+  }, [router]);
 
   if (checking) {
     return (
@@ -27,7 +32,7 @@ export const AdminGuard = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  if (!authed) return <Navigate to="/forge" replace />;
+  if (!authed) return null;
 
   return <>{children}</>;
 };

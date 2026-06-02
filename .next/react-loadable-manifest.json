@@ -1,0 +1,74 @@
+{
+  "../node_modules/@splinetool/runtime/build/runtime.js -> ./boolean.js": {
+    "id": "../node_modules/@splinetool/runtime/build/runtime.js -> ./boolean.js",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_splinetool_runtime_build_boolean_js.js"
+    ]
+  },
+  "../node_modules/@splinetool/runtime/build/runtime.js -> ./gaussian-splat-compression.js": {
+    "id": "../node_modules/@splinetool/runtime/build/runtime.js -> ./gaussian-splat-compression.js",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_splinetool_runtime_build_gaussian-splat-compression_js.js"
+    ]
+  },
+  "../node_modules/@splinetool/runtime/build/runtime.js -> ./howler.js": {
+    "id": "../node_modules/@splinetool/runtime/build/runtime.js -> ./howler.js",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_splinetool_runtime_build_howler_js.js"
+    ]
+  },
+  "../node_modules/@splinetool/runtime/build/runtime.js -> ./navmesh.js": {
+    "id": "../node_modules/@splinetool/runtime/build/runtime.js -> ./navmesh.js",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_splinetool_runtime_build_navmesh_js.js"
+    ]
+  },
+  "../node_modules/@splinetool/runtime/build/runtime.js -> ./opentype.js": {
+    "id": "../node_modules/@splinetool/runtime/build/runtime.js -> ./opentype.js",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_splinetool_runtime_build_opentype_js.js"
+    ]
+  },
+  "../node_modules/@splinetool/runtime/build/runtime.js -> ./physics.js": {
+    "id": "../node_modules/@splinetool/runtime/build/runtime.js -> ./physics.js",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_splinetool_runtime_build_physics_js.js"
+    ]
+  },
+  "../node_modules/@splinetool/runtime/build/runtime.js -> ./process.js": {
+    "id": "../node_modules/@splinetool/runtime/build/runtime.js -> ./process.js",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_splinetool_runtime_build_process_js.js"
+    ]
+  },
+  "../node_modules/@splinetool/runtime/build/runtime.js -> ./ui.js": {
+    "id": "../node_modules/@splinetool/runtime/build/runtime.js -> ./ui.js",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_splinetool_runtime_build_ui_js.js"
+    ]
+  },
+  "components/site/About.tsx -> ./About3DCard": {
+    "id": "components/site/About.tsx -> ./About3DCard",
+    "files": [
+      "static/chunks/_app-pages-browser_src_components_site_About3DCard_tsx.js"
+    ]
+  },
+  "components/site/PortfolioContent.tsx -> ./PortfolioBackground": {
+    "id": "components/site/PortfolioContent.tsx -> ./PortfolioBackground",
+    "files": [
+      "static/chunks/_app-pages-browser_src_components_site_PortfolioBackground_tsx.js"
+    ]
+  },
+  "components/site/Services.tsx -> @/components/ui/CardSwap": {
+    "id": "components/site/Services.tsx -> @/components/ui/CardSwap",
+    "files": [
+      "static/chunks/_app-pages-browser_src_components_ui_CardSwap_tsx.js"
+    ]
+  },
+  "components/ui/spline-scene.tsx -> @splinetool/react-spline": {
+    "id": "components/ui/spline-scene.tsx -> @splinetool/react-spline",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_splinetool_react-spline_dist_react-spline_js.js"
+    ]
+  }
+}

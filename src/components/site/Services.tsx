@@ -4,7 +4,13 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { SectionHeader } from "./SectionHeader";
-import { CardSwap, Card } from "@/components/ui/CardSwap";
+import dynamic from "next/dynamic";
+// Lazy-load GSAP-heavy CardSwap — keeps it out of the initial page bundle
+const CardSwap = dynamic(() => import("@/components/ui/CardSwap").then(m => ({ default: m.CardSwap })), {
+  ssr: false,
+  loading: () => <div className="w-full h-64 animate-pulse rounded-2xl bg-white/5" />,
+});
+const Card = dynamic(() => import("@/components/ui/CardSwap").then(m => ({ default: m.Card })), { ssr: false });
 import type { Service } from "@/lib/supabase";
 
 const ICON_MAP: Record<string, LucideIcon> = {

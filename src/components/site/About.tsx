@@ -1,6 +1,11 @@
 import { motion } from "motion/react";
 import { SectionHeader } from "./SectionHeader";
-import { About3DCard } from "./About3DCard";
+import dynamic from "next/dynamic";
+// Lazy-load Spline-heavy 3D card
+const About3DCard = dynamic(() => import("./About3DCard").then(m => ({ default: m.About3DCard })), {
+  ssr: false,
+  loading: () => <div className="w-full h-64 animate-pulse rounded-2xl bg-white/5" />,
+});
 
 const DEFAULT_PARAGRAPHS = [
   "I'm a Senior Software Engineer with 3+ years of experience who treats software like a product, not a task list. My recent work at <b>Vusic Technologies</b> and Turtleneck Systems has been deep in the trenches of <b>distributed systems</b> — designing platforms that hold up under 50K+ concurrent users, handle gigabyte-scale encrypted workloads, and stay responsive in milliseconds, not seconds.",

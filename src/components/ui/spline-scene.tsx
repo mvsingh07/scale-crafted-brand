@@ -1,5 +1,10 @@
+"use client";
 import { lazy, Suspense } from "react";
 
+// Spline runtime is ~3 MB+ — React.lazy splits it into its own chunk.
+// The IntersectionObserver gate in About3DCard ensures this only mounts
+// (and WebGL initialises) once the card scrolls near the viewport, keeping
+// it off the critical path for LCP.
 const Spline = lazy(() => import("@splinetool/react-spline"));
 
 interface SplineSceneProps {
