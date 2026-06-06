@@ -410,6 +410,7 @@ export default function HubPage() {
       <Navbar lang={lang} onLangChange={setLang} />
       <div
         ref={scrollRef}
+        className="hub-scroller"
         style={{ position: "fixed", inset: 0, overflowY: "scroll", scrollSnapType: "y mandatory" }}
       >
         {loaderVisible && <Screen2 lang={lang} />}

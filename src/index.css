@@ -216,6 +216,34 @@
     background: hsl(var(--brand-cyan) / 0.3);
     color: hsl(var(--foreground));
   }
+
+  /* Thin modern scrollbar — site-wide */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--gold-border) 45%, transparent);
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--gold-border);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--gold-border) 45%, transparent) transparent;
+  }
+
+  /* Hub landing page — hide scrollbar on the snap-scroll container */
+  .hub-scroller::-webkit-scrollbar {
+    display: none;
+  }
+  .hub-scroller {
+    scrollbar-width: none;
+  }
 }
 
 @layer components {

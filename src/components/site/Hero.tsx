@@ -216,12 +216,13 @@ export const Hero = ({ profile }: HeroProps = {}) => {
             variants={fadeIn(1.3)}
             initial="hidden"
             animate="show"
+            className="hero-stats"
             style={{ display: "flex", flexWrap: "wrap", gap: "0 32px" }}
           >
             {STATS.map((s, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center" }}>
                 {i > 0 && (
-                  <span style={{
+                  <span className="hero-stat-sep" style={{
                     display: "inline-block", width: 4, height: 4, borderRadius: "50%",
                     background: "var(--gold-border)", marginRight: 32,
                   }} />
@@ -250,6 +251,16 @@ export const Hero = ({ profile }: HeroProps = {}) => {
       <style>{`
         @keyframes ping {
           75%, 100% { transform: scale(2); opacity: 0; }
+        }
+        @media (max-width: 640px) {
+          .hero-stats {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 0 !important;
+          }
+          .hero-stat-sep {
+            display: none !important;
+          }
         }
       `}</style>
     </section>
