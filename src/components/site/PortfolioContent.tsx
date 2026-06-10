@@ -1,6 +1,5 @@
 "use client";
 import { Suspense } from "react";
-import { isTrialExpired } from "@/lib/supabase";
 import type { FullProfile } from "@/lib/server/profile";
 import { Hero } from "./Hero";
 import { Personal } from "./Personal";
@@ -11,7 +10,6 @@ import { Journey } from "./Journey";
 import { Skills } from "./Skills";
 import { Contact } from "./Contact";
 import { SectionScroller } from "@/components/SectionScroller";
-import PortfolioExpired from "@/views/PortfolioExpired";
 import dynamic from "next/dynamic";
 
 const PortfolioBackground = dynamic(
@@ -37,8 +35,6 @@ export function PortfolioContent({ data, showNavbar }: Props) {
   }
 
   const { profile, services, projects, steps, skillGroups } = data;
-
-  if (isTrialExpired(profile)) return <PortfolioExpired ownerName={profile.name} />;
 
   return (
     <main id="portfolio-root" className="relative min-h-screen overflow-hidden bg-background">

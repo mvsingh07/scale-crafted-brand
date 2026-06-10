@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Github, Linkedin, Mail, Phone, ArrowRight } from "lucide-react";
+import { Github, Linkedin, Mail, Phone, ArrowRight, Twitter } from "lucide-react";
 import { HubPageLayout } from "@/components/hub/HubPageLayout";
+import { useIdentity } from "@/context/identity";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -12,21 +13,8 @@ const GOLD_LIGHT = "var(--gold-highlight)";
 const SILVER = "var(--silver)";
 const WHITE = "var(--text-primary)";
 const BORDER_GOLD = "var(--gold-border)";
-const BLACK = "var(--bg-primary)";
 
-const CONTACT_INFO = {
-  email: "manvirsinghashat@gmail.com",
-  phone: "+91 62838 49317",
-  linkedin: "https://linkedin.com/in/mvsingh02",
-  github: "https://github.com/mvsingh07",
-};
-
-const LINKS = [
-  { icon: Phone,    label: CONTACT_INFO.phone,                               href: `tel:${CONTACT_INFO.phone.replace(/\s/g, "")}` },
-  { icon: Mail,     label: CONTACT_INFO.email,                               href: `mailto:${CONTACT_INFO.email}` },
-  { icon: Linkedin, label: "linkedin.com/in/mvsingh02",                      href: CONTACT_INFO.linkedin },
-  { icon: Github,   label: "github.com/mvsingh07",                           href: CONTACT_INFO.github },
-];
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
@@ -41,25 +29,52 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box",
 };
 
+const labelStyle: React.CSSProperties = {
+  fontFamily: "var(--font-inter), Inter, sans-serif",
+  fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase",
+  color: SILVER, opacity: 0.6, display: "block", marginBottom: 8,
+};
+
+function urlDisplay(url: string) {
+  return url.replace(/^https?:\/\//, "");
+}
+
 export default function ContactPage() {
+  const { identity } = useIdentity();
   const [sending, setSending] = useState(false);
+
+  const email    = identity?.email    || null;
+  const phone    = identity?.phone    || null;
+  const linkedin = identity?.linkedin_url || null;
+  const github   = identity?.github_url   || null;
+  const twitter  = identity?.twitter_url  || null;
+
+  type Link = { icon: React.ElementType; label: string; href: string };
+  const links: Link[] = [
+    ...(phone    ? [{ icon: Phone,    label: phone,               href: `tel:${phone.replace(/\s/g, "")}` }] : []),
+    ...(email    ? [{ icon: Mail,     label: email,               href: `mailto:${email}` }] : []),
+    ...(linkedin ? [{ icon: Linkedin, label: urlDisplay(linkedin), href: linkedin }] : []),
+    ...(github   ? [{ icon: Github,   label: urlDisplay(github),   href: github }] : []),
+    ...(twitter  ? [{ icon: Twitter,  label: urlDisplay(twitter),  href: twitter }] : []),
+  ];
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSending(true);
     const form = e.target as HTMLFormElement;
-    const data = new FormData(form);
+    const fd = new FormData(form);
 
     const { error } = await supabase.from("contact_submissions").insert({
-      name: data.get("name") as string,
-      email: data.get("email") as string,
-      project_role: (data.get("project_role") as string) || null,
-      message: data.get("message") as string,
+      name: fd.get("name") as string,
+      email: fd.get("email") as string,
+      project_role: (fd.get("project_role") as string) || null,
+      message: fd.get("message") as string,
+      source: "brand",
     });
 
     setSending(false);
     if (error) {
-      toast.error("Failed to send", { description: `Something went wrong. Email me at ${CONTACT_INFO.email}` });
+      toast.error("Failed to send", { description: email ? `Email me directly at ${email}` : "Something went wrong." });
     } else {
       toast.success("Message sent!", { description: "I'll get back to you within 24h." });
       form.reset();
@@ -69,11 +84,12 @@ export default function ContactPage() {
   return (
     <HubPageLayout>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 32px 80px" }}>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.9, ease: EASE }}
           style={{ marginBottom: 64 }}
         >
           <p style={{
@@ -81,14 +97,14 @@ export default function ContactPage() {
             fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase",
             color: GOLD, marginBottom: 16,
           }}>
-            06 — Let&apos;s Build
+            05 — Let&apos;s Build
           </p>
           <h1 style={{
             fontFamily: "var(--font-cinzel), Cinzel, serif",
             fontSize: "clamp(32px, 5vw, 56px)",
             fontWeight: 600, lineHeight: 1.15, color: WHITE, margin: 0,
           }}>
-            Let&apos;s build something<br />scalable.
+            Let&apos;s build something<br />that lasts.
           </h1>
           <p style={{
             fontFamily: "var(--font-inter), Inter, sans-serif",
@@ -101,22 +117,27 @@ export default function ContactPage() {
         </motion.div>
 
         <div style={{ display: "grid", gap: 48 }} className="lg:grid-cols-2">
-          {/* Contact links */}
+
+          {/* Contact links — from identity profile */}
           <motion.div
             initial="hidden"
             animate="visible"
             variants={{ visible: { transition: { staggerChildren: 0.09 } } }}
             style={{ display: "flex", flexDirection: "column", gap: 12 }}
           >
-            {LINKS.map((c) => (
+            {links.length === 0 ? (
+              <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 13, color: "var(--text-muted)" }}>
+                Contact details not configured yet. Add them in the Identity Editor.
+              </p>
+            ) : links.map((c) => (
               <motion.a
-                key={c.label}
+                key={c.href}
                 href={c.href}
-                target="_blank"
+                target={c.href.startsWith("mailto") || c.href.startsWith("tel") ? "_self" : "_blank"}
                 rel="noreferrer"
                 variants={{
                   hidden: { opacity: 0, x: -16 },
-                  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
+                  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: EASE } },
                 }}
                 whileHover={{ x: 4 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -139,30 +160,30 @@ export default function ContactPage() {
             ))}
           </motion.div>
 
-          {/* Form */}
+          {/* Contact form */}
           <motion.form
             onSubmit={onSubmit}
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.9, delay: 0.2, ease: EASE }}
             style={{ display: "flex", flexDirection: "column", gap: 16 }}
           >
             <div style={{ display: "grid", gap: 16 }} className="sm:grid-cols-2">
               <div>
-                <label style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: SILVER, opacity: 0.6, display: "block", marginBottom: 8 }}>Name</label>
+                <label style={labelStyle}>Name</label>
                 <input name="name" required placeholder="Your name" style={inputStyle} />
               </div>
               <div>
-                <label style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: SILVER, opacity: 0.6, display: "block", marginBottom: 8 }}>Email</label>
+                <label style={labelStyle}>Email</label>
                 <input name="email" required type="email" placeholder="you@company.com" style={inputStyle} />
               </div>
             </div>
             <div>
-              <label style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: SILVER, opacity: 0.6, display: "block", marginBottom: 8 }}>Project / Role</label>
+              <label style={labelStyle}>Project / Role</label>
               <input name="project_role" placeholder="e.g. Real-time platform · Senior backend role" style={inputStyle} />
             </div>
             <div>
-              <label style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: SILVER, opacity: 0.6, display: "block", marginBottom: 8 }}>Message</label>
+              <label style={labelStyle}>Message</label>
               <textarea
                 name="message"
                 required

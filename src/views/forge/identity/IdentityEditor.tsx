@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import type { IdentityProfile, NavLink, HubTextState } from "@/lib/supabase";
+import type { IdentityProfile, NavLink, HubTextState, AboutParagraph, AboutStat } from "@/lib/supabase";
 import {
   ArrowLeft,
   Plus,
@@ -16,6 +16,8 @@ import {
   Link2,
   Layout,
   FileText,
+  BookOpen,
+  Phone,
 } from "lucide-react";
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
@@ -24,6 +26,8 @@ const EMPTY: IdentityProfile = {
   username: "mvsingh",
   display_name: "MV Singh",
   tagline: "Igniting Innovation through continuous learning",
+  email: null,
+  phone: null,
   logo_dark_url: null,
   logo_light_url: null,
   favicon_url: null,
@@ -47,6 +51,18 @@ const EMPTY: IdentityProfile = {
     { title: "AI Strategist",     subtitle: "Empowering businesses to harness the transformative potential of AI for growth and innovation." },
   ],
   footer_text: "mvsingh.in · © 2026 · All rights reserved",
+  about_eyebrow: "01 — The Engineer",
+  about_headline: "The engineer behind\nthe systems.",
+  about_paragraphs: [
+    { text: "I'm a Senior Software Engineer with 3+ years of experience who treats software like a product, not a task list.", italic: false },
+    { text: "The vision needs an architect.", italic: true },
+  ],
+  about_stats: [
+    { value: "3+",   label: "Years Experience" },
+    { value: "50K+", label: "Concurrent Users Handled" },
+    { value: "10+",  label: "Products Shipped" },
+    { value: "AI",   label: "Native Builder" },
+  ],
   created_at: "",
   updated_at: "",
 };
@@ -391,6 +407,13 @@ export default function IdentityEditor() {
           <Field label="Logo — Light Mode URL" value={data.logo_light_url ?? ""} onChange={setStr("logo_light_url")} placeholder="/light_mode_logo.png" />
           <Field label="Favicon URL" value={data.favicon_url ?? ""} onChange={setStr("favicon_url")} placeholder="/light_mode_logo.png" />
 
+          <SectionLabel icon={Phone} label="Contact Info (Identity)" />
+          <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 10, lineHeight: 1.5 }}>
+            Used in the brand ecosystem — /contact page, footer, hub. Not shared with the portfolio.
+          </p>
+          <Field label="Identity Email" value={data.email ?? ""} onChange={setStr("email")} placeholder="hello@mvsingh.in" />
+          <Field label="Phone" value={data.phone ?? ""} onChange={setStr("phone")} placeholder="+91 62838 49317" />
+
           <SectionLabel icon={Link2} label="Social Links" />
           <Field label="LinkedIn" value={data.linkedin_url ?? ""} onChange={setStr("linkedin_url")} placeholder="https://linkedin.com/in/…" />
           <Field label="GitHub" value={data.github_url ?? ""} onChange={setStr("github_url")} placeholder="https://github.com/…" />
@@ -497,6 +520,143 @@ export default function IdentityEditor() {
               }}
             >
               <Plus size={11} /> Add State
+            </button>
+          </div>
+
+          <SectionLabel icon={BookOpen} label="About Page" />
+
+          <Field label="Eyebrow" value={data.about_eyebrow ?? ""} onChange={v => set("about_eyebrow", v || null)} placeholder="01 — The Engineer" />
+          <Field label="Headline (use \\n for line break)" value={data.about_headline ?? ""} onChange={v => set("about_headline", v || null)} placeholder="The engineer behind\nthe systems." multiline />
+
+          {/* Paragraphs */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{
+              display: "block", fontFamily: "var(--font-inter), Inter, sans-serif",
+              fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" as const,
+              color: "rgba(255,255,255,0.3)", marginBottom: 8,
+            }}>Paragraphs</label>
+            {(data.about_paragraphs ?? []).map((p, i) => (
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 10, padding: "10px 12px", marginBottom: 8,
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <button
+                    onClick={() => {
+                      const updated = (data.about_paragraphs ?? []).map((x, idx) =>
+                        idx === i ? { ...x, italic: !x.italic } : x
+                      );
+                      set("about_paragraphs", updated);
+                    }}
+                    style={{
+                      background: p.italic ? "rgba(201,165,90,0.1)" : "rgba(255,255,255,0.04)",
+                      border: p.italic ? "1px solid rgba(201,165,90,0.25)" : "1px solid rgba(255,255,255,0.07)",
+                      borderRadius: 6, padding: "2px 8px",
+                      fontFamily: "var(--font-inter), Inter, sans-serif",
+                      fontSize: 9, letterSpacing: "0.1em",
+                      color: p.italic ? "#C9A55A" : "rgba(255,255,255,0.3)",
+                      cursor: "pointer", fontStyle: "italic",
+                    }}
+                  >
+                    italic
+                  </button>
+                  <button
+                    onClick={() => set("about_paragraphs", (data.about_paragraphs ?? []).filter((_, idx) => idx !== i))}
+                    style={{ background: "none", border: "none", color: "rgba(255,100,100,0.5)", cursor: "pointer", padding: 2 }}
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+                <textarea
+                  value={p.text}
+                  onChange={e => {
+                    const updated = (data.about_paragraphs ?? []).map((x, idx) =>
+                      idx === i ? { ...x, text: e.target.value } : x
+                    );
+                    set("about_paragraphs", updated);
+                  }}
+                  rows={3}
+                  placeholder="Paragraph text…"
+                  style={{
+                    width: "100%", background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8,
+                    padding: "7px 9px", color: "#F8FAFC",
+                    fontFamily: "var(--font-inter), Inter, sans-serif",
+                    fontSize: 12, outline: "none", resize: "vertical" as const,
+                    boxSizing: "border-box" as const,
+                  }}
+                />
+              </div>
+            ))}
+            <button
+              onClick={() => set("about_paragraphs", [...(data.about_paragraphs ?? []), { text: "", italic: false }])}
+              style={{
+                display: "flex", alignItems: "center", gap: 4,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px dashed rgba(255,255,255,0.12)",
+                borderRadius: 8, padding: "6px 12px",
+                color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 11,
+                fontFamily: "var(--font-inter), Inter, sans-serif",
+                width: "100%", justifyContent: "center",
+              }}
+            >
+              <Plus size={11} /> Add Paragraph
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{
+              display: "block", fontFamily: "var(--font-inter), Inter, sans-serif",
+              fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" as const,
+              color: "rgba(255,255,255,0.3)", marginBottom: 8,
+            }}>Stats</label>
+            {(data.about_stats ?? []).map((s, i) => (
+              <div key={i} style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
+                <input
+                  value={s.value}
+                  onChange={e => {
+                    const updated = (data.about_stats ?? []).map((x, idx) =>
+                      idx === i ? { ...x, value: e.target.value } : x
+                    );
+                    set("about_stats", updated);
+                  }}
+                  placeholder="3+"
+                  style={{ ...inputStyle, width: 64 }}
+                />
+                <input
+                  value={s.label}
+                  onChange={e => {
+                    const updated = (data.about_stats ?? []).map((x, idx) =>
+                      idx === i ? { ...x, label: e.target.value } : x
+                    );
+                    set("about_stats", updated);
+                  }}
+                  placeholder="Years Experience"
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+                <button
+                  onClick={() => set("about_stats", (data.about_stats ?? []).filter((_, idx) => idx !== i))}
+                  style={{ background: "none", border: "none", color: "rgba(255,100,100,0.5)", cursor: "pointer", padding: 2 }}
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => set("about_stats", [...(data.about_stats ?? []), { value: "", label: "" }])}
+              style={{
+                display: "flex", alignItems: "center", gap: 4,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px dashed rgba(255,255,255,0.12)",
+                borderRadius: 8, padding: "6px 12px",
+                color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 11,
+                fontFamily: "var(--font-inter), Inter, sans-serif",
+                width: "100%", justifyContent: "center", marginTop: 4,
+              }}
+            >
+              <Plus size={11} /> Add Stat
             </button>
           </div>
 

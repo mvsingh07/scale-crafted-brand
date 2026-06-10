@@ -22,27 +22,38 @@ const STATS = [
 ];
 
 // Per-character clip-from-below reveal — most dramatic for a large name
+//
+// Gradient is applied directly to each motion.span (not the parent) so it stays
+// in the same compositing layer as the text. CSS background-clip:text cannot
+// cross compositing-layer boundaries created by CSS transforms on mobile/Safari,
+// which would make the text invisible. backgroundSize+backgroundPosition simulate
+// a gradient that spans the full name.
 function SplitChars({ text, gradient }: { text: string; gradient?: boolean }) {
   const chars = text.split("");
+  const nonSpaceCount = chars.filter(c => c !== " ").length;
+  let charIdx = 0;
+
   return (
-    <span
-      aria-label={text}
-      style={gradient ? {
-        background: "linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-highlight) 55%, var(--silver) 100%)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-        display: "inline",
-      } : {}}
-    >
-      {chars.map((char, i) =>
-        char === " " ? (
-          <span key={i} style={{ display: "inline-block", width: "0.3em" }} aria-hidden />
-        ) : (
+    <span aria-label={text}>
+      {chars.map((char, i) => {
+        if (char === " ") {
+          return <span key={i} style={{ display: "inline-block", width: "0.3em" }} aria-hidden />;
+        }
+        const ci = charIdx++;
+        const gradStyle: React.CSSProperties = gradient ? {
+          background: "linear-gradient(90deg, var(--gold-primary) 0%, var(--gold-highlight) 55%, var(--silver) 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          backgroundSize: `${nonSpaceCount * 0.72}em 100%`,
+          backgroundPosition: `-${ci * 0.72}em 0`,
+        } : {};
+        return (
           <span key={i} style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}>
             <motion.span
+              key={i}
               aria-hidden
-              style={{ display: "inline-block" }}
+              style={{ display: "inline-block", ...gradStyle }}
               initial={{ y: "115%", opacity: 0 }}
               animate={{ y: "0%", opacity: 1 }}
               transition={{ duration: 0.58, ease: EASE, delay: 0.06 + i * 0.032 }}
@@ -50,8 +61,8 @@ function SplitChars({ text, gradient }: { text: string; gradient?: boolean }) {
               {char}
             </motion.span>
           </span>
-        )
-      )}
+        );
+      })}
     </span>
   );
 }

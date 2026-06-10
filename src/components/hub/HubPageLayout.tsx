@@ -1,7 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
+import { HubFooter } from "@/components/hub/HubFooter";
 
 export function HubPageLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +12,7 @@ export function HubPageLayout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <Footer />
+      <HubFooter />
     </div>
   );
 }

@@ -3,63 +3,70 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { toast } from "sonner";
-import { supabase, trialDaysLeft, isTrialExpired } from "@/lib/supabase";
-import type { SubscriptionStatus, Plan } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { AdminGuard } from "@/components/AdminGuard";
 import {
   MessageSquare,
   UserPen,
   LogOut,
-  Star,
+  Sparkles,
   ExternalLink,
   Copy,
   Check,
   AlertCircle,
-  Zap,
-  Clock,
-  ShieldCheck,
   Fingerprint,
   Palette,
+  FolderKanban,
+  BookOpen,
 } from "lucide-react";
 
 const SPRING = { type: "spring" as const, stiffness: 400, damping: 25 };
+const EASE = [0.16, 1, 0.3, 1] as const;
 
-const navCards = [
+const WORKSPACE = [
   {
     icon: UserPen,
-    label: "Edit Portfolio",
+    label: "Portfolio Editor",
     description: "Update content, upload resume, manage every section of your portfolio.",
     href: "/forge/tech/edit",
     accent: "hsl(var(--brand-cyan))",
   },
   {
+    icon: FolderKanban,
+    label: "Projects Editor",
+    description: "Manage ecosystem projects — add live links, code repos, and seeking tags.",
+    href: "/forge/projects",
+    accent: "#C9A55A",
+  },
+  {
+    icon: BookOpen,
+    label: "Blogs Editor",
+    description: "Curate your writing across Medium, Reddit, and LinkedIn.",
+    href: "/forge/blogs",
+    accent: "hsl(var(--brand-violet))",
+  },
+  {
     icon: MessageSquare,
     label: "Contact Queries",
-    description: "Review messages sent through your portfolio contact form.",
+    description: "Review and filter messages sent through portfolio and brand.",
     href: "/forge/tech/queries",
-    accent: "hsl(var(--brand-violet))",
+    accent: "hsl(var(--brand-pink))",
   },
   {
     icon: Fingerprint,
     label: "Identity Editor",
-    description: "Edit your display name, nav links, hub text states, logos, and social links.",
+    description: "Edit display name, nav links, hub text states, logos, and social links.",
     href: "/forge/identity",
-    accent: "hsl(var(--brand-pink))",
+    accent: "#A78BFA",
   },
   {
     icon: Palette,
     label: "Theme Editor",
     description: "Customise colours, fonts, and border radius with a live preview.",
     href: "/forge/theme",
-    accent: "#C9A55A",
+    accent: "#34D399",
   },
 ];
-
-const PLAN_LABEL: Record<Plan, string> = {
-  monthly: "Monthly Pro",
-  halfyearly: "6-Month Pro",
-  annual: "Annual Pro",
-};
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -67,10 +74,6 @@ const DashboardPage = () => {
   const [name, setName] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
-  const [subStatus, setSubStatus] = useState<SubscriptionStatus>("trial");
-  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
-  const [currentPlan, setCurrentPlan] = useState<Plan | null>(null);
-  const [planEndsAt, setPlanEndsAt] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -78,22 +81,17 @@ const DashboardPage = () => {
       if (!user) return;
       const { data } = await supabase
         .from("profiles")
-        .select("username, name, subscription_status, trial_ends_at, current_plan, plan_ends_at")
+        .select("username, name")
         .eq("user_id", user.id)
         .maybeSingle();
-      const un = data?.username ?? null;
-      setUsername(un);
+      setUsername(data?.username ?? null);
       setName(data?.name ?? "");
-      setSubStatus((data?.subscription_status as SubscriptionStatus) ?? "trial");
-      setTrialEndsAt(data?.trial_ends_at ?? null);
-      setCurrentPlan((data?.current_plan as Plan) ?? null);
-      setPlanEndsAt(data?.plan_ends_at ?? null);
       setLoadingProfile(false);
     };
     load();
   }, []);
 
-  const portfolioUrl = username ? `${window.location.origin}/${username}` : null;
+  const portfolioUrl = username ? `${window.location.origin}/portfolio/tech` : null;
 
   const copyUrl = () => {
     if (!portfolioUrl) return;
@@ -109,53 +107,60 @@ const DashboardPage = () => {
     router.push("/admin");
   };
 
-  const daysLeft = trialDaysLeft({ trial_ends_at: trialEndsAt });
-  const expired = isTrialExpired({ subscription_status: subStatus, trial_ends_at: trialEndsAt });
-
-  const trialBannerColor =
-    subStatus === "active"
-      ? null
-      : expired
-      ? "red"
-      : daysLeft <= 7
-      ? "red"
-      : daysLeft <= 14
-      ? "amber"
-      : "green";
-
   return (
-    <div className="min-h-screen bg-[hsl(220_18%_6%)] text-white">
+    <div style={{ minHeight: "100vh", background: "#0A0B0E", color: "#F8FAFC" }}>
 
       {/* Header */}
-      <header className="flex items-center justify-between border-b border-white/[0.07] px-6 py-4">
+      <header style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "14px 28px",
+        borderBottom: "1px solid rgba(201,165,90,0.12)",
+        background: "rgba(10,11,14,0.95)",
+        backdropFilter: "blur(12px)",
+        position: "sticky", top: 0, zIndex: 10,
+      }}>
         <motion.div
-          className="flex items-center gap-3 cursor-default select-none"
+          style={{ display: "flex", alignItems: "center", gap: 12, cursor: "default", userSelect: "none" }}
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.45, ease: EASE }}
         >
           <motion.div
-            className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-[hsl(var(--brand-cyan))] to-[hsl(var(--brand-violet))]"
-            whileHover={{ scale: 1.1, rotate: 6 }}
+            style={{
+              display: "grid", placeItems: "center",
+              width: 34, height: 34, borderRadius: 10,
+              background: "linear-gradient(135deg, #C9A55A 0%, #E0C27A 100%)",
+            }}
+            whileHover={{ scale: 1.08, rotate: 5 }}
             transition={SPRING}
           >
-            <Star size={15} className="text-white" fill="white" />
+            <Sparkles size={15} color="#0A0B0E" />
           </motion.div>
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-white/30">The Forge</p>
-            <h1 className="text-sm font-semibold text-white">
+            <p style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(201,165,90,0.6)", margin: 0 }}>
+              The Forge
+            </p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "#F8FAFC", margin: 0 }}>
               {name ? `Welcome back, ${name.split(" ")[0]}.` : "Dashboard"}
-            </h1>
+            </p>
           </div>
         </motion.div>
 
         <motion.button
           onClick={signOut}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-xs text-white/30 transition-colors hover:text-white"
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 8, padding: "7px 14px",
+            fontFamily: "monospace", fontSize: 11,
+            color: "rgba(255,255,255,0.35)", cursor: "pointer",
+            transition: "all 0.2s",
+          }}
           initial={{ opacity: 0, x: 12 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          whileHover={{ scale: 1.04, x: -1 }}
+          transition={{ duration: 0.45, ease: EASE }}
+          whileHover={{ backgroundColor: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.8)" }}
           whileTap={{ scale: 0.95 }}
         >
           <LogOut size={12} />
@@ -163,130 +168,88 @@ const DashboardPage = () => {
         </motion.button>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 py-12">
-
-        {/* Trial / subscription banner */}
-        {!loadingProfile && trialBannerColor !== null && (
-          <motion.div
-            className={`mb-6 flex items-center justify-between gap-4 rounded-2xl border p-4 ${
-              trialBannerColor === "red"
-                ? "border-red-500/20 bg-red-500/[0.06]"
-                : trialBannerColor === "amber"
-                ? "border-amber-500/20 bg-amber-500/[0.06]"
-                : "border-emerald-500/20 bg-emerald-500/[0.05]"
-            }`}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="flex items-center gap-3">
-              <Clock
-                size={14}
-                className={
-                  trialBannerColor === "red"
-                    ? "text-red-400"
-                    : trialBannerColor === "amber"
-                    ? "text-amber-400"
-                    : "text-emerald-400"
-                }
-              />
-              <div>
-                {expired ? (
-                  <>
-                    <p className="text-sm font-medium text-white/80">Trial expired — your portfolio is paused.</p>
-                    <p className="text-xs text-white/35">Upgrade to restore public access.</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-medium text-white/80">
-                      {daysLeft} day{daysLeft !== 1 ? "s" : ""} left in your free trial.
-                    </p>
-                    <p className="text-xs text-white/35">
-                      {daysLeft <= 7
-                        ? "Upgrade soon to keep your portfolio live."
-                        : "Upgrade anytime to go Pro."}
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
-            <motion.button
-              onClick={() => router.push("/forge/tech/upgrade")}
-              className="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-[hsl(var(--brand-cyan))] to-[hsl(var(--brand-violet))] px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-white"
-              whileHover={{ scale: 1.06, y: -1 }}
-              whileTap={{ scale: 0.96 }}
-              transition={SPRING}
-            >
-              <Zap size={10} />
-              Upgrade
-            </motion.button>
-          </motion.div>
-        )}
-
-        {/* Active plan badge */}
-        {!loadingProfile && subStatus === "active" && currentPlan && (
-          <motion.div
-            className="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.05] p-4"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <ShieldCheck size={14} className="text-emerald-400" />
-            <div>
-              <p className="text-sm font-medium text-white/80">
-                {PLAN_LABEL[currentPlan]} — active
-              </p>
-              {planEndsAt && (
-                <p className="text-xs text-white/35">
-                  Renews {new Date(planEndsAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
-                </p>
-              )}
-            </div>
-          </motion.div>
-        )}
+      <main style={{ maxWidth: 800, margin: "0 auto", padding: "40px 28px 80px" }}>
 
         {/* Portfolio URL card */}
         <motion.div
-          className="mb-8 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6"
+          style={{
+            marginBottom: 40,
+            borderRadius: 16,
+            border: "1px solid rgba(201,165,90,0.18)",
+            background: "linear-gradient(135deg, rgba(201,165,90,0.06) 0%, rgba(10,11,14,0) 60%)",
+            padding: "24px 28px",
+          }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-          whileHover={{ borderColor: "rgba(255,255,255,0.12)" }}
+          transition={{ duration: 0.55, delay: 0.05, ease: EASE }}
         >
-          <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-white/30">Your portfolio</p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+            <p style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(201,165,90,0.7)", margin: 0 }}>
+              Live Portfolio
+            </p>
+            <span style={{
+              background: "rgba(52,211,153,0.08)",
+              border: "1px solid rgba(52,211,153,0.25)",
+              borderRadius: 100, padding: "2px 10px",
+              fontFamily: "monospace", fontSize: 9, letterSpacing: "0.1em",
+              color: "rgba(52,211,153,0.7)",
+            }}>
+              ● Live
+            </span>
+          </div>
           {loadingProfile ? (
-            <div className="mt-3 flex items-center gap-2">
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/10 border-t-white/40" />
-              <span className="text-sm text-white/30">Loading…</span>
+              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)" }}>Loading…</span>
             </div>
           ) : portfolioUrl ? (
-            <div className="mt-3 flex items-center gap-3">
-              <div className="flex flex-1 items-center gap-2 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2.5">
-                <ExternalLink size={12} className="shrink-0 text-white/30" />
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <div style={{
+                flex: 1, minWidth: 0,
+                display: "flex", alignItems: "center", gap: 8,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                borderRadius: 10, padding: "9px 14px",
+              }}>
+                <ExternalLink size={11} color="rgba(255,255,255,0.25)" style={{ flexShrink: 0 }} />
                 <a
                   href={portfolioUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="truncate font-mono text-xs text-white/60 hover:text-white transition-colors"
+                  style={{ fontFamily: "monospace", fontSize: 12, color: "rgba(255,255,255,0.55)", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                 >
                   {portfolioUrl}
                 </a>
               </div>
               <motion.button
                 onClick={copyUrl}
-                className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 font-mono text-[10px] uppercase tracking-widest text-white/40 transition-all hover:border-white/20 hover:text-white"
-                whileHover={{ scale: 1.04 }}
+                style={{
+                  flexShrink: 0, display: "flex", alignItems: "center", gap: 6,
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 10, padding: "9px 16px",
+                  fontFamily: "monospace", fontSize: 10, letterSpacing: "0.1em",
+                  color: copied ? "rgba(52,211,153,0.8)" : "rgba(255,255,255,0.35)",
+                  cursor: "pointer",
+                }}
+                whileHover={{ backgroundColor: "rgba(255,255,255,0.07)" }}
                 whileTap={{ scale: 0.95 }}
                 transition={SPRING}
               >
-                {copied ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
+                {copied ? <Check size={11} /> : <Copy size={11} />}
                 {copied ? "Copied" : "Copy"}
               </motion.button>
               <motion.a
                 href={portfolioUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-white px-3 py-2.5 font-mono text-[10px] uppercase tracking-widest text-black transition-opacity hover:opacity-90"
+                style={{
+                  flexShrink: 0, display: "flex", alignItems: "center", gap: 6,
+                  background: "linear-gradient(135deg, #C9A55A, #E0C27A)",
+                  borderRadius: 10, padding: "9px 16px",
+                  fontFamily: "monospace", fontSize: 10, letterSpacing: "0.1em",
+                  color: "#0A0B0E", fontWeight: 600, textDecoration: "none",
+                }}
                 whileHover={{ scale: 1.04, y: -1 }}
                 whileTap={{ scale: 0.96 }}
                 transition={SPRING}
@@ -296,56 +259,75 @@ const DashboardPage = () => {
               </motion.a>
             </div>
           ) : (
-            <div className="mt-3 flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
-              <AlertCircle size={14} className="mt-0.5 shrink-0 text-amber-400" />
+            <div style={{
+              display: "flex", alignItems: "flex-start", gap: 10,
+              background: "rgba(251,191,36,0.05)",
+              border: "1px solid rgba(251,191,36,0.15)",
+              borderRadius: 10, padding: 14,
+            }}>
+              <AlertCircle size={14} color="rgba(251,191,36,0.7)" style={{ marginTop: 1, flexShrink: 0 }} />
               <div>
-                <p className="text-sm text-white/70">No username set yet.</p>
-                <p className="mt-0.5 text-xs text-white/30">
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", margin: 0 }}>No username set yet.</p>
+                <p style={{ marginTop: 4, fontSize: 11, color: "rgba(255,255,255,0.3)", margin: "4px 0 0" }}>
                   Go to{" "}
                   <button
                     onClick={() => router.push("/forge/tech/edit")}
-                    className="underline underline-offset-2 hover:text-white transition-colors"
+                    style={{ background: "none", border: "none", color: "rgba(201,165,90,0.8)", cursor: "pointer", padding: 0, textDecoration: "underline", fontSize: 11 }}
                   >
-                    Edit Portfolio
+                    Portfolio Editor
                   </button>{" "}
-                  and set a username to activate your portfolio URL.
+                  and set a username first.
                 </p>
               </div>
             </div>
           )}
         </motion.div>
 
-        {/* Nav cards */}
+        {/* Workspace section label */}
         <motion.p
-          className="mb-4 font-mono text-[10px] uppercase tracking-widest text-white/20"
+          style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: 16 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
+          transition={{ duration: 0.4, delay: 0.18 }}
         >
           Workspace
         </motion.p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {navCards.map((c, i) => (
+
+        {/* Editor cards grid */}
+        <div style={{ display: "grid", gap: 14, gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
+          {WORKSPACE.map((c, i) => (
             <motion.button
               key={c.href}
               onClick={() => router.push(c.href)}
-              className="group rounded-2xl border border-white/[0.07] bg-white/[0.03] p-6 text-left"
+              style={{
+                background: "rgba(255,255,255,0.025)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                borderRadius: 16,
+                padding: "22px 22px 20px",
+                textAlign: "left",
+                cursor: "pointer",
+              }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.24 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={{ y: -4, borderColor: "rgba(255,255,255,0.14)", backgroundColor: "rgba(255,255,255,0.06)" }}
+              transition={{ duration: 0.5, delay: 0.22 + i * 0.06, ease: EASE }}
+              whileHover={{ y: -4, borderColor: `${c.accent}40`, backgroundColor: "rgba(255,255,255,0.04)" }}
               whileTap={{ scale: 0.98 }}
             >
               <motion.div
-                className="mb-4 grid h-10 w-10 place-items-center rounded-xl border border-white/10"
-                style={{ background: `${c.accent}18` }}
-                whileHover={{ scale: 1.12, rotate: 4 }}
+                style={{
+                  display: "grid", placeItems: "center",
+                  width: 40, height: 40, borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: `${c.accent}14`,
+                  marginBottom: 16,
+                }}
+                whileHover={{ scale: 1.1, rotate: 4 }}
                 transition={SPRING}
               >
                 <c.icon size={18} style={{ color: c.accent }} />
               </motion.div>
-              <p className="text-sm font-semibold text-white">{c.label}</p>
-              <p className="mt-1.5 text-xs leading-relaxed text-white/40">{c.description}</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "#F8FAFC", margin: 0 }}>{c.label}</p>
+              <p style={{ marginTop: 6, fontSize: 11, lineHeight: 1.6, color: "rgba(255,255,255,0.38)" }}>{c.description}</p>
             </motion.button>
           ))}
         </div>

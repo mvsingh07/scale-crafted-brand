@@ -1,6 +1,5 @@
 "use client";
 import { useProfile } from "@/hooks/useProfile";
-import { isTrialExpired } from "@/lib/supabase";
 import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
 import { Personal } from "@/components/site/Personal";
@@ -12,7 +11,6 @@ import { Skills } from "@/components/site/Skills";
 import { Contact } from "@/components/site/Contact";
 import { Footer } from "@/components/site/Footer";
 import { PortfolioBackground } from "@/components/site/PortfolioBackground";
-import PortfolioExpired from "@/views/PortfolioExpired";
 
 // Theme and fonts come from ecosystem_theme CSS vars — no per-profile overrides
 
@@ -39,8 +37,6 @@ const Portfolio = ({ username = "" }: PortfolioProps) => {
       </div>
     );
   }
-
-  if (isTrialExpired(profile)) return <PortfolioExpired ownerName={profile.name} />;
 
   const { services, projects, steps, skillGroups } = data;
 

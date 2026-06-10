@@ -10,14 +10,14 @@ import { useIdentity } from "@/context/identity";
 
 type Lang = "EN" | "HI" | "PA";
 
-const LANG_LABELS: Record<Lang, string> = { EN: "English", HI: "Hindi", PA: "Punjabi" };
+const LANG_LABELS: Record<Lang, string> = { EN: "English", HI: "Hindi", PA: "Panjabi" };
 
 const FALLBACK_LINKS = [
-  { label: "About",     href: "/about",     order: 1 },
-  { label: "Portfolio", href: "/portfolio", order: 2 },
-  { label: "Services",  href: "/services",  order: 3 },
-  { label: "Blog",      href: "/blog",      order: 4 },
-  { label: "Contact",   href: "/contact",   order: 5 },
+  { label: "Home",    href: "/",        order: 1 },
+  { label: "About",   href: "/about",   order: 2 },
+  { label: "Work",    href: "/work",    order: 3 },
+  { label: "Blogs",   href: "/blog",    order: 4 },
+  { label: "Contact", href: "/contact", order: 5 },
 ];
 
 const PORTFOLIO_SECTIONS = [
@@ -241,9 +241,7 @@ export const Navbar = ({
 
   const links = mode === "portfolio"
     ? PORTFOLIO_SECTIONS
-    : (identity?.nav_links
-        ? [...identity.nav_links].sort((a, b) => a.order - b.order)
-        : FALLBACK_LINKS);
+    : FALLBACK_LINKS;
 
   const navStyle: React.CSSProperties = {
     position: contained ? "sticky" : "fixed",
@@ -328,7 +326,7 @@ export const Navbar = ({
         {/* Right: Time+Location | Language (landing only) | Theme */}
         <div className="hidden md:flex" style={{ alignItems: "center", gap: 12 }}>
           <span suppressHydrationWarning style={mutedStyle}>
-            🇮🇳&nbsp;Punjab&nbsp;·&nbsp;{time}
+            🇮🇳&nbsp;Panjab&nbsp;·&nbsp;{time}
           </span>
 
           {showLang && <LangDropdown lang={lang} onLangChange={onLangChange} />}
@@ -440,7 +438,7 @@ export const Navbar = ({
               {showLang && <LangDropdown lang={lang} onLangChange={onLangChange} mobile />}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span suppressHydrationWarning style={mutedStyle}>
-                  🇮🇳&nbsp;Punjab&nbsp;·&nbsp;{time}
+                  🇮🇳&nbsp;Panjab&nbsp;·&nbsp;{time}
                 </span>
                 <ThemeToggle />
               </div>

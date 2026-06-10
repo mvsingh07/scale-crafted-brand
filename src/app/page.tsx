@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/site/Navbar";
+import { HubFooter } from "@/components/hub/HubFooter";
 
 type Lang = "EN" | "HI" | "PA";
 
@@ -347,20 +348,9 @@ function Screen3({
         </div>
       </div>
 
-      <footer
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: "absolute", bottom: 0, left: 0, right: 0,
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: "16px 32px",
-          fontFamily: "var(--font-inter), Inter, system-ui, sans-serif",
-          fontSize: 11, color: MUTED_WHITE, letterSpacing: "0.1em",
-          borderTop: `1px solid color-mix(in srgb, var(--gold-border) 18%, transparent)`,
-        }}
-      >
-        <span>WWW.MVSINGH.IN</span>
-        <span suppressHydrationWarning>{T[lang].footerRight}, {new Date().getFullYear()}</span>
-      </footer>
+      <div onClick={(e) => e.stopPropagation()}>
+        <HubFooter lang={lang} style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
+      </div>
     </section>
   );
 }

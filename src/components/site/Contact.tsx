@@ -14,7 +14,7 @@ interface ContactProps {
 }
 
 const DEFAULTS = {
-  email: "manvirsinghashat@gmail.com",
+  email: "hello@mvsingh.in",
   phone: "+91 62838 49317",
   linkedin_url: "https://linkedin.com/in/mvsingh02",
   github_url: "https://github.com/mvsingh07",
@@ -60,6 +60,7 @@ export const Contact = ({ profile }: ContactProps = {}) => {
       email: data.get("email") as string,
       project_role: (data.get("project_role") as string) || null,
       message: data.get("message") as string,
+      source: "portfolio",
     });
 
     setSending(false);

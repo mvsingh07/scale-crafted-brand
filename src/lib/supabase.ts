@@ -14,6 +14,7 @@ export type ContactSubmission = {
   message: string;
   created_at: string;
   is_read: boolean;
+  source: "portfolio" | "brand";
 };
 
 // ── Portfolio schema ──────────────────────────────────────────────────────────
@@ -102,11 +103,16 @@ export type EcosystemTheme = {
 export type NavLink = { label: string; href: string; order: number };
 export type HubTextState = { title: string; subtitle: string };
 
+export type AboutParagraph = { text: string; italic: boolean };
+export type AboutStat = { value: string; label: string };
+
 export type IdentityProfile = {
   id: string;
   username: string;
   display_name: string;
   tagline: string;
+  email: string | null;
+  phone: string | null;
   logo_dark_url: string | null;
   logo_light_url: string | null;
   favicon_url: string | null;
@@ -120,6 +126,10 @@ export type IdentityProfile = {
   nav_links: NavLink[];
   hub_text_states: HubTextState[];
   footer_text: string;
+  about_eyebrow: string | null;
+  about_headline: string | null;
+  about_paragraphs: AboutParagraph[] | null;
+  about_stats: AboutStat[] | null;
   created_at: string;
   updated_at: string;
 };
@@ -195,4 +205,41 @@ export type SkillGroup = {
   title: string;
   items: string[];
   ord: number;
+};
+
+// ── Ecosystem content ─────────────────────────────────────────────────────────
+export type ProjectStatus = "active" | "completed" | "paused";
+
+export type EcosystemProject = {
+  id: string;
+  username: string;
+  title: string;
+  tagline: string;
+  description: string;
+  status: ProjectStatus;
+  live_url: string | null;
+  code_url: string | null;
+  stack_tags: string[];
+  seeking: string[];
+  cover_image_url: string | null;
+  is_public: boolean;
+  ord: number;
+  created_at: string;
+};
+
+export type BlogPlatform = "medium" | "reddit" | "linkedin" | "other";
+
+export type EcosystemBlog = {
+  id: string;
+  username: string;
+  title: string;
+  subtitle: string | null;
+  summary: string | null;
+  image_url: string | null;
+  platform: BlogPlatform;
+  url: string;
+  published_at: string | null;
+  ord: number;
+  is_public: boolean;
+  created_at: string;
 };
