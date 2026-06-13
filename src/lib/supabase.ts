@@ -249,6 +249,15 @@ export type VisionProjectModule = {
   ord: number;
 };
 
+export type VisionModuleDivision = {
+  id: string;
+  module_id: string;
+  title: string;
+  subtitle: string | null;
+  description: string;
+  ord: number;
+};
+
 export type BlogPlatform = "medium" | "reddit" | "linkedin" | "other";
 
 export type EcosystemBlog = {

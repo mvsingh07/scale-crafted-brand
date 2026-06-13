@@ -56,10 +56,10 @@ export function WorkSection() {
           03 — Active Work
         </p>
         <h2 style={{ fontFamily: "var(--font-cinzel), Cinzel, serif", fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 600, lineHeight: 1.15, color: WHITE, margin: 0 }}>
-          What I&apos; have build.
+          What I&apos; have built.
         </h2>
         <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: "clamp(14px, 1.6vw, 17px)", color: SILVER, maxWidth: 560, lineHeight: 1.7, margin: "16px 0 0" }}>
-          Kind of projects that I&apos; have built — open to the right collaborators, whether that&apos;s technical help, investment, or amplification.
+          Kind of projects that I&apos; have built — from side projects to client work, and everything in between.
         </p>
         <div style={{ marginTop: 24, width: 48, height: 1, background: `linear-gradient(to right, ${GOLD}, transparent)` }} />
       </motion.div>

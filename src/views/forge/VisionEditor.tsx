@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import type { VisionaryProject, VisionProjectModule } from "@/lib/supabase";
+import type { VisionaryProject, VisionProjectModule, VisionModuleDivision } from "@/lib/supabase";
 import { AdminGuard } from "@/components/AdminGuard";
 import {
   ArrowLeft,
@@ -68,16 +68,83 @@ function Field({ label, value, onChange, placeholder, multiline }: {
   );
 }
 
+// ── Division editor row inside a module ───────────────────────────────────────
+type DraftDivision = Partial<VisionModuleDivision>;
+
+function DivisionRow({
+  division: d, index: i,
+  onChange, onDelete,
+}: {
+  division: DraftDivision; index: number;
+  onChange: (d: DraftDivision) => void;
+  onDelete: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{
+      background: "rgba(201,165,90,0.03)",
+      border: "1px solid rgba(201,165,90,0.1)",
+      borderRadius: 8, marginBottom: 6,
+    }}>
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 10px", cursor: "pointer" }}
+        onClick={() => setOpen(o => !o)}
+      >
+        <span style={{ fontFamily: "monospace", fontSize: 9, color: "rgba(201,165,90,0.45)", flexShrink: 0, minWidth: 16 }}>
+          {String(i + 1).padStart(2, "0")}
+        </span>
+        <span style={{ fontSize: 11, color: "#F8FAFC", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {d.title || "Untitled division"}
+        </span>
+        <button onClick={e => { e.stopPropagation(); onDelete(); }}
+          style={{ background: "none", border: "none", color: "rgba(255,100,100,0.4)", cursor: "pointer", padding: 2, flexShrink: 0 }}>
+          <Trash2 size={10} />
+        </button>
+        {open ? <ChevronDown size={10} color="rgba(255,255,255,0.2)" /> : <ChevronRight size={10} color="rgba(255,255,255,0.2)" />}
+      </div>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: EASE }}
+            style={{ overflow: "hidden" }}
+          >
+            <div style={{ padding: "0 10px 10px" }}>
+              <Field label="Title *" value={d.title ?? ""} onChange={v => onChange({ ...d, title: v })} placeholder="Division name" />
+              <Field label="Subtitle" value={d.subtitle ?? ""} onChange={v => onChange({ ...d, subtitle: v || undefined })} placeholder="Short tagline" />
+              <Field label="Description" value={d.description ?? ""} onChange={v => onChange({ ...d, description: v })} placeholder="What this covers…" multiline />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ── Module form inside the project modal ──────────────────────────────────────
+type DraftModule = Partial<VisionProjectModule> & { divisions: DraftDivision[] };
+
 function ModuleRow({
   module: m, index: i, total,
   onChange, onDelete,
 }: {
-  module: Partial<VisionProjectModule>; index: number; total: number;
-  onChange: (m: Partial<VisionProjectModule>) => void;
+  module: DraftModule; index: number; total: number;
+  onChange: (m: DraftModule) => void;
   onDelete: () => void;
 }) {
   const [open, setOpen] = useState(i === 0);
+
+  const addDivision = () =>
+    onChange({ ...m, divisions: [...m.divisions, { title: "", subtitle: undefined, description: "", ord: m.divisions.length }] });
+
+  const updateDivision = (di: number, d: DraftDivision) =>
+    onChange({ ...m, divisions: m.divisions.map((x, idx) => idx === di ? d : x) });
+
+  const removeDivision = (di: number) =>
+    onChange({ ...m, divisions: m.divisions.filter((_, idx) => idx !== di) });
+
   return (
     <div style={{
       background: "rgba(255,255,255,0.02)",
@@ -85,10 +152,7 @@ function ModuleRow({
       borderRadius: 10, marginBottom: 8,
     }}>
       <div
-        style={{
-          display: "flex", alignItems: "center", gap: 8,
-          padding: "10px 12px", cursor: "pointer",
-        }}
+        style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", cursor: "pointer" }}
         onClick={() => setOpen(o => !o)}
       >
         <GripVertical size={12} color="rgba(255,255,255,0.15)" style={{ flexShrink: 0 }} />
@@ -98,6 +162,11 @@ function ModuleRow({
         <span style={{ fontSize: 12, color: "#F8FAFC", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {m.title || "Untitled module"}
         </span>
+        {m.divisions.length > 0 && (
+          <span style={{ fontFamily: "monospace", fontSize: 9, color: "rgba(201,165,90,0.45)", flexShrink: 0 }}>
+            {m.divisions.length}÷
+          </span>
+        )}
         <button onClick={e => { e.stopPropagation(); onDelete(); }}
           style={{ background: "none", border: "none", color: "rgba(255,100,100,0.45)", cursor: "pointer", padding: 2, flexShrink: 0 }}>
           <Trash2 size={11} />
@@ -117,6 +186,34 @@ function ModuleRow({
               <Field label="Title *" value={m.title ?? ""} onChange={v => onChange({ ...m, title: v })} placeholder="Module name" />
               <Field label="Subtitle" value={m.subtitle ?? ""} onChange={v => onChange({ ...m, subtitle: v || undefined })} placeholder="Short tagline" />
               <Field label="Description" value={m.description ?? ""} onChange={v => onChange({ ...m, description: v })} placeholder="What this module covers…" multiline />
+
+              {/* Divisions */}
+              <div style={{ marginTop: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0, fontSize: 9 }}>Divisions</label>
+                  <button
+                    onClick={addDivision}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 3,
+                      background: "rgba(201,165,90,0.06)", border: "1px solid rgba(201,165,90,0.15)",
+                      borderRadius: 5, padding: "3px 8px",
+                      fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 9,
+                      color: "rgba(201,165,90,0.6)", cursor: "pointer",
+                    }}
+                  >
+                    <Plus size={9} /> Add
+                  </button>
+                </div>
+                {m.divisions.map((d, di) => (
+                  <DivisionRow
+                    key={di}
+                    division={d}
+                    index={di}
+                    onChange={updated => updateDivision(di, updated)}
+                    onDelete={() => removeDivision(di)}
+                  />
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
@@ -127,13 +224,13 @@ function ModuleRow({
 
 // ── Project form modal ────────────────────────────────────────────────────────
 type DraftProject = Omit<VisionaryProject, "id" | "created_at"> & {
-  modules: Partial<VisionProjectModule>[];
+  modules: DraftModule[];
 };
 
 function ProjectForm({
   project, onSave, onDelete, onClose,
 }: {
-  project: (VisionaryProject & { modules: VisionProjectModule[] }) | null;
+  project: (VisionaryProject & { modules: (VisionProjectModule & { divisions: VisionModuleDivision[] })[] }) | null;
   onSave: (d: DraftProject, id?: string) => Promise<void>;
   onDelete?: () => Promise<void>;
   onClose: () => void;
@@ -147,7 +244,7 @@ function ProjectForm({
     description: project?.description ?? "",
     ord: project?.ord ?? 0,
     is_public: project?.is_public ?? true,
-    modules: project?.modules ?? [],
+    modules: (project?.modules ?? []).map(m => ({ ...m, divisions: m.divisions ?? [] })),
   });
   const [saving, setSaving] = useState(false);
 
@@ -155,9 +252,9 @@ function ProjectForm({
     setData(d => ({ ...d, [k]: v }));
 
   const addModule = () =>
-    set("modules", [...data.modules, { title: "", subtitle: undefined, description: "", ord: data.modules.length }]);
+    set("modules", [...data.modules, { title: "", subtitle: undefined, description: "", ord: data.modules.length, divisions: [] }]);
 
-  const updateModule = (i: number, m: Partial<VisionProjectModule>) =>
+  const updateModule = (i: number, m: DraftModule) =>
     set("modules", data.modules.map((x, idx) => idx === i ? m : x));
 
   const removeModule = (i: number) =>
@@ -308,7 +405,8 @@ function ProjectForm({
 }
 
 // ── Main editor ───────────────────────────────────────────────────────────────
-type ProjectWithModules = VisionaryProject & { modules: VisionProjectModule[] };
+type ModuleWithDivisions = VisionProjectModule & { divisions: VisionModuleDivision[] };
+type ProjectWithModules = VisionaryProject & { modules: ModuleWithDivisions[] };
 
 const EditorPage = () => {
   const router = useRouter();
@@ -326,15 +424,31 @@ const EditorPage = () => {
 
     if (!projs?.length) { setProjects([]); setLoading(false); return; }
 
-    const ids = projs.map(p => p.id);
+    const projectIds = projs.map(p => p.id);
     const { data: mods } = await supabase
       .from("vision_project_modules")
       .select("*")
-      .in("project_id", ids)
+      .in("project_id", projectIds)
       .order("ord", { ascending: true });
 
-    const byProject = (mods ?? []).reduce<Record<string, VisionProjectModule[]>>((acc, m) => {
-      (acc[m.project_id] ??= []).push(m);
+    const allMods = mods ?? [];
+    const moduleIds = allMods.map(m => m.id);
+
+    const { data: divs } = moduleIds.length
+      ? await supabase
+          .from("vision_module_divisions")
+          .select("*")
+          .in("module_id", moduleIds)
+          .order("ord", { ascending: true })
+      : { data: [] };
+
+    const divsByModule = (divs ?? []).reduce<Record<string, VisionModuleDivision[]>>((acc, d) => {
+      (acc[d.module_id] ??= []).push(d);
+      return acc;
+    }, {});
+
+    const byProject = allMods.reduce<Record<string, ModuleWithDivisions[]>>((acc, m) => {
+      (acc[m.project_id] ??= []).push({ ...m, divisions: divsByModule[m.id] ?? [] });
       return acc;
     }, {});
 
@@ -353,31 +467,48 @@ const EditorPage = () => {
     const { modules, ...projectData } = draft;
 
     if (id) {
-      // Update existing project
       const { error } = await supabase
         .from("visionary_projects")
         .update({ ...projectData, username: OWNER })
         .eq("id", id);
       if (error) { toast.error("Failed to save", { description: error.message }); return; }
 
-      // Replace all modules: delete then insert
+      // Delete all modules (cascades to divisions), then re-insert
       await supabase.from("vision_project_modules").delete().eq("project_id", id);
+
       if (modules.length) {
-        const inserts = modules.map((m, i) => ({
+        const modInserts = modules.map((m, i) => ({
           project_id: id,
           title: m.title ?? "",
           subtitle: m.subtitle ?? null,
           description: m.description ?? "",
           ord: i,
         }));
-        const { error: me } = await supabase.from("vision_project_modules").insert(inserts);
+        const { data: newMods, error: me } = await supabase
+          .from("vision_project_modules")
+          .insert(modInserts)
+          .select();
         if (me) { toast.error("Modules save failed", { description: me.message }); return; }
+
+        // Insert divisions with the new module IDs
+        const divInserts = (newMods ?? []).flatMap((newMod, mi) =>
+          (modules[mi]?.divisions ?? []).map((d, di) => ({
+            module_id: newMod.id,
+            title: d.title ?? "",
+            subtitle: d.subtitle ?? null,
+            description: d.description ?? "",
+            ord: di,
+          }))
+        );
+        if (divInserts.length) {
+          const { error: de } = await supabase.from("vision_module_divisions").insert(divInserts);
+          if (de) { toast.error("Divisions save failed", { description: de.message }); return; }
+        }
       }
 
       toast.success("Project saved");
       setEditing(null);
     } else {
-      // Insert new project
       const { data: newProj, error } = await supabase
         .from("visionary_projects")
         .insert({ ...projectData, username: OWNER })
@@ -386,14 +517,30 @@ const EditorPage = () => {
       if (error || !newProj) { toast.error("Failed to create", { description: error?.message }); return; }
 
       if (modules.length) {
-        const inserts = modules.map((m, i) => ({
+        const modInserts = modules.map((m, i) => ({
           project_id: newProj.id,
           title: m.title ?? "",
           subtitle: m.subtitle ?? null,
           description: m.description ?? "",
           ord: i,
         }));
-        await supabase.from("vision_project_modules").insert(inserts);
+        const { data: newMods } = await supabase
+          .from("vision_project_modules")
+          .insert(modInserts)
+          .select();
+
+        const divInserts = (newMods ?? []).flatMap((newMod, mi) =>
+          (modules[mi]?.divisions ?? []).map((d, di) => ({
+            module_id: newMod.id,
+            title: d.title ?? "",
+            subtitle: d.subtitle ?? null,
+            description: d.description ?? "",
+            ord: di,
+          }))
+        );
+        if (divInserts.length) {
+          await supabase.from("vision_module_divisions").insert(divInserts);
+        }
       }
 
       toast.success("Project created");
@@ -512,6 +659,15 @@ const EditorPage = () => {
                     }}>
                       {p.modules.length} module{p.modules.length !== 1 ? "s" : ""}
                     </span>
+                    {p.modules.some(m => m.divisions.length > 0) && (
+                      <span style={{
+                        background: "rgba(201,165,90,0.04)", border: "1px solid rgba(201,165,90,0.12)",
+                        borderRadius: 5, padding: "1px 7px", fontFamily: "monospace", fontSize: 9,
+                        color: "rgba(201,165,90,0.4)",
+                      }}>
+                        {p.modules.reduce((s, m) => s + m.divisions.length, 0)} div
+                      </span>
+                    )}
                     {!p.is_public && <EyeOff size={11} color="rgba(255,255,255,0.25)" />}
                   </div>
                   {p.subtitle && (

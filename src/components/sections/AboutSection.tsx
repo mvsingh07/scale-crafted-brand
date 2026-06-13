@@ -82,7 +82,7 @@ export function AboutSection() {
           ))}
         </motion.div>
 
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, x: 24 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-60px" }}
@@ -113,7 +113,7 @@ export function AboutSection() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
     </div>
   );
