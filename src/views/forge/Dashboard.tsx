@@ -18,6 +18,7 @@ import {
   Palette,
   FolderKanban,
   BookOpen,
+  Lightbulb,
 } from "lucide-react";
 
 const SPRING = { type: "spring" as const, stiffness: 400, damping: 25 };
@@ -44,6 +45,13 @@ const WORKSPACE = [
     description: "Curate your writing across Medium, Reddit, and LinkedIn.",
     href: "/forge/blogs",
     accent: "hsl(var(--brand-violet))",
+  },
+  {
+    icon: Lightbulb,
+    label: "Vision Editor",
+    description: "Manage vision projects and their journey modules displayed on /vision.",
+    href: "/forge/vision",
+    accent: "#F59E0B",
   },
   {
     icon: MessageSquare,

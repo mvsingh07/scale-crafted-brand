@@ -227,6 +227,28 @@ export type EcosystemProject = {
   created_at: string;
 };
 
+// ── Vision ────────────────────────────────────────────────────────────────────
+export type VisionaryProject = {
+  id: string;
+  username: string;
+  title: string;
+  subtitle: string | null;
+  live_url: string | null;
+  description: string;
+  ord: number;
+  is_public: boolean;
+  created_at: string;
+};
+
+export type VisionProjectModule = {
+  id: string;
+  project_id: string;
+  title: string;
+  subtitle: string | null;
+  description: string;
+  ord: number;
+};
+
 export type BlogPlatform = "medium" | "reddit" | "linkedin" | "other";
 
 export type EcosystemBlog = {

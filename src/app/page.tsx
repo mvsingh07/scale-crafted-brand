@@ -1,66 +1,55 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/site/Navbar";
 import { HubFooter } from "@/components/hub/HubFooter";
+import { useIdentity } from "@/context/identity";
+import { AboutSection } from "@/components/sections/AboutSection";
+import { VisionSection } from "@/components/sections/VisionSection";
+import { WorkSection } from "@/components/sections/WorkSection";
+import { BlogsSection } from "@/components/sections/BlogsSection";
+import { ContactSection } from "@/components/sections/ContactSection";
 
 type Lang = "EN" | "HI" | "PA";
 
-const GOLD = "var(--gold-primary)";
-const GOLD_LIGHT = "var(--gold-highlight)";
+const GOLD   = "var(--gold-primary)";
+const GOLD_L = "var(--gold-highlight)";
+const WHITE  = "var(--text-primary)";
+const MUTED  = "var(--text-muted)";
 const SILVER = "var(--silver)";
-const WHITE = "var(--text-primary)";
-const MUTED_WHITE = "var(--text-muted)";
-const BLACK = "var(--bg-primary)";
-const BORDER_GOLD = "var(--gold-border)";
-
-const DIGITAL_DATE = new Date("2023-01-02");
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const WALL_KEY = "mvs-wall-shown";
 
 const T = {
   EN: {
-    counterLabel: "Creating Impact in the Digital World Since",
     hero: [
       { title: "MV Singh",          subtitle: "Igniting Innovation through continuous learning" },
-      { title: "Digital Architect", subtitle: "Crafting immersive digital experiences that blend creativity and technology." },
-      { title: "AI Strategist",     subtitle: "Empowering businesses to harness the transformative potential of AI for growth and innovation." },
+      { title: "Digital Architect",  subtitle: "Crafting immersive digital experiences that blend creativity and technology." },
+      { title: "AI Strategist",      subtitle: "Empowering businesses to harness the transformative potential of AI for growth and innovation." },
     ],
-    footerRight: "All Rights Reserved",
   },
   HI: {
-    counterLabel: "डिजिटल दुनिया में प्रभाव बनाते हुए",
     hero: [
-      { title: "एमवी सिंह",          subtitle: "निरंतर सीखने के माध्यम से नवाचार को प्रज्वलित करना" },
-      { title: "डिजिटल आर्किटेक्ट", subtitle: "रचनात्मकता और प्रौद्योगिकी को मिलाकर इमर्सिव डिजिटल अनुभव बनाना।" },
-      { title: "AI रणनीतिकार",       subtitle: "विकास के लिए AI की संभावनाओं का उपयोग कर व्यवसायों को सशक्त बनाना।" },
+      { title: "एमवी सिंह",           subtitle: "निरंतर सीखने के माध्यम से नवाचार को प्रज्वलित करना" },
+      { title: "डिजिटल आर्किटेक्ट",   subtitle: "रचनात्मकता और प्रौद्योगिकी को मिलाकर इमर्सिव डिजिटल अनुभव बनाना।" },
+      { title: "AI रणनीतिकार",         subtitle: "विकास के लिए AI की संभावनाओं का उपयोग कर व्यवसायों को सशक्त बनाना।" },
     ],
-    footerRight: "सर्वाधिकार सुरक्षित",
   },
   PA: {
-    counterLabel: "ਡਿਜੀਟਲ ਦੁਨੀਆ ਵਿੱਚ ਪ੍ਰਭਾਵ ਬਣਾਉਂਦੇ ਹੋਏ",
     hero: [
-      { title: "ਐੱਮ ਵੀ ਸਿੰਘ",       subtitle: "ਨਿਰੰਤਰ ਸਿੱਖਣ ਰਾਹੀਂ ਨਵੀਨਤਾ ਨੂੰ ਜਗਾਉਣਾ" },
-      { title: "ਡਿਜੀਟਲ ਆਰਕੀਟੈਕਟ", subtitle: "ਰਚਨਾਤਮਕਤਾ ਅਤੇ ਤਕਨਾਲੋਜੀ ਨੂੰ ਜੋੜ ਕੇ ਡਿਜੀਟਲ ਅਨੁਭਵ ਬਣਾਉਣਾ।" },
-      { title: "AI ਰਣਨੀਤੀਕਾਰ",      subtitle: "ਵਿਕਾਸ ਲਈ AI ਦੀ ਸੰਭਾਵਨਾ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਕਾਰੋਬਾਰਾਂ ਨੂੰ ਸਸ਼ਕਤ ਕਰਨਾ।" },
+      { title: "ਐੱਮ ਵੀ ਸਿੰਘ",         subtitle: "ਨਿਰੰਤਰ ਸਿੱਖਣ ਰਾਹੀਂ ਨਵੀਨਤਾ ਨੂੰ ਜਗਾਉਣਾ" },
+      { title: "ਡਿਜੀਟਲ ਆਰਕੀਟੈਕਟ",     subtitle: "ਰਚਨਾਤਮਕਤਾ ਅਤੇ ਤਕਨਾਲੋਜੀ ਨੂੰ ਜੋੜ ਕੇ ਡਿਜੀਟਲ ਅਨੁਭਵ ਬਣਾਉਣਾ।" },
+      { title: "AI ਰਣਨੀਤੀਕਾਰ",         subtitle: "ਵਿਕਾਸ ਲਈ AI ਦੀ ਸੰਭਾਵਨਾ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਕਾਰੋਬਾਰਾਂ ਨੂੰ ਸਸ਼ਕਤ ਕਰਨਾ।" },
     ],
-    footerRight: "ਸਾਰੇ ਹੱਕ ਸੁਰੱਖਿਅਤ",
   },
 } as const;
 
-function elapsedStr(from: Date): string {
-  const diff = Date.now() - from.getTime();
-  const totalS = Math.floor(diff / 1000);
-  const s = totalS % 60;
-  const m = Math.floor(totalS / 60) % 60;
-  const h = Math.floor(totalS / 3600) % 24;
-  const d = Math.floor(totalS / 86400) % 365;
-  const y = Math.floor(totalS / (365 * 86400));
-  return `${y}y · ${d}d · ${h}h · ${m}m · ${s}s`;
-}
-
-// ── Wall opening intro ────────────────────────────────────────────────────────
+// ── Wall opening intro — one-time per session ─────────────────────────────────
 function WallScreen({ onDone }: { onDone: () => void }) {
+  const BLACK = "var(--bg-primary)";
+
   useEffect(() => {
     const t = setTimeout(onDone, 3200);
     return () => clearTimeout(t);
@@ -98,273 +87,202 @@ function WallScreen({ onDone }: { onDone: () => void }) {
   );
 }
 
-// ── Existence counter ─────────────────────────────────────────────────────────
-function ExistenceCounter({ from, delay, lang }: { from: Date; delay: number; lang: Lang }) {
-  const [curr, setCurr] = useState("");
-  const [snapshot, setSnapshot] = useState("");
-  const [revealed, setRevealed] = useState(false);
-
-  useEffect(() => {
-    const initial = elapsedStr(from);
-    setCurr(initial);
-    setSnapshot(initial);
-    const id = setInterval(() => setCurr(elapsedStr(from)), 1000);
-    return () => clearInterval(id);
-  }, [from]);
-
-  useEffect(() => {
-    const t = setTimeout(() => setRevealed(true), (delay + 1.6) * 1000);
-    return () => clearTimeout(t);
-  }, [delay]);
-
-  const segStyle: React.CSSProperties = {
-    fontFamily: "var(--font-cinzel), Cinzel, system-ui, serif",
-    fontSize: "clamp(18px, 2.4vw, 28px)",
-    letterSpacing: "0.14em",
-    color: WHITE,
-  };
-
-  const segments = snapshot ? snapshot.split(" · ") : [];
-
+// ── TypeWriter — character-by-character reveal ───────────────────────────────
+function TypeWriter({ text, delay = 0, charDelay = 0.05 }: {
+  text: string; delay?: number; charDelay?: number;
+}) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
-      style={{ textAlign: "center" }}
+    <motion.span
+      aria-label={text}
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: charDelay, delayChildren: delay } } }}
     >
-      <p style={{
-        color: SILVER,
-        fontFamily: "var(--font-inter), Inter, system-ui, sans-serif",
-        fontSize: "clamp(11px, 1.2vw, 14px)",
-        letterSpacing: "0.16em",
-        textTransform: "uppercase",
-        marginBottom: 18,
-      }}>
-        {T[lang].counterLabel}
-      </p>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", flexWrap: "wrap", minHeight: "1.4em" }}>
-        {revealed ? (
-          <span suppressHydrationWarning style={segStyle}>{curr}</span>
-        ) : (
-          segments.map((seg, i) => (
-            <span key={i} style={{ display: "inline-flex", alignItems: "baseline" }}>
-              <motion.span
-                initial={{ opacity: 0, filter: "blur(10px)", y: 14 }}
-                animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-                transition={{ duration: 0.65, delay: delay + 0.15 + i * 0.13, ease: [0.16, 1, 0.3, 1] }}
-                style={segStyle}
-              >
-                {seg}
-              </motion.span>
-              {i < segments.length - 1 && (
-                <motion.span
-                  initial={{ opacity: 0 }} animate={{ opacity: 0.4 }}
-                  transition={{ duration: 0.4, delay: delay + 0.35 + i * 0.13 }}
-                  style={{ ...segStyle, color: BORDER_GOLD, margin: "0 0.5em" }}
-                >·</motion.span>
-              )}
-            </span>
-          ))
-        )}
-      </div>
-    </motion.div>
+      {text.split("").map((char, i) => (
+        <motion.span
+          key={i}
+          aria-hidden
+          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+          transition={{ duration: 0.07 }}
+          style={{ display: "inline" }}
+        >
+          {char === " " ? " " : char}
+        </motion.span>
+      ))}
+    </motion.span>
   );
 }
 
-function Screen2({ lang }: { lang: Lang }) {
+// ── Hero section — Display Name · Three Motion Texts · Tagline · Scroll ───────
+function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
+  const { identity } = useIdentity();
+  const [titleIdx, setTitleIdx] = useState(1);
+  const titleFirstShown = useRef(false);
+
+  const slides = identity?.hub_text_states?.length
+    ? identity.hub_text_states.slice(0, 3)
+    : T[lang].hero;
+
+  const displayName = identity?.display_name || T[lang].hero[0].title;
+  const tagline     = identity?.tagline       || T[lang].hero[0].subtitle;
+  const titles      = slides.map(s => s.title);
+
+  useEffect(() => { setTitleIdx(1); }, [lang]);
+
+  useEffect(() => {
+    if (!ready) return;
+    const id = setInterval(() => setTitleIdx(i => (i + 1) % titles.length), 2600);
+    return () => clearInterval(id);
+  }, [ready, titles.length]);
+
   return (
-    <section style={{
-      height: "100vh", scrollSnapAlign: "start",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      padding: "0 32px", background: BLACK, position: "relative", overflow: "hidden",
+    <section id="eco-home" style={{
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      padding: "80px 32px", position: "relative", overflow: "hidden",
+      background: "var(--bg-primary)",
     }}>
+      {/* Ambient glow */}
       <div aria-hidden style={{
-        position: "absolute", inset: 0,
-        background: `radial-gradient(ellipse 70% 50% at 50% 50%, color-mix(in srgb, var(--gold-primary) 7%, transparent) 0%, transparent 65%)`,
-        pointerEvents: "none",
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: `radial-gradient(ellipse 72% 58% at 50% 48%, color-mix(in srgb, ${GOLD} 7%, transparent) 0%, transparent 65%)`,
       }} />
+
+      <div style={{
+        position: "relative", zIndex: 1, textAlign: "center",
+        width: "100%", maxWidth: 860,
+        display: "flex", flexDirection: "column", alignItems: "center",
+      }}>
+        {/* ① Display Name — gradient text, typed character by character */}
+        <h1 style={{
+          fontFamily: "var(--font-cinzel), Cinzel, system-ui, serif",
+          fontSize: "clamp(52px, 9vw, 100px)",
+          fontWeight: 600, lineHeight: 1.08, margin: 0,
+          background: `linear-gradient(135deg, ${WHITE} 55%, ${GOLD_L} 100%)`,
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }}>
+          {ready && <TypeWriter text={displayName} delay={0.5} charDelay={0.08} />}
+        </h1>
+
+        {/* ② Three Motion Texts — cycling hero slider titles */}
+        <div style={{ height: 52, marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={`${lang}-${titleIdx}`}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
+              transition={{ duration: 0.45, delay: titleFirstShown.current ? 0 : 0.5, ease: EASE }}
+              onAnimationStart={() => { titleFirstShown.current = true; }}
+              style={{
+                fontFamily: "var(--font-cinzel), Cinzel, serif",
+                fontSize: "clamp(18px, 2.8vw, 32px)",
+                fontWeight: 400, color: GOLD, letterSpacing: "0.04em",
+              }}
+            >
+              {titles[titleIdx]}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+
+        {/* Gold divider */}
+        <motion.div
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={ready ? { scaleX: 1, opacity: 1 } : {}}
+          transition={{ duration: 0.65, delay: 1.3, ease: EASE }}
+          style={{
+            margin: "32px auto 0", height: 1, width: 80,
+            background: `linear-gradient(to right, transparent, ${GOLD}, transparent)`,
+            transformOrigin: "center",
+          }}
+        />
+
+        {/* ③ Tagline — typed in */}
+        <p style={{
+          fontFamily: "var(--font-inter), Inter, sans-serif",
+          fontSize: "clamp(15px, 1.7vw, 18px)",
+          color: SILVER, margin: "28px 0 0", lineHeight: 1.7, maxWidth: 520,
+          minHeight: "1.7em",
+        }}>
+          {ready && <TypeWriter text={tagline} delay={1.4} charDelay={0.018} />}
+        </p>
+      </div>
+
+      {/* Scroll indicator */}
       <motion.div
-        style={{ position: "relative", zIndex: 1 }}
-        initial={{ scale: 1.22, opacity: 0.6 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 2.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        initial={{ opacity: 0 }}
+        animate={ready ? { opacity: 0.45 } : {}}
+        transition={{ duration: 0.8, delay: 2.2 }}
+        style={{
+          position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)",
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+        }}
       >
-        <ExistenceCounter from={DIGITAL_DATE} delay={0.4} lang={lang} />
+        <span style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: MUTED }}>
+          Scroll
+        </span>
+        <motion.div
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          style={{ width: 1, height: 24, background: `linear-gradient(to bottom, ${GOLD}, transparent)` }}
+        />
       </motion.div>
     </section>
   );
 }
 
-// ── Hero ──────────────────────────────────────────────────────────────────────
-function WordReveal({ text, gold = false, wordStyles = [], baseDelay = 0 }: {
-  text: string; gold?: boolean; wordStyles?: React.CSSProperties[]; baseDelay?: number;
-}) {
-  const goldStyle: React.CSSProperties = {
-    background: `linear-gradient(135deg, ${GOLD} 0%, ${GOLD_LIGHT} 100%)`,
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    backgroundClip: "text",
-  };
-  return (
-    <span>
-      {text.split(" ").map((word, i) => {
-        const style: React.CSSProperties = wordStyles[i] ?? (gold ? goldStyle : {});
-        return (
-          <motion.span
-            key={`${word}-${i}`}
-            initial={{ opacity: 0, filter: "blur(8px)", y: 8 }}
-            animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-            transition={{ duration: 0.75, delay: baseDelay + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-            style={{ display: "inline-block", marginRight: "0.28em", ...style }}
-          >
-            {word}
-          </motion.span>
-        );
-      })}
-    </span>
-  );
-}
-
-type HeroState = 0 | 1 | 2;
-const HERO_GOLD = [false, true, true] as const;
-
-function getWordStyles(stateIndex: number, title: string): React.CSSProperties[] {
-  if (stateIndex !== 0) return [];
-  const words = title.split(" ");
-  return words.map((_, i) => i < words.length - 1 ? { color: GOLD } : { color: SILVER });
-}
-
-function Screen3({
-  heroState, setHeroState, autoPlay, lang,
-}: {
-  heroState: HeroState;
-  setHeroState: React.Dispatch<React.SetStateAction<HeroState>>;
-  autoPlay: boolean;
-  lang: Lang;
-}) {
-  const [autoDone, setAutoDone] = useState(true);
-  const heroText = T[lang].hero[heroState];
-  const isGold = HERO_GOLD[heroState];
-
-  useEffect(() => {
-    if (!autoPlay) return;
-    setAutoDone(false);
-    const ts = [
-      setTimeout(() => setHeroState(1), 3000),
-      setTimeout(() => setHeroState(2), 6000),
-      setTimeout(() => { setHeroState(0); setAutoDone(true); }, 9000),
-    ];
-    return () => ts.forEach(clearTimeout);
-  }, [autoPlay, setHeroState]);
-
-  const handleClick = useCallback(() => {
-    if (!autoDone) return;
-    setHeroState((s) => ((s + 1) % 3) as HeroState);
-  }, [autoDone, setHeroState]);
-
+// ── Ecosystem section wrapper ─────────────────────────────────────────────────
+function EcoSection({ id, children }: { id: string; children: React.ReactNode }) {
   return (
     <section
-      onClick={handleClick}
+      id={id}
       style={{
-        height: "100vh", scrollSnapAlign: "start",
-        position: "relative", background: BLACK,
-        cursor: autoDone ? "pointer" : "default",
-        userSelect: "none",
+        borderTop: "1px solid color-mix(in srgb, var(--gold-border) 12%, transparent)",
+        scrollMarginTop: "70px",
       }}
     >
-      <div aria-hidden style={{
-        position: "absolute", inset: 0,
-        background: `radial-gradient(ellipse 70% 50% at 50% 40%, color-mix(in srgb, var(--gold-primary) 5%, transparent) 0%, transparent 70%)`,
-        pointerEvents: "none",
-      }} />
-
-      <div style={{
-        position: "absolute", inset: 0,
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        padding: "90px 24px 120px", textAlign: "center",
-      }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`${heroState}-${lang}`}
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -28 }}
-            transition={{ duration: 0.45, ease: "easeInOut" }}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24 }}
-          >
-            <h1 style={{
-              fontFamily: "var(--font-cinzel), Cinzel, system-ui, serif",
-              fontSize: "clamp(40px, 6vw, 72px)",
-              fontWeight: 600, lineHeight: 1.15, margin: 0, color: WHITE,
-            }}>
-              <WordReveal
-                text={heroText.title}
-                gold={isGold}
-                wordStyles={getWordStyles(heroState, heroText.title)}
-                baseDelay={0}
-              />
-            </h1>
-            <p style={{
-              fontFamily: "var(--font-inter), Inter, system-ui, sans-serif",
-              fontSize: "clamp(15px, 2vw, 22px)",
-              color: SILVER, maxWidth: 620, lineHeight: 1.65, margin: 0,
-            }}>
-              <WordReveal text={heroText.subtitle} baseDelay={0.35} />
-            </p>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Dot indicators */}
-        <div
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: "absolute", bottom: 80,
-            left: "50%", transform: "translateX(-50%)",
-            display: "flex", gap: 12, alignItems: "center",
-          }}
-        >
-          {([0, 1, 2] as HeroState[]).map((i) => (
-            <button
-              key={i}
-              onClick={(e) => { e.stopPropagation(); if (autoDone) setHeroState(i); }}
-              aria-label={`State ${i + 1}`}
-              style={{
-                width: 24, height: 8, borderRadius: 4,
-                border: "none", cursor: autoDone ? "pointer" : "default",
-                background: "color-mix(in srgb, var(--silver) 25%, transparent)",
-                padding: 0, position: "relative", overflow: "hidden", flexShrink: 0,
-              }}
-            >
-              <span style={{
-                position: "absolute", inset: 0, borderRadius: 4,
-                background: GOLD, transformOrigin: "left",
-                transform: heroState === i ? "scaleX(1)" : "scaleX(0)",
-                opacity: heroState === i ? 1 : 0,
-                transition: "transform 0.3s ease, opacity 0.3s ease",
-              }} />
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div onClick={(e) => e.stopPropagation()}>
-        <HubFooter lang={lang} style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} />
-      </div>
+      {children}
     </section>
   );
 }
 
 // ── Root ──────────────────────────────────────────────────────────────────────
+const SECTION_MAP = [
+  { id: "eco-home",    href: "/" },
+  { id: "eco-about",   href: "/about" },
+  { id: "eco-vision",  href: "/vision" },
+  { id: "eco-work",    href: "/work" },
+  { id: "eco-blogs",   href: "/blogs" },
+  { id: "eco-contact", href: "/contact" },
+];
+
 export default function HubPage() {
   const router = useRouter();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [lang, setLang] = useState<Lang>("EN");
-  const [portalDone, setPortalDone] = useState(false);
-  const [loaderVisible, setLoaderVisible] = useState(true);
-  const [heroAutoPlay, setHeroAutoPlay] = useState(false);
-  const [heroState, setHeroState] = useState<HeroState>(0);
+  const [lang, setLang]             = useState<Lang>("EN");
+  // null = not yet checked, false = showing wall, true = wall done/skipped
+  const [wallDone, setWallDone]     = useState<boolean | null>(null);
+  const [heroReady, setHeroReady]   = useState(false);
+  const [activeHref, setActiveHref] = useState("/");
 
+  // On mount: decide whether to show wall or skip it
+  useEffect(() => {
+    if (sessionStorage.getItem(WALL_KEY)) {
+      setWallDone(true);
+      setTimeout(() => setHeroReady(true), 50);
+    } else {
+      setWallDone(false);
+    }
+  }, []);
+
+  // Scroll lock only while wall is open
+  useEffect(() => {
+    document.body.style.overflow = wallDone === false ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [wallDone]);
+
+  // Keyboard shortcut to forge
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.altKey && (e.code === "KeyL" || e.key.toLowerCase() === "l")) {
@@ -376,45 +294,55 @@ export default function HubPage() {
     return () => window.removeEventListener("keydown", handle);
   }, [router]);
 
-  const scrollToHero = useCallback(() => {
-    scrollRef.current?.scrollTo({ top: window.innerHeight, behavior: "smooth" });
+  // Auto-switch active nav tab based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const mid = window.innerHeight / 2;
+      let bestHref = "/";
+      let bestDist = Infinity;
+
+      SECTION_MAP.forEach(({ id, href }) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const top = el.getBoundingClientRect().top;
+        if (top <= mid) {
+          const dist = mid - top;
+          if (dist < bestDist) { bestDist = dist; bestHref = href; }
+        }
+      });
+
+      setActiveHref(bestHref);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (!portalDone || !loaderVisible) return;
-    const t = setTimeout(() => {
-      scrollToHero();
-      setTimeout(() => {
-        setLoaderVisible(false);
-        setHeroAutoPlay(true);
-        requestAnimationFrame(() => {
-          scrollRef.current?.scrollTo({ top: 0, behavior: "instant" });
-        });
-      }, 900);
-    }, 1500);
-    return () => clearTimeout(t);
-  }, [portalDone, loaderVisible, scrollToHero]);
-
   return (
-    <main style={{ background: BLACK, width: "100vw", height: "100vh", overflow: "hidden" }}>
-      <Navbar lang={lang} onLangChange={setLang} />
-      <div
-        ref={scrollRef}
-        className="hub-scroller"
-        style={{ position: "fixed", inset: 0, overflowY: "scroll", scrollSnapType: "y mandatory" }}
-      >
-        {loaderVisible && <Screen2 lang={lang} />}
-        <Screen3
-          heroState={heroState}
-          setHeroState={setHeroState}
-          autoPlay={heroAutoPlay}
-          lang={lang}
-        />
-      </div>
+    <div style={{ background: "var(--bg-primary)", minHeight: "100vh" }}>
+      <Navbar lang={lang} onLangChange={setLang} activeSectionHref={activeHref} />
+
+      <main>
+        <HeroSection lang={lang} ready={heroReady} />
+        <EcoSection id="eco-about"><AboutSection /></EcoSection>
+        <EcoSection id="eco-vision"><VisionSection /></EcoSection>
+        <EcoSection id="eco-work"><WorkSection /></EcoSection>
+        <EcoSection id="eco-blogs"><BlogsSection /></EcoSection>
+        <EcoSection id="eco-contact"><ContactSection /></EcoSection>
+      </main>
+
+      <HubFooter lang={lang} />
 
       <AnimatePresence>
-        {!portalDone && <WallScreen onDone={() => setPortalDone(true)} />}
+        {wallDone === false && (
+          <WallScreen onDone={() => {
+            sessionStorage.setItem(WALL_KEY, "1");
+            setWallDone(true);
+            setTimeout(() => setHeroReady(true), 200);
+          }} />
+        )}
       </AnimatePresence>
-    </main>
+    </div>
   );
 }

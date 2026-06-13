@@ -16,7 +16,7 @@ const FALLBACK_LINKS = [
   { label: "Home",    href: "/",        order: 1 },
   { label: "About",   href: "/about",   order: 2 },
   { label: "Work",    href: "/work",    order: 3 },
-  { label: "Blogs",   href: "/blog",    order: 4 },
+  { label: "Blogs",   href: "/blogs",    order: 4 },
   { label: "Contact", href: "/contact", order: 5 },
 ];
 
@@ -122,7 +122,7 @@ function LangDropdown({ lang, onLangChange, mobile = false }: { lang: Lang; onLa
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button onClick={() => setOpen(v => !v)} style={triggerStyle}>
+      {/* <button onClick={() => setOpen(v => !v)} style={triggerStyle}>
         <span style={{
           width: 5, height: 5, borderRadius: "50%",
           background: "var(--gold-primary)", flexShrink: 0,
@@ -133,7 +133,7 @@ function LangDropdown({ lang, onLangChange, mobile = false }: { lang: Lang; onLa
           size={mobile ? 13 : 10}
           style={{ transition: "transform 0.18s ease", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
         />
-      </button>
+      </button> */}
 
       <AnimatePresence>
         {open && (
@@ -209,6 +209,7 @@ interface NavbarProps {
   mode?: "main" | "portfolio";
   lang?: Lang;
   onLangChange?: (l: Lang) => void;
+  activeSectionHref?: string;
 }
 
 export const Navbar = ({
@@ -217,6 +218,7 @@ export const Navbar = ({
   mode = "main",
   lang,
   onLangChange,
+  activeSectionHref,
 }: NavbarProps = {}) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -239,9 +241,13 @@ export const Navbar = ({
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
+  const identityLinks = identity?.nav_links?.length
+    ? [...identity.nav_links].sort((a, b) => a.order - b.order)
+    : FALLBACK_LINKS;
+
   const links = mode === "portfolio"
     ? PORTFOLIO_SECTIONS
-    : FALLBACK_LINKS;
+    : identityLinks;
 
   const navStyle: React.CSSProperties = {
     position: contained ? "sticky" : "fixed",
@@ -314,9 +320,10 @@ export const Navbar = ({
                 {l.label}
               </button>
             ) : (
-              <Link key={l.href} href={l.href} style={linkStyle}
+              <Link key={l.href} href={l.href}
+                style={{ ...linkStyle, color: l.href === activeSectionHref ? "var(--gold-primary)" : "var(--text-primary)" }}
                 onMouseEnter={e => (e.currentTarget.style.color = "var(--gold-primary)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--text-primary)")}>
+                onMouseLeave={e => (e.currentTarget.style.color = l.href === activeSectionHref ? "var(--gold-primary)" : "var(--text-primary)")}>
                 {l.label}
               </Link>
             )
@@ -417,14 +424,14 @@ export const Navbar = ({
                         fontSize: "clamp(22px, 6vw, 30px)",
                         fontWeight: 400,
                         letterSpacing: "0.04em",
-                        color: "var(--text-primary)",
+                        color: l.href === activeSectionHref ? "var(--gold-primary)" : "var(--text-primary)",
                         textDecoration: "none",
                         display: "block",
                         padding: "10px 0",
                         borderBottom: "1px solid color-mix(in srgb, var(--gold-border) 12%, transparent)",
                       }}
                       onMouseEnter={e => (e.currentTarget.style.color = "var(--gold-primary)")}
-                      onMouseLeave={e => (e.currentTarget.style.color = "var(--text-primary)")}
+                      onMouseLeave={e => (e.currentTarget.style.color = l.href === activeSectionHref ? "var(--gold-primary)" : "var(--text-primary)")}
                     >
                       {l.label}
                     </Link>

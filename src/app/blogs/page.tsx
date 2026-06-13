@@ -1,12 +1,12 @@
 "use client";
 
 import { HubPageLayout } from "@/components/hub/HubPageLayout";
-import { ContactSection } from "@/components/sections/ContactSection";
+import { BlogsSection } from "@/components/sections/BlogsSection";
 
-export default function ContactPage() {
+export default function BlogPage() {
   return (
     <HubPageLayout>
-      <ContactSection />
+      <BlogsSection />
     </HubPageLayout>
   );
 }
