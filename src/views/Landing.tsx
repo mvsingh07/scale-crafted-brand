@@ -210,7 +210,7 @@ const Landing = () => {
             >
               <div
                 className="mb-4 grid h-10 w-10 place-items-center rounded-xl border border-white/10"
-                style={{ background: `${f.accent}18` }}
+                style={{ background: `color-mix(in srgb, ${f.accent} 9%, transparent)` }}
               >
                 <f.icon size={18} style={{ color: f.accent }} />
               </div>

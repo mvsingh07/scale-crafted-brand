@@ -318,7 +318,7 @@ const DashboardPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.22 + i * 0.06, ease: EASE }}
-              whileHover={{ y: -4, borderColor: `${c.accent}40`, backgroundColor: "rgba(255,255,255,0.04)" }}
+              whileHover={{ y: -4, borderColor: `color-mix(in srgb, ${c.accent} 25%, transparent)`, backgroundColor: "rgba(255,255,255,0.04)" }}
               whileTap={{ scale: 0.98 }}
             >
               <motion.div
@@ -326,7 +326,7 @@ const DashboardPage = () => {
                   display: "grid", placeItems: "center",
                   width: 40, height: 40, borderRadius: 12,
                   border: "1px solid rgba(255,255,255,0.08)",
-                  background: `${c.accent}14`,
+                  background: `color-mix(in srgb, ${c.accent} 8%, transparent)`,
                   marginBottom: 16,
                 }}
                 whileHover={{ scale: 1.1, rotate: 4 }}

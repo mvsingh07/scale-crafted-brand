@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { VisionaryProject, VisionProjectModule, VisionModuleDivision } from "@/lib/supabase";
+import { DivineAura } from "./vision/DivineAura";
+import { Mandala } from "./vision/SacredGeometry";
 
 const GOLD   = "var(--gold-primary)";
 const GOLD_L = "var(--gold-highlight)";
@@ -14,12 +16,15 @@ const SILVER = "var(--silver)";
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const OWNER = process.env.NEXT_PUBLIC_OWNER_USERNAME ?? "mvsingh";
 
+const SHIMMER = "linear-gradient(100deg, #E0C27A 0%, #FBF0CE 22%, #C9A55A 48%, #FBF0CE 74%, #E0C27A 100%)";
+
 type ModuleWithDivisions = VisionProjectModule & { divisions: VisionModuleDivision[] };
 type ProjectWithModules = VisionaryProject & { modules: ModuleWithDivisions[] };
 
 export function VisionSection() {
   const [projects, setProjects] = useState<ProjectWithModules[]>([]);
   const [loading, setLoading] = useState(true);
+  const reduce = useReducedMotion() ?? false;
 
   useEffect(() => {
     const load = async () => {
@@ -67,53 +72,113 @@ export function VisionSection() {
   }, []);
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 32px 80px" }}>
-      <motion.div
-        initial={{ opacity: 0, y: 32 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.9, ease: EASE }}
-        style={{ marginBottom: 72 }}
-      >
-        <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: GOLD, marginBottom: 16 }}>
-          02 — The Vision
-        </p>
-        <h2 style={{ fontFamily: "var(--font-cinzel), Cinzel, serif", fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 600, lineHeight: 1.15, color: WHITE, margin: 0 }}>
-          What I&apos;m building<br />toward.
-        </h2>
-        <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: "clamp(14px, 1.6vw, 17px)", color: SILVER, lineHeight: 1.7, margin: "16px 0 0", maxWidth: 520 }}>
-          These projects are where I am putting my heart and soul into — ambitious, long-term visions that I hope to bring to life in the coming years. They are all in early stages, and I&apos;m open to the right collaborators who share the passion for these problems, whether that&apos;s technical help, investment, or amplification.
-        </p>
-        <div style={{ marginTop: 24, width: 48, height: 1, background: `linear-gradient(to right, ${GOLD}, transparent)` }} />
-      </motion.div>
-
-      {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", paddingTop: 64 }}>
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-white/40" />
+    <div style={{ position: "relative", overflow: "hidden" }}>
+      {/* ---- Divine backdrop ---- */}
+      <div aria-hidden style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+        {/* God-ray radial glows */}
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(60% 42% at 50% 0%, color-mix(in srgb, var(--gold-primary) 12%, transparent), transparent 70%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(40% 30% at 80% 30%, color-mix(in srgb, var(--gold-highlight) 7%, transparent), transparent 70%)" }} />
+        {/* Ambient mandala halo behind header */}
+        <div style={{ position: "absolute", top: -120, left: "50%", transform: "translateX(-50%)", opacity: 0.22, filter: "blur(0.3px)" }}>
+          <Mandala size={620} speed={0.6} reduce={reduce} />
         </div>
-      ) : projects.length === 0 ? (
-        <motion.p
-          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-          style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 14, color: MUTED, textAlign: "center", paddingTop: 80 }}
-        >
-          Coming soon.
-        </motion.p>
-      ) : (
+        <DivineAura />
+      </div>
+
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "96px 32px 96px" }}>
+        {/* ---- Header ---- */}
         <motion.div
-          initial="hidden"
-          whileInView="visible"
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
-          variants={{ visible: { transition: { staggerChildren: 0.14 } } }}
-          style={{ display: "flex", flexDirection: "column", gap: 48 }}
+          transition={{ duration: 0.9, ease: EASE }}
+          style={{ marginBottom: 88, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}
         >
-          {projects.map(p => <VisionCard key={p.id} project={p} />)}
+          {/* Seal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.7 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.1, ease: EASE }}
+            style={{ marginBottom: 28, filter: "drop-shadow(0 0 18px color-mix(in srgb, var(--gold-primary) 35%, transparent))" }}
+          >
+            <Mandala size={108} reduce={reduce} />
+          </motion.div>
+
+          <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, letterSpacing: "0.34em", textTransform: "uppercase", color: GOLD, marginBottom: 18, display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ width: 22, height: 1, background: `linear-gradient(to right, transparent, ${GOLD})` }} />
+            02 — The Digital Gurukul
+            <span style={{ width: 22, height: 1, background: `linear-gradient(to left, transparent, ${GOLD})` }} />
+          </p>
+
+          {/* Sanskrit shloka */}
+          <p style={{ fontFamily: "var(--font-cinzel), Cinzel, serif", fontSize: "clamp(18px, 2.6vw, 26px)", color: GOLD_L, margin: "0 0 6px", letterSpacing: "0.04em" }}>
+            विद्या ददाति विनयम्
+          </p>
+          <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 12, fontStyle: "italic", letterSpacing: "0.08em", color: MUTED, margin: "0 0 28px" }}>
+            “Knowledge bestows humility.”
+          </p>
+
+          <h2
+            className="animate-shimmer"
+            style={{
+              fontFamily: "var(--font-cinzel), Cinzel, serif",
+              fontSize: "clamp(34px, 5.4vw, 60px)",
+              fontWeight: 600,
+              lineHeight: 1.12,
+              margin: 0,
+              backgroundImage: SHIMMER,
+              backgroundSize: "200% 100%",
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              color: "transparent",
+            }}
+          >
+            What I&apos;m building<br />toward.
+          </h2>
+
+          <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: "clamp(14px, 1.6vw, 17px)", color: SILVER, lineHeight: 1.8, margin: "22px auto 0", maxWidth: 600 }}>
+            A digital gurukul — where ideas are tended like sacred fire. These are the visions I am
+            pouring heart and soul into: ambitious, long-horizon work, still in early dawn. I am open to
+            the right fellow travellers who share the devotion — through craft, capital, or amplification.
+          </p>
+
+          <div style={{ marginTop: 30, display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ width: 60, height: 1, background: `linear-gradient(to right, transparent, ${GOLD})` }} />
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: GOLD, boxShadow: `0 0 8px ${GOLD}` }} />
+            <span style={{ width: 60, height: 1, background: `linear-gradient(to left, transparent, ${GOLD})` }} />
+          </div>
         </motion.div>
-      )}
+
+        {/* ---- Body ---- */}
+        {loading ? (
+          <div style={{ display: "flex", justifyContent: "center", paddingTop: 64 }}>
+            <Mandala size={64} reduce={reduce} />
+          </div>
+        ) : projects.length === 0 ? (
+          <motion.p
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+            style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 14, color: MUTED, textAlign: "center", paddingTop: 80 }}
+          >
+            Coming soon.
+          </motion.p>
+        ) : (
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={{ visible: { transition: { staggerChildren: 0.16 } } }}
+            style={{ display: "flex", flexDirection: "column", gap: 56 }}
+          >
+            {projects.map((p, i) => <VisionCard key={p.id} project={p} reduce={reduce} index={i} />)}
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }
 
-function VisionCard({ project: p }: { project: ProjectWithModules }) {
+function VisionCard({ project: p, reduce, index }: { project: ProjectWithModules; reduce: boolean; index: number }) {
   const [expanded, setExpanded] = useState(true);
 
   return (
@@ -122,9 +187,30 @@ function VisionCard({ project: p }: { project: ProjectWithModules }) {
         hidden: { opacity: 0, y: 28 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.75, ease: EASE } },
       }}
+      whileHover={reduce ? undefined : { y: -4 }}
+      transition={{ duration: 0.4, ease: EASE }}
+      style={{
+        position: "relative",
+        borderRadius: 22,
+        padding: "clamp(24px, 3.4vw, 40px)",
+        background: "linear-gradient(180deg, color-mix(in srgb, var(--gold-primary) 5%, transparent) 0%, color-mix(in srgb, var(--bg-primary) 70%, transparent) 100%)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        border: "1px solid color-mix(in srgb, var(--gold-border) 26%, transparent)",
+        boxShadow: "0 24px 70px -42px rgba(0,0,0,0.9), inset 0 1px 0 color-mix(in srgb, var(--gold-highlight) 14%, transparent)",
+        overflow: "hidden",
+      }}
     >
+      {/* Corner seal */}
+      <div aria-hidden style={{ position: "absolute", top: -54, right: -54, opacity: 0.16, pointerEvents: "none" }}>
+        <Mandala size={200} speed={0.8} reduce={reduce} />
+      </div>
+      {/* Top hairline glow */}
+      <div aria-hidden style={{ position: "absolute", top: 0, left: "10%", right: "10%", height: 1, background: `linear-gradient(to right, transparent, ${GOLD}, transparent)`, opacity: 0.6 }} />
+
       <div
         style={{
+          position: "relative",
           display: "flex", alignItems: "flex-start", justifyContent: "space-between",
           gap: 16, cursor: p.description ? "pointer" : "default",
           paddingBottom: 24,
@@ -133,6 +219,9 @@ function VisionCard({ project: p }: { project: ProjectWithModules }) {
         onClick={() => p.description && setExpanded(e => !e)}
       >
         <div style={{ flex: 1 }}>
+          <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, letterSpacing: "0.3em", color: MUTED, margin: "0 0 10px" }}>
+            {String(index + 1).padStart(2, "0")}
+          </p>
           <h3 style={{ fontFamily: "var(--font-cinzel), Cinzel, serif", fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 600, color: WHITE, margin: "0 0 6px", lineHeight: 1.2 }}>
             {p.title}
           </h3>
@@ -149,7 +238,7 @@ function VisionCard({ project: p }: { project: ProjectWithModules }) {
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3, ease: EASE }}
-                  style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: "clamp(13px, 1.5vw, 16px)", color: SILVER, lineHeight: 1.75, margin: "14px 0 0", maxWidth: 680, overflow: "hidden" }}
+                  style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: "clamp(13px, 1.5vw, 16px)", color: SILVER, lineHeight: 1.8, margin: "14px 0 0", maxWidth: 680, overflow: "hidden" }}
                 >
                   {p.description}
                 </motion.p>
@@ -160,7 +249,7 @@ function VisionCard({ project: p }: { project: ProjectWithModules }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0, paddingTop: 4 }}>
           {p.live_url && (
             <a href={p.live_url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}
-              style={{ display: "flex", alignItems: "center", gap: 6, background: `linear-gradient(135deg, ${GOLD}, ${GOLD_L})`, borderRadius: 8, padding: "8px 14px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, fontWeight: 600, color: "var(--bg-primary)", textDecoration: "none" }}>
+              style={{ display: "flex", alignItems: "center", gap: 6, background: `linear-gradient(135deg, ${GOLD}, ${GOLD_L})`, borderRadius: 8, padding: "8px 14px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, fontWeight: 600, color: "var(--bg-primary)", textDecoration: "none", boxShadow: `0 0 18px -4px ${GOLD}` }}>
               <ExternalLink size={12} />Visit
             </a>
           )}
@@ -173,14 +262,23 @@ function VisionCard({ project: p }: { project: ProjectWithModules }) {
       </div>
 
       {p.modules.length > 0 && (
-        <div style={{ marginTop: 32 }}>
-          <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: GOLD, marginBottom: 24 }}>
-            The Journey
+        <div style={{ position: "relative", marginTop: 34 }}>
+          <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, letterSpacing: "0.28em", textTransform: "uppercase", color: GOLD, marginBottom: 28, display: "flex", alignItems: "center", gap: 10 }}>
+            <span aria-hidden>✦</span> The Path of Becoming
           </p>
           <div style={{ position: "relative" }}>
-            <div style={{ position: "absolute", left: 7, top: 12, bottom: 12, width: 1, background: `linear-gradient(to bottom, ${GOLD}, color-mix(in srgb, ${GOLD} 10%, transparent))` }} />
+            {/* Base track */}
+            <div style={{ position: "absolute", left: 8, top: 12, bottom: 12, width: 1, background: "color-mix(in srgb, var(--gold-border) 22%, transparent)" }} />
+            {/* Animated luminous fill */}
+            <motion.div
+              initial={{ scaleY: 0 }}
+              whileInView={{ scaleY: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 1.4, ease: EASE }}
+              style={{ position: "absolute", left: 8, top: 12, bottom: 12, width: 1, transformOrigin: "top", background: `linear-gradient(to bottom, ${GOLD_L}, ${GOLD}, color-mix(in srgb, ${GOLD} 8%, transparent))`, boxShadow: `0 0 8px ${GOLD}` }}
+            />
             <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              {p.modules.map((m, i) => <ModuleRow key={m.id} module={m} index={i} total={p.modules.length} />)}
+              {p.modules.map((m, i) => <ModuleRow key={m.id} module={m} index={i} total={p.modules.length} reduce={reduce} />)}
             </div>
           </div>
         </div>
@@ -189,7 +287,7 @@ function VisionCard({ project: p }: { project: ProjectWithModules }) {
   );
 }
 
-function ModuleRow({ module: m, index: i, total }: { module: ModuleWithDivisions; index: number; total: number }) {
+function ModuleRow({ module: m, index: i, total, reduce }: { module: ModuleWithDivisions; index: number; total: number; reduce: boolean }) {
   const [open, setOpen] = useState(false);
   const isLast = i === total - 1;
   const hasDivisions = m.divisions.length > 0;
@@ -200,9 +298,20 @@ function ModuleRow({ module: m, index: i, total }: { module: ModuleWithDivisions
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.65, delay: i * 0.1, ease: EASE }}
-      style={{ display: "flex", alignItems: "flex-start", gap: 24, paddingBottom: isLast ? 0 : 36 }}
+      style={{ display: "flex", alignItems: "flex-start", gap: 24, paddingBottom: isLast ? 0 : 38 }}
     >
-      <div style={{ width: 15, height: 15, borderRadius: "50%", flexShrink: 0, marginTop: 4, border: `2px solid ${GOLD}`, background: isLast ? GOLD : "var(--bg-primary)", boxShadow: isLast ? `0 0 10px ${GOLD}` : "none", position: "relative", zIndex: 1 }} />
+      {/* Diya node */}
+      <div style={{ position: "relative", width: 17, height: 17, flexShrink: 0, marginTop: 3, zIndex: 1 }}>
+        {!reduce && (
+          <motion.div
+            animate={{ opacity: [0.35, 0.85, 0.35], scale: [1, 1.7, 1] }}
+            transition={{ duration: isLast ? 2.2 : 3.2, ease: "easeInOut", repeat: Infinity, delay: i * 0.3 }}
+            style={{ position: "absolute", inset: 0, borderRadius: "50%", background: GOLD, filter: "blur(5px)" }}
+          />
+        )}
+        <div style={{ position: "relative", width: 15, height: 15, margin: "1px", borderRadius: "50%", border: `2px solid ${GOLD}`, background: isLast ? GOLD : "var(--bg-primary)", boxShadow: isLast ? `0 0 12px ${GOLD}` : `0 0 6px color-mix(in srgb, ${GOLD} 50%, transparent)` }} />
+      </div>
+
       <div style={{ flex: 1 }}>
         {/* Module header */}
         <div
@@ -237,7 +346,7 @@ function ModuleRow({ module: m, index: i, total }: { module: ModuleWithDivisions
               style={{ overflow: "hidden" }}
             >
               {m.description && (
-                <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: "clamp(13px, 1.4vw, 15px)", color: SILVER, lineHeight: 1.75, margin: "10px 0 0", maxWidth: 520 }}>
+                <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: "clamp(13px, 1.4vw, 15px)", color: SILVER, lineHeight: 1.8, margin: "10px 0 0", maxWidth: 520 }}>
                   {m.description}
                 </p>
               )}
@@ -272,7 +381,7 @@ function DivisionItem({ division: d, index: di }: { division: VisionModuleDivisi
         style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: d.description ? "pointer" : "default" }}
         onClick={() => d.description && setOpen(o => !o)}
       >
-        <div style={{ width: 5, height: 5, borderRadius: "50%", background: GOLD, opacity: 0.55, flexShrink: 0, marginTop: 7 }} />
+        <div style={{ width: 5, height: 5, borderRadius: "50%", background: GOLD, opacity: 0.55, flexShrink: 0, marginTop: 7, boxShadow: `0 0 5px color-mix(in srgb, ${GOLD} 60%, transparent)` }} />
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <p style={{ fontFamily: "var(--font-cinzel), Cinzel, serif", fontSize: "clamp(13px, 1.5vw, 15px)", fontWeight: 600, color: WHITE, margin: 0, lineHeight: 1.3 }}>

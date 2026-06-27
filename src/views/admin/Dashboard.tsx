@@ -78,7 +78,7 @@ const AdminDashboardPage = () => {
             >
               <motion.div
                 className="mb-4 grid h-10 w-10 place-items-center rounded-xl border border-white/10"
-                style={{ background: `${c.accent}14` }}
+                style={{ background: `color-mix(in srgb, ${c.accent} 8%, transparent)` }}
                 whileHover={{ scale: 1.12, rotate: 4 }}
                 transition={SPRING}
               >
