@@ -44,8 +44,8 @@ export function Mandala({ size = 420, className, style, speed = 1, reduce = fals
       <defs>
         <linearGradient id="mandala-gold" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="var(--gold-highlight)" />
-          <stop offset="55%" stopColor="var(--gold-primary)" />
-          <stop offset="100%" stopColor="var(--gold-border)" />
+          <stop offset="55%" stopColor="color-mix(in srgb, var(--gold-highlight) 65%, var(--gold-primary))" />
+          <stop offset="100%" stopColor="var(--gold-primary)" />
         </linearGradient>
         <radialGradient id="mandala-core" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="var(--gold-highlight)" />
@@ -95,9 +95,8 @@ export function Mandala({ size = 420, className, style, speed = 1, reduce = fals
             d={PETAL}
             stroke="url(#mandala-gold)"
             strokeWidth="0.8"
-            transform={`rotate(${a} 100 100) translate(0 26) scale(0.62)`}
+            transform={`rotate(${a} 100 100) translate(100 100) scale(0.55) translate(-100 -100)`}
             opacity={0.8}
-            style={{ transformBox: "fill-box" }}
           />
         ))}
       </motion.g>

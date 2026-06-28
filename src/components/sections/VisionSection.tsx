@@ -81,26 +81,26 @@ export function VisionSection() {
         <DivineAura />
       </div>
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "140px 32px 96px" }}>
-        {/* ---- Mandala crest (fully visible; text flows below) ---- */}
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "100px 32px 72px" }}>
+        {/* ---- Mandala crest (lightened; text rises into its lower-middle) ---- */}
         <motion.div
           aria-hidden
           initial={{ opacity: 0, scale: 0.92 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          whileInView={{ opacity: 0.6, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1.1, ease: EASE }}
-          style={{ display: "flex", justifyContent: "center", marginBottom: 56, filter: "drop-shadow(0 0 34px color-mix(in srgb, var(--gold-primary) 24%, transparent))" }}
+          style={{ display: "flex", justifyContent: "center", marginBottom: 0, filter: "drop-shadow(0 0 24px color-mix(in srgb, var(--gold-primary) 14%, transparent))" }}
         >
           <Mandala size={620} speed={0.6} reduce={reduce} style={{ width: "min(620px, 78vw)", height: "auto" }} />
         </motion.div>
 
-        {/* ---- Header ---- */}
+        {/* ---- Header (pulled up to overlap the mandala) ---- */}
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.9, ease: EASE }}
-          style={{ marginBottom: 88, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}
+          style={{ marginTop: "calc(-1 * min(260px, 33vw))", marginBottom: 88, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", position: "relative", zIndex: 1 }}
         >
           <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, letterSpacing: "0.34em", textTransform: "uppercase", color: GOLD, marginBottom: 18, display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ width: 22, height: 1, background: `linear-gradient(to right, transparent, ${GOLD})` }} />

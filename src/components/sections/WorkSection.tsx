@@ -110,6 +110,12 @@ function ProjectCard({ project: p }: { project: EcosystemProject; index: number 
     >
       <div style={{ padding: "28px 32px 24px", cursor: "pointer" }} onClick={() => setExpanded(e => !e)}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+          {p.cover_image_url && (
+            <div style={{ width: 104, height: 78, borderRadius: 10, overflow: "hidden", background: "rgba(255,255,255,0.04)", flexShrink: 0 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.cover_image_url} alt={p.title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
               <span style={{ background: status.bg, borderRadius: 6, padding: "3px 10px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, letterSpacing: "0.1em", color: status.color }}>

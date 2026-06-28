@@ -249,18 +249,31 @@ function EcoSection({ id, children }: { id: string; children: React.ReactNode })
 }
 
 // ── Root ──────────────────────────────────────────────────────────────────────
+// Each scrollable section on the hub, mapped to the nav href that targets it.
 const SECTION_MAP = [
-  { id: "eco-home",    href: "/" },
-  { id: "eco-about",   href: "/about" },
-  { id: "eco-vision",  href: "/vision" },
-  { id: "eco-work",    href: "/work" },
-  { id: "eco-blogs",   href: "/blogs" },
-  { id: "eco-contact", href: "/contact" },
+  { id: "eco-home",    href: "/",        Component: null },
+  { id: "eco-about",   href: "/about",   Component: AboutSection },
+  { id: "eco-vision",  href: "/vision",  Component: VisionSection },
+  { id: "eco-work",    href: "/work",    Component: WorkSection },
+  { id: "eco-blogs",   href: "/blogs",   Component: BlogsSection },
+  { id: "eco-contact", href: "/contact", Component: ContactSection },
 ];
+
+// Hrefs always shown on the hub even when no identity nav_links are configured.
+const FALLBACK_NAV_HREFS = ["/", "/about", "/work", "/blogs", "/contact"];
 
 export default function HubPage() {
   const router = useRouter();
+  const { identity } = useIdentity();
   const [lang, setLang]             = useState<Lang>("EN");
+
+  // Only render the hub sections whose href is present in the navbar.
+  const navHrefs = new Set(
+    identity?.nav_links?.length
+      ? identity.nav_links.map(l => l.href)
+      : FALLBACK_NAV_HREFS,
+  );
+  const visibleSections = SECTION_MAP.filter(s => s.Component && navHrefs.has(s.href));
   // null = not yet checked, false = showing wall, true = wall done/skipped
   const [wallDone, setWallDone]     = useState<boolean | null>(null);
   const [heroReady, setHeroReady]   = useState(false);
@@ -325,11 +338,13 @@ export default function HubPage() {
 
       <main>
         <HeroSection lang={lang} ready={heroReady} />
-        <EcoSection id="eco-about"><AboutSection /></EcoSection>
-        <EcoSection id="eco-vision"><VisionSection /></EcoSection>
-        <EcoSection id="eco-work"><WorkSection /></EcoSection>
-        <EcoSection id="eco-blogs"><BlogsSection /></EcoSection>
-        <EcoSection id="eco-contact"><ContactSection /></EcoSection>
+        {visibleSections.map(({ id, Component }) =>
+          Component ? (
+            <EcoSection key={id} id={id}>
+              <Component />
+            </EcoSection>
+          ) : null,
+        )}
       </main>
 
       <HubFooter lang={lang} />
