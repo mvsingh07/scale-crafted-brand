@@ -78,14 +78,22 @@ export function VisionSection() {
         {/* God-ray radial glows */}
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(60% 42% at 50% 0%, color-mix(in srgb, var(--gold-primary) 12%, transparent), transparent 70%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(40% 30% at 80% 30%, color-mix(in srgb, var(--gold-highlight) 7%, transparent), transparent 70%)" }} />
-        {/* Ambient mandala halo behind header */}
-        <div style={{ position: "absolute", top: -120, left: "50%", transform: "translateX(-50%)", opacity: 0.22, filter: "blur(0.3px)" }}>
-          <Mandala size={620} speed={0.6} reduce={reduce} />
-        </div>
         <DivineAura />
       </div>
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "96px 32px 96px" }}>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "140px 32px 96px" }}>
+        {/* ---- Mandala crest (fully visible; text flows below) ---- */}
+        <motion.div
+          aria-hidden
+          initial={{ opacity: 0, scale: 0.92 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.1, ease: EASE }}
+          style={{ display: "flex", justifyContent: "center", marginBottom: 56, filter: "drop-shadow(0 0 34px color-mix(in srgb, var(--gold-primary) 24%, transparent))" }}
+        >
+          <Mandala size={620} speed={0.6} reduce={reduce} style={{ width: "min(620px, 78vw)", height: "auto" }} />
+        </motion.div>
+
         {/* ---- Header ---- */}
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -94,17 +102,6 @@ export function VisionSection() {
           transition={{ duration: 0.9, ease: EASE }}
           style={{ marginBottom: 88, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}
         >
-          {/* Seal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.7 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.1, ease: EASE }}
-            style={{ marginBottom: 28, filter: "drop-shadow(0 0 18px color-mix(in srgb, var(--gold-primary) 35%, transparent))" }}
-          >
-            <Mandala size={108} reduce={reduce} />
-          </motion.div>
-
           <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, letterSpacing: "0.34em", textTransform: "uppercase", color: GOLD, marginBottom: 18, display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ width: 22, height: 1, background: `linear-gradient(to right, transparent, ${GOLD})` }} />
             02 — The Digital Gurukul
