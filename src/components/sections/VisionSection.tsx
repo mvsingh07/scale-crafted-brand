@@ -81,7 +81,7 @@ export function VisionSection() {
         <DivineAura />
       </div>
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "100px 32px 72px" }}>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "0 32px 72px" }}>
         {/* ---- Mandala crest (lightened; text rises into its lower-middle) ---- */}
         <motion.div
           aria-hidden

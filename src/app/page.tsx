@@ -11,6 +11,7 @@ import { VisionSection } from "@/components/sections/VisionSection";
 import { WorkSection } from "@/components/sections/WorkSection";
 import { BlogsSection } from "@/components/sections/BlogsSection";
 import { ContactSection } from "@/components/sections/ContactSection";
+import { DivineBranchWave } from "@/components/site/DivineBranchWave";
 
 type Lang = "EN" | "HI" | "PA";
 
@@ -208,6 +209,11 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
         }}>
           {ready && <TypeWriter text={tagline} delay={1.4} charDelay={0.018} />}
         </p>
+      </div>
+
+      {/* Orb line — anchored near the bottom, above the scroll indicator */}
+      <div style={{ position: "absolute", bottom: 88, left: 0, right: 0 }}>
+        <DivineBranchWave ready={ready} startDelay={1.5} />
       </div>
 
       {/* Scroll indicator */}

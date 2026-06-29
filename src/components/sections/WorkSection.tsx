@@ -56,10 +56,10 @@ export function WorkSection() {
           03 — Active Work
         </p>
         <h2 style={{ fontFamily: "var(--font-cinzel), Cinzel, serif", fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 600, lineHeight: 1.15, color: WHITE, margin: 0 }}>
-          What I&apos; have built.
+          What I&apos; am building.
         </h2>
         <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: "clamp(14px, 1.6vw, 17px)", color: SILVER, maxWidth: 560, lineHeight: 1.7, margin: "16px 0 0" }}>
-          Kind of projects that I&apos; have built — from side projects to client work, and everything in between.
+          Projects that I&apos; am building — out of current interests and opportunities.
         </p>
         <div style={{ marginTop: 24, width: 48, height: 1, background: `linear-gradient(to right, ${GOLD}, transparent)` }} />
       </motion.div>
@@ -108,45 +108,50 @@ function ProjectCard({ project: p }: { project: EcosystemProject; index: number 
         overflow: "hidden",
       }}
     >
-      <div style={{ padding: "28px 32px 24px", cursor: "pointer" }} onClick={() => setExpanded(e => !e)}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-          {p.cover_image_url && (
-            <div style={{ width: 104, height: 78, borderRadius: 10, overflow: "hidden", background: "rgba(255,255,255,0.04)", flexShrink: 0 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.cover_image_url} alt={p.title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            </div>
-          )}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
-              <span style={{ background: status.bg, borderRadius: 6, padding: "3px 10px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, letterSpacing: "0.1em", color: status.color }}>
-                {status.label}
+      <div style={{ padding: "20px 20px 16px", cursor: "pointer" }} onClick={() => setExpanded(e => !e)}>
+        {/* Row 1: status badge + tags | buttons */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ background: status.bg, borderRadius: 6, padding: "3px 10px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, letterSpacing: "0.1em", color: status.color, flexShrink: 0 }}>
+              {status.label}
+            </span>
+            {p.stack_tags.slice(0, 4).map(tag => (
+              <span key={tag} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 6, padding: "2px 8px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, color: MUTED }}>
+                {tag}
               </span>
-              {p.stack_tags.slice(0, 4).map(tag => (
-                <span key={tag} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 6, padding: "2px 8px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, color: MUTED }}>
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <h3 style={{ fontFamily: "var(--font-cinzel), Cinzel, serif", fontSize: "clamp(20px, 2.5vw, 28px)", fontWeight: 600, color: WHITE, margin: "0 0 8px" }}>
-              {p.title}
-            </h3>
-            <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 14, color: SILVER, margin: 0, lineHeight: 1.6 }}>
-              {p.tagline}
-            </p>
+            ))}
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             {p.live_url && (
               <a href={p.live_url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}
-                style={{ display: "flex", alignItems: "center", gap: 6, background: `linear-gradient(135deg, ${GOLD}, ${GOLD_L})`, borderRadius: 8, padding: "8px 14px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, fontWeight: 600, color: "var(--bg-primary)", textDecoration: "none" }}>
+                style={{ display: "flex", alignItems: "center", gap: 6, background: `linear-gradient(135deg, ${GOLD}, ${GOLD_L})`, borderRadius: 8, padding: "7px 13px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, fontWeight: 600, color: "var(--bg-primary)", textDecoration: "none" }}>
                 <ExternalLink size={12} />Live
               </a>
             )}
             {p.code_url && (
               <a href={p.code_url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}
-                style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "8px 14px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, color: SILVER, textDecoration: "none" }}>
+                style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "7px 13px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, color: SILVER, textDecoration: "none" }}>
                 <Github size={12} />Code
               </a>
             )}
+          </div>
+        </div>
+
+        {/* Row 2: cover image | title + tagline — always side-by-side */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {p.cover_image_url && (
+            <div style={{ width: 80, height: 80, borderRadius: 10, overflow: "hidden", background: "rgba(255,255,255,0.04)", flexShrink: 0 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.cover_image_url} alt={p.title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h3 style={{ fontFamily: "var(--font-cinzel), Cinzel, serif", fontSize: "clamp(18px, 2.5vw, 26px)", fontWeight: 600, color: WHITE, margin: "0 0 6px" }}>
+              {p.title}
+            </h3>
+            <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 14, color: SILVER, margin: 0, lineHeight: 1.6 }}>
+              {p.tagline}
+            </p>
           </div>
         </div>
         {p.description && (
@@ -168,7 +173,7 @@ function ProjectCard({ project: p }: { project: EcosystemProject; index: number 
             transition={{ duration: 0.35, ease: EASE }}
             style={{ overflow: "hidden" }}
           >
-            <div style={{ padding: "20px 32px 28px", borderTop: "1px solid color-mix(in srgb, var(--gold-border) 15%, transparent)" }}>
+            <div style={{ padding: "20px 24px 28px", borderTop: "1px solid color-mix(in srgb, var(--gold-border) 15%, transparent)" }}>
               <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 14, lineHeight: 1.8, color: SILVER, margin: "0 0 20px", maxWidth: 700 }}>
                 {p.description}
               </p>

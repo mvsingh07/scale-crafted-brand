@@ -29,6 +29,15 @@ const PORTFOLIO_SECTIONS = [
   { label: "Contact",  href: "?section=contact",  sectionId: "contact",  order: 6 },
 ];
 
+const HUB_SECTION_MAP: Record<string, string> = {
+  "/":        "eco-home",
+  "/about":   "eco-about",
+  "/vision":  "eco-vision",
+  "/work":    "eco-work",
+  "/blogs":   "eco-blogs",
+  "/contact": "eco-contact",
+};
+
 function scrollToSection(sectionId: string) {
   const el = document.getElementById(sectionId);
   if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -308,26 +317,43 @@ export const Navbar = ({
 
         {/* Center: Desktop nav links */}
         <div className="hidden md:flex" style={{ alignItems: "center", gap: 36 }}>
-          {links.map((l) =>
-            mode === "portfolio" && "sectionId" in l ? (
-              <button
-                key={l.href}
-                onClick={() => scrollToSection((l as typeof PORTFOLIO_SECTIONS[0]).sectionId)}
-                style={{ ...linkStyle, background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--gold-primary)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--text-primary)")}
-              >
-                {l.label}
-              </button>
-            ) : (
+          {links.map((l) => {
+            const isActive = l.href === activeSectionHref;
+            if (mode === "portfolio" && "sectionId" in l) {
+              return (
+                <button
+                  key={l.href}
+                  onClick={() => scrollToSection((l as typeof PORTFOLIO_SECTIONS[0]).sectionId)}
+                  style={{ ...linkStyle, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--gold-primary)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--text-primary)")}
+                >
+                  {l.label}
+                </button>
+              );
+            }
+            if (mode === "main" && l.href in HUB_SECTION_MAP) {
+              return (
+                <button
+                  key={l.href}
+                  onClick={() => scrollToSection(HUB_SECTION_MAP[l.href])}
+                  style={{ ...linkStyle, background: "none", border: "none", cursor: "pointer", padding: 0, color: isActive ? "var(--gold-primary)" : "var(--text-primary)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--gold-primary)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = isActive ? "var(--gold-primary)" : "var(--text-primary)")}
+                >
+                  {l.label}
+                </button>
+              );
+            }
+            return (
               <Link key={l.href} href={l.href}
-                style={{ ...linkStyle, color: l.href === activeSectionHref ? "var(--gold-primary)" : "var(--text-primary)" }}
+                style={{ ...linkStyle, color: isActive ? "var(--gold-primary)" : "var(--text-primary)" }}
                 onMouseEnter={e => (e.currentTarget.style.color = "var(--gold-primary)")}
-                onMouseLeave={e => (e.currentTarget.style.color = l.href === activeSectionHref ? "var(--gold-primary)" : "var(--text-primary)")}>
+                onMouseLeave={e => (e.currentTarget.style.color = isActive ? "var(--gold-primary)" : "var(--text-primary)")}>
                 {l.label}
               </Link>
-            )
-          )}
+            );
+          })}
         </div>
 
         {/* Right: Time+Location | Language (landing only) | Theme */}
@@ -384,60 +410,73 @@ export const Navbar = ({
 
             {/* Nav links */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
-              {links.map((l, i) => (
-                <motion.div
-                  key={l.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.35, delay: 0.1 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  {mode === "portfolio" && "sectionId" in l ? (
-                    <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setTimeout(() => scrollToSection((l as typeof PORTFOLIO_SECTIONS[0]).sectionId), 320);
-                      }}
-                      style={{
-                        fontFamily: "var(--font-cinzel), Cinzel, serif",
-                        fontSize: "clamp(22px, 6vw, 30px)",
-                        fontWeight: 400,
-                        letterSpacing: "0.04em",
-                        color: "var(--text-primary)",
-                        background: "none",
-                        border: "none",
-                        borderBottom: "1px solid color-mix(in srgb, var(--gold-border) 12%, transparent)",
-                        cursor: "pointer",
-                        display: "block",
-                        width: "100%",
-                        textAlign: "left",
-                        padding: "10px 0",
-                      }}
-                    >
-                      {l.label}
-                    </button>
-                  ) : (
-                    <Link
-                      href={l.href}
-                      onClick={() => setMenuOpen(false)}
-                      style={{
-                        fontFamily: "var(--font-cinzel), Cinzel, serif",
-                        fontSize: "clamp(22px, 6vw, 30px)",
-                        fontWeight: 400,
-                        letterSpacing: "0.04em",
-                        color: l.href === activeSectionHref ? "var(--gold-primary)" : "var(--text-primary)",
-                        textDecoration: "none",
-                        display: "block",
-                        padding: "10px 0",
-                        borderBottom: "1px solid color-mix(in srgb, var(--gold-border) 12%, transparent)",
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.color = "var(--gold-primary)")}
-                      onMouseLeave={e => (e.currentTarget.style.color = l.href === activeSectionHref ? "var(--gold-primary)" : "var(--text-primary)")}
-                    >
-                      {l.label}
-                    </Link>
-                  )}
-                </motion.div>
-              ))}
+              {links.map((l, i) => {
+                const isActive = l.href === activeSectionHref;
+                const mobileScrollBtnStyle: React.CSSProperties = {
+                  fontFamily: "var(--font-cinzel), Cinzel, serif",
+                  fontSize: "clamp(22px, 6vw, 30px)",
+                  fontWeight: 400,
+                  letterSpacing: "0.04em",
+                  background: "none",
+                  border: "none",
+                  borderBottom: "1px solid color-mix(in srgb, var(--gold-border) 12%, transparent)",
+                  cursor: "pointer",
+                  display: "block",
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "10px 0",
+                };
+                return (
+                  <motion.div
+                    key={l.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, delay: 0.1 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {mode === "portfolio" && "sectionId" in l ? (
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setTimeout(() => scrollToSection((l as typeof PORTFOLIO_SECTIONS[0]).sectionId), 320);
+                        }}
+                        style={{ ...mobileScrollBtnStyle, color: "var(--text-primary)" }}
+                      >
+                        {l.label}
+                      </button>
+                    ) : mode === "main" && l.href in HUB_SECTION_MAP ? (
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setTimeout(() => scrollToSection(HUB_SECTION_MAP[l.href]), 320);
+                        }}
+                        style={{ ...mobileScrollBtnStyle, color: isActive ? "var(--gold-primary)" : "var(--text-primary)" }}
+                      >
+                        {l.label}
+                      </button>
+                    ) : (
+                      <Link
+                        href={l.href}
+                        onClick={() => setMenuOpen(false)}
+                        style={{
+                          fontFamily: "var(--font-cinzel), Cinzel, serif",
+                          fontSize: "clamp(22px, 6vw, 30px)",
+                          fontWeight: 400,
+                          letterSpacing: "0.04em",
+                          color: isActive ? "var(--gold-primary)" : "var(--text-primary)",
+                          textDecoration: "none",
+                          display: "block",
+                          padding: "10px 0",
+                          borderBottom: "1px solid color-mix(in srgb, var(--gold-border) 12%, transparent)",
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.color = "var(--gold-primary)")}
+                        onMouseLeave={e => (e.currentTarget.style.color = isActive ? "var(--gold-primary)" : "var(--text-primary)")}
+                      >
+                        {l.label}
+                      </Link>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
 
             {/* Bottom: lang + time + theme */}
