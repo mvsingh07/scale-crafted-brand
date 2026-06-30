@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/site/Navbar";
 import { HubFooter } from "@/components/hub/HubFooter";
@@ -12,6 +12,8 @@ import { WorkSection } from "@/components/sections/WorkSection";
 import { BlogsSection } from "@/components/sections/BlogsSection";
 import { ContactSection } from "@/components/sections/ContactSection";
 import { DivineBranchWave } from "@/components/site/DivineBranchWave";
+import { HeroParticles } from "@/components/site/HeroParticles";
+import { Mandala } from "@/components/sections/vision/SacredGeometry";
 
 type Lang = "EN" | "HI" | "PA";
 
@@ -136,23 +138,72 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
     return () => clearInterval(id);
   }, [ready, titles.length]);
 
+  // ── Mouse parallax ────────────────────────────────────────────────────────
+  const reduce = useReducedMotion() ?? false;
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const sx = useSpring(mx, { stiffness: 48, damping: 22 });
+  const sy = useSpring(my, { stiffness: 48, damping: 22 });
+  const textX = useTransform(sx, v => reduce ? 0 : v * 9);
+  const textY = useTransform(sy, v => reduce ? 0 : v * 6);
+  const mandX = useTransform(sx, v => reduce ? 0 : -v * 24);
+  const mandY = useTransform(sy, v => reduce ? 0 : -v * 18);
+
   return (
-    <section id="eco-home" style={{
-      minHeight: "100vh", display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      padding: "80px 32px", position: "relative", overflow: "hidden",
-      background: "var(--bg-primary)",
-    }}>
+    <section
+      id="eco-home"
+      onMouseMove={e => {
+        mx.set((e.clientX / window.innerWidth  - 0.5) * 2);
+        my.set((e.clientY / window.innerHeight - 0.5) * 2);
+      }}
+      style={{
+        minHeight: "100vh", display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        padding: "80px 32px", position: "relative", overflow: "hidden",
+        background: "var(--bg-primary)",
+      }}
+    >
+      {/* Mandala backdrop — counter-parallax, very slow rotation */}
+      <div aria-hidden style={{
+        position: "absolute", inset: 0, display: "flex",
+        alignItems: "center", justifyContent: "center",
+        pointerEvents: "none", zIndex: 0,
+      }}>
+        <motion.div style={{ x: mandX, y: mandY }}>
+          <Mandala
+            size={1080} speed={0.18} reduce={reduce} innerPetals={false}
+            style={{ opacity: 0.052, filter: "blur(0.5px)" }}
+          />
+        </motion.div>
+      </div>
+
+      {/* Floating gold particles */}
+      <HeroParticles ready={ready} />
+
       {/* Ambient glow */}
       <div aria-hidden style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
+        position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
         background: `radial-gradient(ellipse 72% 58% at 50% 48%, color-mix(in srgb, ${GOLD} 7%, transparent) 0%, transparent 65%)`,
       }} />
 
-      <div style={{
-        position: "relative", zIndex: 1, textAlign: "center",
+      {/* Film grain — cinematic texture */}
+      <svg aria-hidden style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        zIndex: 2, pointerEvents: "none", opacity: 0.042,
+        animation: "grain 8s steps(10) infinite",
+      }}>
+        <filter id="hero-grain">
+          <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
+          <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width="200%" height="200%" x="-50%" y="-50%" filter="url(#hero-grain)" />
+      </svg>
+
+      <motion.div style={{
+        position: "relative", zIndex: 4, textAlign: "center",
         width: "100%", maxWidth: 860,
         display: "flex", flexDirection: "column", alignItems: "center",
+        x: textX, y: textY,
       }}>
         {/* ① Display Name — gradient text, typed character by character */}
         <h1 style={{
@@ -209,10 +260,10 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
         }}>
           {ready && <TypeWriter text={tagline} delay={1.4} charDelay={0.018} />}
         </p>
-      </div>
+      </motion.div>
 
-      {/* Orb line — anchored near the bottom, above the scroll indicator */}
-      <div style={{ position: "absolute", bottom: 88, left: 0, right: 0 }}>
+      {/* Orb line — anchored near the bottom, above cinematic overlays */}
+      <div style={{ position: "absolute", bottom: 88, left: 0, right: 0, zIndex: 4 }}>
         <DivineBranchWave ready={ready} startDelay={1.5} />
       </div>
 
@@ -224,6 +275,7 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
         style={{
           position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)",
           display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+          zIndex: 4,
         }}
       >
         <span style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: MUTED }}>

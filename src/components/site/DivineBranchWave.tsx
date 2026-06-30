@@ -58,37 +58,6 @@ export function DivineBranchWave({ ready, startDelay = 1.5 }: Props) {
             stroke="url(#orb-line)" strokeWidth={0.8} />
         </motion.g>
 
-        {/* ── Orb corona ───────────────────────────────────────────────────── */}
-        <motion.g
-          filter="url(#orb-corona)"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={ready ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
-          transition={{ delay: d + 0.5, duration: 0.7, ease: E }}
-          style={{ transformOrigin: "280px 10px" }}
-        >
-          <circle cx={280} cy={10} r={9} fill="#b8860b" opacity={0.55} />
-        </motion.g>
-
-        {/* ── Orb mid glow ─────────────────────────────────────────────────── */}
-        <motion.g
-          filter="url(#orb-mid)"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={ready ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
-          transition={{ delay: d + 0.52, duration: 0.6, ease: E }}
-          style={{ transformOrigin: "280px 10px" }}
-        >
-          <circle cx={280} cy={10} r={5} fill="#d4a017" opacity={0.85} />
-        </motion.g>
-
-        {/* ── Orb core (solid, bright) ──────────────────────────────────────── */}
-        <motion.circle
-          cx={280} cy={10} r={2.8}
-          fill="#f5dfa0"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={ready ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
-          transition={{ delay: d + 0.55, duration: 0.45, ease: E }}
-          style={{ transformOrigin: "280px 10px" }}
-        />
       </svg>
     </div>
   );

@@ -16,13 +16,15 @@ type MandalaProps = {
   /** Slow the whole thing down for large ambient halos. */
   speed?: number;
   reduce?: boolean;
+  /** Set false to hide the 8-petal inner ring (e.g. for the hero backdrop). */
+  innerPetals?: boolean;
 };
 
 /**
  * Mandala — a counter-rotating lotus / Sri-Yantra seal (petal rings, shatkona, bindu).
  * Used as a large ambient halo behind the header and as a small seal on each shrine card.
  */
-export function Mandala({ size = 420, className, style, speed = 1, reduce = false }: MandalaProps) {
+export function Mandala({ size = 420, className, style, speed = 1, reduce = false, innerPetals = true }: MandalaProps) {
   const spin = (duration: number, dir: 1 | -1) =>
     reduce
       ? {}
@@ -87,19 +89,21 @@ export function Mandala({ size = 420, className, style, speed = 1, reduce = fals
         <circle cx="100" cy="100" r="62" stroke="url(#mandala-gold)" strokeWidth="0.5" opacity="0.35" />
       </motion.g>
 
-      {/* Inner petals */}
-      <motion.g style={{ transformOrigin: "100px 100px" }} {...spin(90, 1)}>
-        {ring(8, (i, a) => (
-          <path
-            key={i}
-            d={PETAL}
-            stroke="url(#mandala-gold)"
-            strokeWidth="0.8"
-            transform={`rotate(${a} 100 100) translate(100 100) scale(0.55) translate(-100 -100)`}
-            opacity={0.8}
-          />
-        ))}
-      </motion.g>
+      {/* Inner petals — hidden for hero backdrop via innerPetals=false */}
+      {innerPetals && (
+        <motion.g style={{ transformOrigin: "100px 100px" }} {...spin(90, 1)}>
+          {ring(8, (i, a) => (
+            <path
+              key={i}
+              d={PETAL}
+              stroke="url(#mandala-gold)"
+              strokeWidth="0.8"
+              transform={`rotate(${a} 100 100) translate(100 100) scale(0.55) translate(-100 -100)`}
+              opacity={0.8}
+            />
+          ))}
+        </motion.g>
+      )}
 
       {/* Shatkona — interlocked triangles of divine union */}
       <motion.g style={{ transformOrigin: "100px 100px" }} {...spin(70, -1)}>
