@@ -19,6 +19,7 @@ import {
   FolderKanban,
   BookOpen,
   Lightbulb,
+  LayoutGrid,
 } from "lucide-react";
 
 const SPRING = { type: "spring" as const, stiffness: 400, damping: 25 };
@@ -38,6 +39,13 @@ const WORKSPACE = [
     description: "Manage ecosystem projects — add live links, code repos, and seeking tags.",
     href: "/forge/projects",
     accent: "#C9A55A",
+  },
+  {
+    icon: LayoutGrid,
+    label: "Services Editor",
+    description: "Manage the service categories shown on the unified /services page.",
+    href: "/forge/services",
+    accent: "#38BDF8",
   },
   {
     icon: BookOpen,

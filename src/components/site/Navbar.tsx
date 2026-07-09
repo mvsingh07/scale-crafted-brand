@@ -13,11 +13,11 @@ type Lang = "EN" | "HI" | "PA";
 const LANG_LABELS: Record<Lang, string> = { EN: "English", HI: "Hindi", PA: "Panjabi" };
 
 const FALLBACK_LINKS = [
-  { label: "Home",    href: "/",        order: 1 },
-  { label: "About",   href: "/about",   order: 2 },
-  { label: "Work",    href: "/work",    order: 3 },
-  { label: "Blogs",   href: "/blogs",    order: 4 },
-  { label: "Contact", href: "/contact", order: 5 },
+  { label: "Home",     href: "/",         order: 1 },
+  { label: "About",    href: "/about",    order: 2 },
+  { label: "Services", href: "/services", order: 3 },
+  { label: "Blogs",    href: "/blogs",    order: 4 },
+  { label: "Contact",  href: "/contact",  order: 5 },
 ];
 
 const PORTFOLIO_SECTIONS = [
@@ -30,12 +30,13 @@ const PORTFOLIO_SECTIONS = [
 ];
 
 const HUB_SECTION_MAP: Record<string, string> = {
-  "/":        "eco-home",
-  "/about":   "eco-about",
-  "/vision":  "eco-vision",
-  "/work":    "eco-work",
-  "/blogs":   "eco-blogs",
-  "/contact": "eco-contact",
+  "/":         "eco-home",
+  "/about":    "eco-about",
+  "/vision":   "eco-vision",
+  "/services": "eco-services",
+  "/work":     "eco-services", // legacy — Work merged into Services
+  "/blogs":    "eco-blogs",
+  "/contact":  "eco-contact",
 };
 
 function scrollToSection(sectionId: string) {

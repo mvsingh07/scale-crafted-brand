@@ -1,5 +1,12 @@
-import { ComingSoonPage } from "@/components/hub/ComingSoonPage";
+"use client";
+
+import { HubPageLayout } from "@/components/hub/HubPageLayout";
+import { ServicesSection } from "@/components/sections/ServicesSection";
 
 export default function ServicesPage() {
-  return <ComingSoonPage title="Services" eyebrow="02 — What I Offer" description="Consulting, engineering, and AI strategy services — curated and coming soon." />;
+  return (
+    <HubPageLayout>
+      <ServicesSection />
+    </HubPageLayout>
+  );
 }

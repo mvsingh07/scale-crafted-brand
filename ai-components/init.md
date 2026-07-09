@@ -1,1 +1,0 @@
-can you create a component that is one time divine appearing branch like wave  with elegance and include it in  hero section of our landing page

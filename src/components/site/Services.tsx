@@ -37,7 +37,7 @@ const listContainer = {
 
 const listItem = {
   hidden: { opacity: 0, x: -16 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
 };
 
 interface ServicesProps {
@@ -99,7 +99,7 @@ export const Services = ({ services }: ServicesProps = {}) => {
             initial={{ opacity: 0, scale: 0.96 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-8%" }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.7, ease: "easeInOut" }}
           >
             <div className="relative" style={{ width: 420, height: 360 }}>
               <CardSwap

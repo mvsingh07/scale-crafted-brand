@@ -8,7 +8,7 @@ import { HubFooter } from "@/components/hub/HubFooter";
 import { useIdentity } from "@/context/identity";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { VisionSection } from "@/components/sections/VisionSection";
-import { WorkSection } from "@/components/sections/WorkSection";
+import { ServicesSection } from "@/components/sections/ServicesSection";
 import { BlogsSection } from "@/components/sections/BlogsSection";
 import { ContactSection } from "@/components/sections/ContactSection";
 import { DivineBranchWave } from "@/components/site/DivineBranchWave";
@@ -152,10 +152,7 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
   return (
     <section
       id="eco-home"
-      onMouseMove={e => {
-        mx.set((e.clientX / window.innerWidth  - 0.5) * 2);
-        my.set((e.clientY / window.innerHeight - 0.5) * 2);
-      }}
+      onMouseMove={() => { /* mouse hold / parallax effect disabled */ }}
       style={{
         minHeight: "100vh", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
@@ -163,7 +160,7 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
         background: "var(--bg-primary)",
       }}
     >
-      {/* Mandala backdrop — counter-parallax, very slow rotation */}
+      {/* Mandala backdrop — counter-parallax, very slow rotation — DISABLED
       <div aria-hidden style={{
         position: "absolute", inset: 0, display: "flex",
         alignItems: "center", justifyContent: "center",
@@ -176,6 +173,7 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
           />
         </motion.div>
       </div>
+      */}
 
       {/* Floating gold particles */}
       <HeroParticles ready={ready} />
@@ -186,7 +184,7 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
         background: `radial-gradient(ellipse 72% 58% at 50% 48%, color-mix(in srgb, ${GOLD} 7%, transparent) 0%, transparent 65%)`,
       }} />
 
-      {/* Film grain — cinematic texture */}
+      {/* Film grain — cinematic texture — DISABLED (light blink / flicker effect removed)
       <svg aria-hidden style={{
         position: "absolute", inset: 0, width: "100%", height: "100%",
         zIndex: 2, pointerEvents: "none", opacity: 0.042,
@@ -198,6 +196,7 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
         </filter>
         <rect width="200%" height="200%" x="-50%" y="-50%" filter="url(#hero-grain)" />
       </svg>
+      */}
 
       <motion.div style={{
         position: "relative", zIndex: 4, textAlign: "center",
@@ -312,13 +311,13 @@ const SECTION_MAP = [
   { id: "eco-home",    href: "/",        Component: null },
   { id: "eco-about",   href: "/about",   Component: AboutSection },
   { id: "eco-vision",  href: "/vision",  Component: VisionSection },
-  { id: "eco-work",    href: "/work",    Component: WorkSection },
+  { id: "eco-services", href: "/services", Component: ServicesSection },
   { id: "eco-blogs",   href: "/blogs",   Component: BlogsSection },
   { id: "eco-contact", href: "/contact", Component: ContactSection },
 ];
 
 // Hrefs always shown on the hub even when no identity nav_links are configured.
-const FALLBACK_NAV_HREFS = ["/", "/about", "/work", "/blogs", "/contact"];
+const FALLBACK_NAV_HREFS = ["/", "/about", "/services", "/blogs", "/contact"];
 
 export default function HubPage() {
   const router = useRouter();
@@ -331,7 +330,10 @@ export default function HubPage() {
       ? identity.nav_links.map(l => l.href)
       : FALLBACK_NAV_HREFS,
   );
-  const visibleSections = SECTION_MAP.filter(s => s.Component && navHrefs.has(s.href));
+  // Work merged into Services: a legacy "/work" nav entry still surfaces the Services section.
+  const visibleSections = SECTION_MAP.filter(
+    s => s.Component && (navHrefs.has(s.href) || (s.href === "/services" && navHrefs.has("/work"))),
+  );
   // null = not yet checked, false = showing wall, true = wall done/skipped
   const [wallDone, setWallDone]     = useState<boolean | null>(null);
   const [heroReady, setHeroReady]   = useState(false);

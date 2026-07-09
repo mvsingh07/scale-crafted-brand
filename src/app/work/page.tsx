@@ -1,12 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { HubPageLayout } from "@/components/hub/HubPageLayout";
-import { WorkSection } from "@/components/sections/WorkSection";
-
+// Work has merged into the unified Services page.
 export default function WorkPage() {
-  return (
-    <HubPageLayout>
-      <WorkSection />
-    </HubPageLayout>
-  );
+  redirect("/services");
 }

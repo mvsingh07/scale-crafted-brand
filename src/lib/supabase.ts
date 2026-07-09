@@ -227,6 +227,21 @@ export type EcosystemProject = {
   created_at: string;
 };
 
+// ── Services (Hub /services — "How I Can Help" cards) ──────────────────────────
+export type EcosystemService = {
+  id: string;
+  username: string;
+  title: string;
+  summary: string;
+  items: string[];
+  impact: string;
+  icon_name: string;
+  accent: string;
+  is_public: boolean;
+  ord: number;
+  created_at: string;
+};
+
 // ── Vision ────────────────────────────────────────────────────────────────────
 export type VisionaryProject = {
   id: string;
