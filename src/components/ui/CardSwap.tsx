@@ -90,6 +90,7 @@ export const CardSwap: React.FC<CardSwapProps> = ({
   const intervalRef = useRef<number>(0);
   const timeoutsRef = useRef<number[]>([]);
   const isPaused = useRef(false);
+  const inView = useRef(true);
   const container = useRef<HTMLDivElement>(null);
 
   const clearPending = useCallback(() => {
@@ -110,7 +111,7 @@ export const CardSwap: React.FC<CardSwapProps> = ({
     });
 
     const swap = () => {
-      if (isPaused.current || order.current.length < 2) return;
+      if (isPaused.current || !inView.current || order.current.length < 2) return;
 
       const [front, ...rest] = order.current;
       const elFront = refs[front].current;
@@ -167,20 +168,29 @@ export const CardSwap: React.FC<CardSwapProps> = ({
     intervalRef.current = window.setInterval(swap, delay);
 
     const node = container.current;
+
+    // Skip swap cycles (and their spring animations) while scrolled off-screen.
+    let io: IntersectionObserver | null = null;
+    if (node && "IntersectionObserver" in window) {
+      io = new IntersectionObserver(([entry]) => {
+        inView.current = entry.isIntersecting;
+      });
+      io.observe(node);
+    }
+
+    const pause = () => { isPaused.current = true; };
+    const resume = () => { isPaused.current = false; };
     if (pauseOnHover && node) {
-      const pause = () => { isPaused.current = true; };
-      const resume = () => { isPaused.current = false; };
       node.addEventListener("mouseenter", pause);
       node.addEventListener("mouseleave", resume);
-      return () => {
-        node.removeEventListener("mouseenter", pause);
-        node.removeEventListener("mouseleave", resume);
-        clearInterval(intervalRef.current);
-        clearPending();
-      };
     }
 
     return () => {
+      if (pauseOnHover && node) {
+        node.removeEventListener("mouseenter", pause);
+        node.removeEventListener("mouseleave", resume);
+      }
+      io?.disconnect();
       clearInterval(intervalRef.current);
       clearPending();
     };

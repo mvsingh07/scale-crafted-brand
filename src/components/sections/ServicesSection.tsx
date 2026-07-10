@@ -71,7 +71,7 @@ function Reveal({ children, delay = 0, style }: { children: React.ReactNode; del
 // ── 1 · Hero band ─────────────────────────────────────────────────────────────
 function HeroBand() {
   return (
-    <div style={{ position: "relative", maxWidth: 1100, margin: "0 auto", padding: "72px 32px 40px" }}>
+    <div style={{ position: "relative", maxWidth: 1100, margin: "0 auto", padding: "72px clamp(18px, 4vw, 32px) 40px" }}>
       <Reveal style={{ position: "relative", maxWidth: 760 }}>
         <Eyebrow>02 — What I Offer</Eyebrow>
         <h1 style={{ fontFamily: FONT_H, fontSize: "clamp(30px, 4.4vw, 52px)", fontWeight: 600, lineHeight: 1.12, margin: 0,
@@ -94,7 +94,7 @@ function HeroBand() {
           </a>
           <a href="/contact" onClick={goToContact} style={{
             display: "inline-flex", alignItems: "center", gap: 8,
-            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)",
+            background: "color-mix(in srgb, var(--text-primary) 5%, transparent)", border: "1px solid color-mix(in srgb, var(--text-primary) 14%, transparent)",
             borderRadius: 10, padding: "12px 22px", fontFamily: FONT_B, fontSize: 14,
             color: WHITE, textDecoration: "none",
           }}>
@@ -127,14 +127,14 @@ function ServiceCard({ service: s, index }: { service: EcosystemService; index: 
       variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } } }}
       whileHover={{ y: -4, borderColor: `color-mix(in srgb, ${s.accent} 45%, transparent)` }}
       style={{
-        border: "1px solid rgba(255,255,255,0.08)", borderRadius: 18,
+        border: "1px solid color-mix(in srgb, var(--text-primary) 10%, transparent)", borderRadius: 18,
         background: "color-mix(in srgb, var(--gold-primary) 2.5%, var(--bg-primary))",
         padding: "26px 24px", display: "flex", flexDirection: "column",
       }}
     >
       <div style={{
         display: "grid", placeItems: "center", width: 46, height: 46, borderRadius: 13,
-        border: "1px solid rgba(255,255,255,0.08)", background: `color-mix(in srgb, ${s.accent} 12%, transparent)`,
+        border: "1px solid color-mix(in srgb, var(--text-primary) 10%, transparent)", background: `color-mix(in srgb, ${s.accent} 12%, transparent)`,
         marginBottom: 18,
       }}>
         <Icon size={20} style={{ color: s.accent }} />
@@ -146,17 +146,17 @@ function ServiceCard({ service: s, index }: { service: EcosystemService; index: 
         {s.items.map(item => (
           <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
             <Check size={13} style={{ color: s.accent, flexShrink: 0, marginTop: 3 }} />
-            <span style={{ fontFamily: FONT_B, fontSize: 13, color: "rgba(255,255,255,0.72)", lineHeight: 1.5 }}>{item}</span>
+            <span style={{ fontFamily: FONT_B, fontSize: 13, color: "color-mix(in srgb, var(--text-primary) 78%, transparent)", lineHeight: 1.5 }}>{item}</span>
           </div>
         ))}
       </div>
 
       {s.impact && (
-        <div style={{ marginTop: "auto", paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ marginTop: "auto", paddingTop: 16, borderTop: "1px solid color-mix(in srgb, var(--text-primary) 8%, transparent)" }}>
           <p style={{ fontFamily: FONT_B, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: MUTED, margin: "0 0 6px" }}>
             Business Impact
           </p>
-          <p style={{ fontFamily: FONT_B, fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,0.6)", margin: 0 }}>{s.impact}</p>
+          <p style={{ fontFamily: FONT_B, fontSize: 13, lineHeight: 1.6, color: "color-mix(in srgb, var(--text-primary) 65%, transparent)", margin: 0 }}>{s.impact}</p>
         </div>
       )}
     </motion.div>
@@ -165,7 +165,7 @@ function ServiceCard({ service: s, index }: { service: EcosystemService; index: 
 
 function HowICanHelp({ services, loading }: { services: EcosystemService[]; loading: boolean }) {
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 32px" }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px clamp(18px, 4vw, 32px)" }}>
       <Reveal style={{ marginBottom: 44, maxWidth: 620 }}>
         <Eyebrow>How I Can Help</Eyebrow>
         <SectionHeading>Real solutions for real business problems.</SectionHeading>
@@ -188,7 +188,7 @@ function HowICanHelp({ services, loading }: { services: EcosystemService[]; load
         <motion.div
           initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}
           variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
-          style={{ display: "grid", gap: 18, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}
+          style={{ display: "grid", gap: 18, gridTemplateColumns: "repeat(auto-fill, minmax(min(300px, 100%), 1fr))" }}
         >
           {services.map((s, i) => <ServiceCard key={s.id} service={s} index={i} />)}
         </motion.div>
@@ -200,7 +200,7 @@ function HowICanHelp({ services, loading }: { services: EcosystemService[]; load
 // ── 3 · Featured Projects (existing ecosystem_projects) ───────────────────────
 function FeaturedProjects({ projects, loading }: { projects: EcosystemProject[]; loading: boolean }) {
   return (
-    <div id="services-work" style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 32px", scrollMarginTop: 80 }}>
+    <div id="services-work" style={{ maxWidth: 1100, margin: "0 auto", padding: "56px clamp(18px, 4vw, 32px)", scrollMarginTop: 80 }}>
       <Reveal style={{ marginBottom: 44, maxWidth: 620 }}>
         <Eyebrow>Featured Projects</Eyebrow>
         <SectionHeading>Recent work.</SectionHeading>
@@ -243,7 +243,7 @@ const PROCESS = [
 
 function HowIWork() {
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 32px" }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px clamp(18px, 4vw, 32px)" }}>
       <Reveal style={{ marginBottom: 44, maxWidth: 620 }}>
         <Eyebrow>How I Work</Eyebrow>
         <SectionHeading>A transparent, collaborative process.</SectionHeading>
@@ -251,13 +251,13 @@ function HowIWork() {
       <motion.div
         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}
         variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
-        style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))" }}
+        style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(min(240px, 100%), 1fr))" }}
       >
         {PROCESS.map((p, i) => (
           <motion.div
             key={p.step}
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } } }}
-            style={{ border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 20px 22px", background: "rgba(255,255,255,0.02)" }}
+            style={{ border: "1px solid color-mix(in srgb, var(--text-primary) 9%, transparent)", borderRadius: 14, padding: "20px 20px 22px", background: "color-mix(in srgb, var(--text-primary) 3%, transparent)" }}
           >
             <span style={{ fontFamily: FONT_H, fontSize: 13, color: GOLD, letterSpacing: "0.08em" }}>{String(i + 1).padStart(2, "0")}</span>
             <h3 style={{ fontFamily: FONT_H, fontSize: 19, fontWeight: 600, color: WHITE, margin: "8px 0 8px" }}>{p.step}</h3>
@@ -278,7 +278,7 @@ const ADVANTAGES = [
 
 function WhyMe() {
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 32px" }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px clamp(18px, 4vw, 32px)" }}>
       <Reveal style={{ marginBottom: 34, maxWidth: 640 }}>
         <Eyebrow>Why Work With Me</Eyebrow>
         <SectionHeading>Work directly with the person building your solution.</SectionHeading>
@@ -292,7 +292,7 @@ function WhyMe() {
             display: "inline-flex", alignItems: "center", gap: 8,
             border: `1px solid color-mix(in srgb, var(--gold-border) 30%, transparent)`,
             background: `color-mix(in srgb, ${GOLD} 5%, transparent)`, borderRadius: 100,
-            padding: "9px 16px", fontFamily: FONT_B, fontSize: 13, color: "rgba(255,255,255,0.8)",
+            padding: "9px 16px", fontFamily: FONT_B, fontSize: 13, color: "color-mix(in srgb, var(--text-primary) 82%, transparent)",
           }}>
             <Check size={13} style={{ color: GOLD }} />{a}
           </span>
@@ -314,24 +314,24 @@ const TECH_GROUPS: { group: string; items: { label: string; Icon: React.ElementT
 
 function TechStack() {
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 32px" }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px clamp(18px, 4vw, 32px)" }}>
       <Reveal style={{ marginBottom: 40, maxWidth: 620 }}>
         <Eyebrow>Technology Stack</Eyebrow>
         <SectionHeading>Modern, scalable, AI-ready tools.</SectionHeading>
       </Reveal>
-      <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))" }}>
+      <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(min(240px, 100%), 1fr))" }}>
         {TECH_GROUPS.map((g, gi) => (
           <Reveal key={g.group} delay={gi * 0.05} style={{
-            border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14,
-            padding: "18px 18px 20px", background: "rgba(255,255,255,0.02)",
+            border: "1px solid color-mix(in srgb, var(--text-primary) 9%, transparent)", borderRadius: 14,
+            padding: "18px 18px 20px", background: "color-mix(in srgb, var(--text-primary) 3%, transparent)",
           }}>
             <p style={{ fontFamily: FONT_B, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: GOLD, margin: "0 0 14px" }}>{g.group}</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {g.items.map(({ label, Icon }) => (
                 <span key={label} style={{
                   display: "inline-flex", alignItems: "center", gap: 7,
-                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: 9, padding: "7px 11px", fontFamily: FONT_B, fontSize: 12.5, color: "rgba(255,255,255,0.72)",
+                  background: "color-mix(in srgb, var(--text-primary) 5%, transparent)", border: "1px solid color-mix(in srgb, var(--text-primary) 10%, transparent)",
+                  borderRadius: 9, padding: "7px 11px", fontFamily: FONT_B, fontSize: 12.5, color: "color-mix(in srgb, var(--text-primary) 78%, transparent)",
                 }}>
                   <Icon size={13} style={{ color: SILVER }} />{label}
                 </span>
@@ -363,7 +363,7 @@ const FAQS = [
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, background: "rgba(255,255,255,0.02)", overflow: "hidden" }}>
+    <div style={{ border: "1px solid color-mix(in srgb, var(--text-primary) 9%, transparent)", borderRadius: 12, background: "color-mix(in srgb, var(--text-primary) 3%, transparent)", overflow: "hidden" }}>
       <button onClick={() => setOpen(o => !o)} style={{
         width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
         padding: "16px 18px", background: "none", border: "none", cursor: "pointer", textAlign: "left",
@@ -389,7 +389,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 function Faq() {
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto", padding: "56px 32px" }}>
+    <div style={{ maxWidth: 820, margin: "0 auto", padding: "56px clamp(18px, 4vw, 32px)" }}>
       <Reveal style={{ marginBottom: 34 }}>
         <Eyebrow>FAQ</Eyebrow>
         <SectionHeading>Questions, answered.</SectionHeading>
@@ -404,7 +404,7 @@ function Faq() {
 // ── 8 · Final CTA (static) ────────────────────────────────────────────────────
 function FinalCta() {
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 32px 88px" }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px clamp(18px, 4vw, 32px) 88px" }}>
       <Reveal style={{
         position: "relative", overflow: "hidden", borderRadius: 22,
         border: `1px solid color-mix(in srgb, var(--gold-border) 30%, transparent)`,
@@ -433,7 +433,7 @@ function FinalCta() {
             </a>
             <a href="/contact" onClick={goToContact} style={{
               display: "inline-flex", alignItems: "center", gap: 8,
-              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)",
+              background: "color-mix(in srgb, var(--text-primary) 5%, transparent)", border: "1px solid color-mix(in srgb, var(--text-primary) 14%, transparent)",
               borderRadius: 10, padding: "13px 26px", fontFamily: FONT_B, fontSize: 14,
               color: WHITE, textDecoration: "none",
             }}>
@@ -448,7 +448,7 @@ function FinalCta() {
 
 // ── Divider between sub-sections ──────────────────────────────────────────────
 function Divider() {
-  return <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
+  return <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 clamp(18px, 4vw, 32px)" }}>
     <div style={{ height: 1, background: "color-mix(in srgb, var(--gold-border) 12%, transparent)" }} />
   </div>;
 }

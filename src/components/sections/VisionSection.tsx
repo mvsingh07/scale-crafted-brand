@@ -81,7 +81,7 @@ export function VisionSection() {
         <DivineAura />
       </div>
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "0 32px 72px" }}>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "0 clamp(18px, 4vw, 32px) 72px" }}>
         {/* ---- Mandala crest (lightened; text rises into its lower-middle) ---- */}
         <motion.div
           aria-hidden
@@ -209,6 +209,7 @@ function VisionCard({ project: p, reduce, index }: { project: ProjectWithModules
         style={{
           position: "relative",
           display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+          flexWrap: "wrap",
           gap: 16, cursor: p.description ? "pointer" : "default",
           paddingBottom: 24,
           borderBottom: "1px solid color-mix(in srgb, var(--gold-border) 22%, transparent)",
@@ -300,10 +301,11 @@ function ModuleRow({ module: m, index: i, total, reduce }: { module: ModuleWithD
       {/* Diya node */}
       <div style={{ position: "relative", width: 17, height: 17, flexShrink: 0, marginTop: 3, zIndex: 1 }}>
         {!reduce && (
-          <motion.div
-            animate={{ opacity: [0.35, 0.85, 0.35], scale: [1, 1.7, 1] }}
-            transition={{ duration: isLast ? 2.2 : 3.2, ease: "easeInOut", repeat: Infinity, delay: i * 0.3 }}
-            style={{ position: "absolute", inset: 0, borderRadius: "50%", background: GOLD, filter: "blur(5px)" }}
+          <div
+            style={{
+              position: "absolute", inset: 0, borderRadius: "50%", background: GOLD, filter: "blur(5px)",
+              animation: `diya-pulse ${isLast ? 2.2 : 3.2}s ease-in-out ${i * 0.3}s infinite`,
+            }}
           />
         )}
         <div style={{ position: "relative", width: 15, height: 15, margin: "1px", borderRadius: "50%", border: `2px solid ${GOLD}`, background: isLast ? GOLD : "var(--bg-primary)", boxShadow: isLast ? `0 0 12px ${GOLD}` : `0 0 6px color-mix(in srgb, ${GOLD} 50%, transparent)` }} />

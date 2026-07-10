@@ -69,7 +69,7 @@ export function ContactSection() {
   };
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 32px 80px" }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "64px clamp(18px, 4vw, 32px) 80px" }}>
       <motion.div
         initial={{ opacity: 0, y: 32 }}
         whileInView={{ opacity: 1, y: 0 }}

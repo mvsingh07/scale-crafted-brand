@@ -47,6 +47,22 @@ export function DivineAura() {
 
     let motes: Mote[] = [];
 
+    // Pre-rendered glow sprite — drawing gradients per mote per frame is what
+    // makes this loop expensive, so build the gradient once and drawImage it.
+    const SPRITE = 64;
+    const sprite = document.createElement("canvas");
+    sprite.width = SPRITE;
+    sprite.height = SPRITE;
+    const sctx = sprite.getContext("2d");
+    if (sctx) {
+      const g = sctx.createRadialGradient(SPRITE / 2, SPRITE / 2, 0, SPRITE / 2, SPRITE / 2, SPRITE / 2);
+      g.addColorStop(0, "rgba(232,205,140,1)");
+      g.addColorStop(0.4, "rgba(201,165,90,0.45)");
+      g.addColorStop(1, "rgba(201,165,90,0)");
+      sctx.fillStyle = g;
+      sctx.fillRect(0, 0, SPRITE, SPRITE);
+    }
+
     const init = () => {
       const rect = canvas.getBoundingClientRect();
       w = rect.width;
@@ -71,19 +87,15 @@ export function DivineAura() {
         const tw = Math.sin(t * p.tw + p.ph) * 0.5 + 0.5;
         const alpha = p.a * (0.35 + tw * 0.65);
         const rad = p.r * 4.2;
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
-        g.addColorStop(0, `rgba(232,205,140,${alpha})`);
-        g.addColorStop(0.4, `rgba(201,165,90,${alpha * 0.45})`);
-        g.addColorStop(1, "rgba(201,165,90,0)");
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, rad, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(sprite, p.x - rad, p.y - rad, rad * 2, rad * 2);
       }
+      ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = "source-over";
     };
 
     let frame = 0;
+    let visible = true;
     let last = performance.now();
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
@@ -94,17 +106,32 @@ export function DivineAura() {
         if (p.y < -14 || p.x < -20 || p.x > w + 20) Object.assign(p, spawn(false));
       }
       draw(dt);
-      frame = requestAnimationFrame(loop);
+      if (visible) frame = requestAnimationFrame(loop);
     };
 
     const ro = new ResizeObserver(init);
     ro.observe(canvas);
     init();
+
+    // Pause the loop while the section is scrolled out of view.
+    const io = new IntersectionObserver(([entry]) => {
+      const wasVisible = visible;
+      visible = entry.isIntersecting;
+      if (reduce) return;
+      if (visible && !wasVisible) {
+        last = performance.now();
+        frame = requestAnimationFrame(loop);
+      }
+      if (!visible) cancelAnimationFrame(frame);
+    });
+    io.observe(canvas);
+
     if (!reduce) frame = requestAnimationFrame(loop);
 
     return () => {
       cancelAnimationFrame(frame);
       ro.disconnect();
+      io.disconnect();
     };
   }, []);
 

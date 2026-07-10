@@ -154,9 +154,9 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
       id="eco-home"
       onMouseMove={() => { /* mouse hold / parallax effect disabled */ }}
       style={{
-        minHeight: "100vh", display: "flex", flexDirection: "column",
+        minHeight: "100svh", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
-        padding: "80px 32px", position: "relative", overflow: "hidden",
+        padding: "80px clamp(18px, 4vw, 32px)", position: "relative", overflow: "hidden",
         background: "var(--bg-primary)",
       }}
     >
@@ -207,7 +207,7 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
         {/* ① Display Name — gradient text, typed character by character */}
         <h1 style={{
           fontFamily: "var(--font-cinzel), Cinzel, system-ui, serif",
-          fontSize: "clamp(52px, 9vw, 100px)",
+          fontSize: "clamp(40px, 9.5vw, 100px)",
           fontWeight: 600, lineHeight: 1.08, margin: 0,
           background: `linear-gradient(135deg, ${WHITE} 55%, ${GOLD_L} 100%)`,
           WebkitBackgroundClip: "text",

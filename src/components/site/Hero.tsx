@@ -110,7 +110,7 @@ export const Hero = ({ profile }: HeroProps = {}) => {
       id="top"
       style={{
         position: "relative",
-        minHeight: "100vh",
+        minHeight: "100svh",
         display: "flex",
         alignItems: "center",
         overflow: "hidden",

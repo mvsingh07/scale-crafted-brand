@@ -16,6 +16,12 @@ export interface PrismaticBurstProps {
   hoverDampness?: number;
   rayCount?: number;
   mixBlendMode?: CSSProperties["mixBlendMode"] | "none";
+  /**
+   * Multiplies the internal render resolution (0–1]. The raymarch cost scales
+   * with pixel count, and the output is a soft glow, so 0.5–0.75 is visually
+   * indistinguishable once upscaled but 2–4× cheaper per frame.
+   */
+  resolutionScale?: number;
   className?: string;
 }
 
@@ -217,6 +223,7 @@ export function PrismaticBurst({
   hoverDampness = 0.25,
   rayCount = 24,
   mixBlendMode = "lighten",
+  resolutionScale = 1,
   className = "",
 }: PrismaticBurstProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -242,8 +249,9 @@ export function PrismaticBurst({
     const container = containerRef.current;
     if (!container) return;
 
+    const scale = Math.min(Math.max(resolutionScale, 0.25), 1);
     const renderer = new Renderer({
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      dpr: Math.min(window.devicePixelRatio || 1, 2) * scale,
       alpha: false,
       antialias: false,
     });
@@ -394,7 +402,7 @@ export function PrismaticBurst({
       rendererRef.current = null;
       gradTexRef.current = null;
     };
-  }, []);
+  }, [resolutionScale]);
 
   useEffect(() => {
     const canvas = rendererRef.current?.gl?.canvas as HTMLCanvasElement | undefined;

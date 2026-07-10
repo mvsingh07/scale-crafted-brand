@@ -3,6 +3,24 @@ import { motion } from "motion/react";
 import { SectionHeader } from "./SectionHeader";
 import type { Project } from "@/lib/supabase";
 
+// Tracks whether an element is on screen so the mock widgets can stop their
+// intervals (and the re-renders they cause) while scrolled away.
+function useInViewport<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !("IntersectionObserver" in window)) {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return { ref, inView };
+}
+
 // ── Live Auction Mock ─────────────────────────────────────────────────────────
 const BID_POOL = [
   { u: "apex_bid",     b: "$52,500" },
@@ -21,8 +39,10 @@ const AuctionMock = () => {
   ]);
   const [watchers, setWatchers] = useState(12_438);
   const idx = useRef(0);
+  const { ref, inView } = useInViewport<HTMLDivElement>();
 
   useEffect(() => {
+    if (!inView) return;
     const id = setInterval(() => {
       const next = BID_POOL[idx.current % BID_POOL.length];
       idx.current++;
@@ -34,10 +54,10 @@ const AuctionMock = () => {
       setWatchers(w => w + Math.floor(Math.random() * 12 + 3));
     }, 2500);
     return () => clearInterval(id);
-  }, []);
+  }, [inView]);
 
   return (
-    <div className="space-y-3">
+    <div ref={ref} className="space-y-3">
       <div className="flex items-center justify-between">
         <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Lot #2418 · Live
@@ -73,8 +93,10 @@ const CHUNKS = ["chunk_001", "chunk_002", "chunk_003", "chunk_004"];
 const FileProcessingMock = () => {
   const [progress, setProgress] = useState([100, 85, 52, 18]);
   const filling = useRef(true);
+  const { ref, inView } = useInViewport<HTMLDivElement>();
 
   useEffect(() => {
+    if (!inView) return;
     const id = setInterval(() => {
       if (!filling.current) return;
       setProgress(prev => {
@@ -92,10 +114,10 @@ const FileProcessingMock = () => {
       });
     }, 130);
     return () => clearInterval(id);
-  }, []);
+  }, [inView]);
 
   return (
-    <div className="space-y-4">
+    <div ref={ref} className="space-y-4">
       <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
         Uploading · medical-scan-batch.zip
       </div>
@@ -130,7 +152,7 @@ const BARS = [3, 7, 4, 9, 6, 8, 5, 7, 4, 6];
 const AIHealthMock = () => {
   const [displayed, setDisplayed] = useState("");
   const [typing, setTyping] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { ref: containerRef, inView } = useInViewport<HTMLDivElement>();
   const charRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const loopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -153,23 +175,18 @@ const AIHealthMock = () => {
     }, 28);
   }, []);
 
+  // Type while visible; halt the 28ms interval (and its restart loop) off-screen.
   useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          obs.disconnect();
-          startTyping();
-        }
-      },
-      { threshold: 0.4 }
-    );
-    if (containerRef.current) obs.observe(containerRef.current);
+    if (inView) {
+      startTyping();
+    } else {
+      setTyping(false);
+    }
     return () => {
-      obs.disconnect();
       if (timerRef.current) clearInterval(timerRef.current);
       if (loopRef.current) clearTimeout(loopRef.current);
     };
-  }, [startTyping]);
+  }, [inView, startTyping]);
 
   return (
     <div ref={containerRef} className="space-y-3">

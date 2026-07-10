@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Boxes, Cpu, Gauge, Radio, Sparkles, Layers, Wand2,
   Code, Database, Globe, Shield, Zap, Star, type LucideIcon,
@@ -44,8 +45,27 @@ interface ServicesProps {
   services?: Service[];
 }
 
+// CardSwap needs numeric dimensions (it centers cards via negative margins),
+// so the stack is sized from the viewport instead of CSS. Cards narrower than
+// 380px get extra height because the text wraps onto more lines.
+function useCardStackSize() {
+  const [box, setBox] = useState({ w: 420, h: 360 });
+  useEffect(() => {
+    const update = () => {
+      const w = Math.min(420, window.innerWidth - 96);
+      setBox({ w, h: w < 380 ? 400 : 360 });
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return box;
+}
+
 export const Services = ({ services }: ServicesProps = {}) => {
   const items = services && services.length > 0 ? services : DEFAULT_SERVICES;
+  const box = useCardStackSize();
+  const fan = box.w / 420;
 
   return (
     <section id="services" className="relative py-24 md:py-32">
@@ -101,12 +121,12 @@ export const Services = ({ services }: ServicesProps = {}) => {
             viewport={{ once: true, margin: "-8%" }}
             transition={{ duration: 0.7, ease: "easeInOut" }}
           >
-            <div className="relative" style={{ width: 420, height: 360 }}>
+            <div className="relative" style={{ width: box.w, height: box.h }}>
               <CardSwap
-                width={420}
-                height={360}
-                cardDistance={28}
-                verticalDistance={36}
+                width={box.w}
+                height={box.h}
+                cardDistance={Math.round(28 * fan)}
+                verticalDistance={Math.round(36 * fan)}
                 delay={3800}
                 pauseOnHover
                 skewAmount={4}
@@ -115,7 +135,7 @@ export const Services = ({ services }: ServicesProps = {}) => {
                 {items.map((s) => {
                   const Icon = ICON_MAP[s.icon_name] ?? Layers;
                   return (
-                    <Card key={s.id} className="p-7 flex flex-col justify-between overflow-hidden">
+                    <Card key={s.id} className="p-5 sm:p-7 flex flex-col justify-between overflow-hidden">
                       <div className={`pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br ${s.accent} opacity-[0.05]`} />
                       <div>
                         <div className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${s.accent} shadow-glow`}>

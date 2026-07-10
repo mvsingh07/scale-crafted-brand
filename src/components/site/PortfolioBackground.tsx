@@ -19,6 +19,11 @@ function useThemeMode() {
 export const PortfolioBackground = () => {
   const [reduceMotion, setReduceMotion] = useState(false);
   const mode = useThemeMode();
+  // Loaded with ssr:false, so window is available on first render. The shader
+  // cost scales with pixel count — phones get half resolution, desktop 0.75.
+  const [resolutionScale] = useState(() =>
+    window.matchMedia("(pointer: coarse), (max-width: 768px)").matches ? 0.5 : 0.75
+  );
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -40,6 +45,7 @@ export const PortfolioBackground = () => {
         paused={reduceMotion}
         offset={{ x: 0, y: "-8px" }}
         rayCount={26}
+        resolutionScale={resolutionScale}
         mixBlendMode={isLight ? "multiply" : "lighten"}
         colors={isLight
           ? ["#B8860B", "#9C7A35", "#6B7280", "#8B6914"]

@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
+import { useRef } from "react";
+import { useInView } from "motion/react";
 import type { CSSProperties } from "react";
 
 const PETAL = "M100,100 C92,72 92,50 100,36 C108,50 108,72 100,100 Z";
@@ -23,18 +24,28 @@ type MandalaProps = {
 /**
  * Mandala — a counter-rotating lotus / Sri-Yantra seal (petal rings, shatkona, bindu).
  * Used as a large ambient halo behind the header and as a small seal on each shrine card.
+ *
+ * Rotation runs as CSS animations (not JS-driven frames) and is paused whenever the
+ * mandala is out of the viewport, so idle mandalas cost nothing.
  */
 export function Mandala({ size = 420, className, style, speed = 1, reduce = false, innerPetals = true }: MandalaProps) {
-  const spin = (duration: number, dir: 1 | -1) =>
+  const ref = useRef<SVGSVGElement>(null);
+  const inView = useInView(ref);
+  const running = !reduce && inView;
+
+  const spin = (duration: number, dir: 1 | -1): CSSProperties =>
     reduce
       ? {}
       : {
-          animate: { rotate: 360 * dir },
-          transition: { duration: duration / speed, ease: "linear" as const, repeat: Infinity },
+          transformOrigin: "100px 100px",
+          transformBox: "view-box",
+          animation: `mandala-spin ${duration / speed}s linear infinite ${dir === -1 ? "reverse" : "normal"}`,
+          animationPlayState: running ? "running" : "paused",
         };
 
   return (
     <svg
+      ref={ref}
       viewBox="0 0 200 200"
       width={size}
       height={size}
@@ -56,7 +67,7 @@ export function Mandala({ size = 420, className, style, speed = 1, reduce = fals
       </defs>
 
       {/* Outer tick ring */}
-      <motion.g style={{ transformOrigin: "100px 100px" }} {...spin(160, 1)}>
+      <g style={spin(160, 1)}>
         {ring(48, (i, a) => (
           <line
             key={i}
@@ -72,10 +83,10 @@ export function Mandala({ size = 420, className, style, speed = 1, reduce = fals
           />
         ))}
         <circle cx="100" cy="100" r="84" stroke="url(#mandala-gold)" strokeWidth="0.5" opacity="0.4" />
-      </motion.g>
+      </g>
 
       {/* Large lotus petals */}
-      <motion.g style={{ transformOrigin: "100px 100px" }} {...spin(120, -1)}>
+      <g style={spin(120, -1)}>
         {ring(12, (i, a) => (
           <path
             key={i}
@@ -87,11 +98,11 @@ export function Mandala({ size = 420, className, style, speed = 1, reduce = fals
           />
         ))}
         <circle cx="100" cy="100" r="62" stroke="url(#mandala-gold)" strokeWidth="0.5" opacity="0.35" />
-      </motion.g>
+      </g>
 
       {/* Inner petals — hidden for hero backdrop via innerPetals=false */}
       {innerPetals && (
-        <motion.g style={{ transformOrigin: "100px 100px" }} {...spin(90, 1)}>
+        <g style={spin(90, 1)}>
           {ring(8, (i, a) => (
             <path
               key={i}
@@ -102,30 +113,33 @@ export function Mandala({ size = 420, className, style, speed = 1, reduce = fals
               opacity={0.8}
             />
           ))}
-        </motion.g>
+        </g>
       )}
 
       {/* Shatkona — interlocked triangles of divine union */}
-      <motion.g style={{ transformOrigin: "100px 100px" }} {...spin(70, -1)}>
+      <g style={spin(70, -1)}>
         <polygon points="100,78 119,111 81,111" stroke="url(#mandala-gold)" strokeWidth="0.9" opacity="0.85" />
         <polygon points="100,122 119,89 81,89" stroke="url(#mandala-gold)" strokeWidth="0.9" opacity="0.85" />
         <circle cx="100" cy="100" r="34" stroke="url(#mandala-gold)" strokeWidth="0.5" opacity="0.45" />
-      </motion.g>
+      </g>
 
       {/* Bindu — the still center */}
       <circle cx="100" cy="100" r="14" fill="url(#mandala-core)" />
-      <motion.circle
+      <circle
         cx="100"
         cy="100"
         r="3.4"
         fill="var(--gold-highlight)"
-        {...(reduce
-          ? {}
-          : {
-              animate: { opacity: [0.55, 1, 0.55], scale: [1, 1.25, 1] },
-              transition: { duration: 3.4, ease: "easeInOut", repeat: Infinity },
-            })}
-        style={{ transformOrigin: "100px 100px" }}
+        style={
+          reduce
+            ? { transformOrigin: "100px 100px", transformBox: "view-box" }
+            : {
+                transformOrigin: "100px 100px",
+                transformBox: "view-box",
+                animation: "bindu-pulse 3.4s ease-in-out infinite",
+                animationPlayState: running ? "running" : "paused",
+              }
+        }
       />
     </svg>
   );

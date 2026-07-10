@@ -74,6 +74,16 @@ function useLiveTime() {
   return time;
 }
 
+// Isolated so the per-second tick re-renders only this span, not the whole navbar.
+function LiveClock({ style }: { style: React.CSSProperties }) {
+  const time = useLiveTime();
+  return (
+    <span suppressHydrationWarning style={style}>
+      🇮🇳&nbsp;Panjab&nbsp;·&nbsp;{time}
+    </span>
+  );
+}
+
 function useDayDate() {
   const [label, setLabel] = useState("");
   useEffect(() => {
@@ -234,7 +244,6 @@ export const Navbar = ({
   const [scrolled, setScrolled] = useState(false);
   const { identity } = useIdentity();
   const logoSrc = useLogoSrc("/dark_mode_logo.png", "/dark_mode_logo.png");
-  const time = useLiveTime();
   const dayDate = useDayDate();
   const displayName = identity?.display_name ?? ownerName ?? "MV Singh";
   const showLang = lang !== undefined && onLangChange !== undefined;
@@ -265,7 +274,7 @@ export const Navbar = ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: scrolled ? "10px 32px" : "14px 32px",
+    padding: scrolled ? "10px clamp(16px, 4vw, 32px)" : "14px clamp(16px, 4vw, 32px)",
     background: "var(--bg-nav)",
     backdropFilter: "blur(16px)",
     WebkitBackdropFilter: "blur(16px)",
@@ -359,9 +368,7 @@ export const Navbar = ({
 
         {/* Right: Time+Location | Language (landing only) | Theme */}
         <div className="hidden md:flex" style={{ alignItems: "center", gap: 12 }}>
-          <span suppressHydrationWarning style={mutedStyle}>
-            🇮🇳&nbsp;Panjab&nbsp;·&nbsp;{time}
-          </span>
+          <LiveClock style={mutedStyle} />
 
           {showLang && <LangDropdown lang={lang} onLangChange={onLangChange} />}
 
@@ -484,9 +491,7 @@ export const Navbar = ({
             <div style={{ borderTop: "1px solid color-mix(in srgb, var(--gold-border) 20%, transparent)", paddingTop: 20, display: "flex", flexDirection: "column", gap: 14 }}>
               {showLang && <LangDropdown lang={lang} onLangChange={onLangChange} mobile />}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span suppressHydrationWarning style={mutedStyle}>
-                  🇮🇳&nbsp;Panjab&nbsp;·&nbsp;{time}
-                </span>
+                <LiveClock style={mutedStyle} />
                 <ThemeToggle />
               </div>
             </div>

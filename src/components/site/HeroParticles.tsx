@@ -43,8 +43,9 @@ export function HeroParticles({ ready }: { ready: boolean }) {
       mkp(canvas.width, canvas.height),
     );
 
-    let raf: number;
+    let raf = 0;
     let alpha = 0;
+    let visible = true;
 
     const draw = () => {
       alpha = Math.min(1, alpha + 0.006);
@@ -71,11 +72,20 @@ export function HeroParticles({ ready }: { ready: boolean }) {
         }
       }
 
-      raf = requestAnimationFrame(draw);
+      if (visible) raf = requestAnimationFrame(draw);
     };
 
+    // Pause the loop while the hero is scrolled out of view.
+    const io = new IntersectionObserver(([entry]) => {
+      const wasVisible = visible;
+      visible = entry.isIntersecting;
+      if (visible && !wasVisible) raf = requestAnimationFrame(draw);
+      if (!visible) cancelAnimationFrame(raf);
+    });
+    io.observe(canvas);
+
     draw();
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); };
   }, [ready]);
 
   return (
