@@ -10,7 +10,7 @@ function useLogoSrc() {
   useEffect(() => {
     const update = () =>
       setSrc(document.documentElement.getAttribute("data-theme") === "light"
-        ? "/light_mode_logo.png"
+        ? "/dark_mode_logo.png"
         : "/dark_mode_logo.png");
     update();
     const obs = new MutationObserver(update);

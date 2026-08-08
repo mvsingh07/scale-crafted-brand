@@ -404,8 +404,8 @@ export default function IdentityEditor() {
 
           <SectionLabel icon={Layout} label="Logos" />
           <Field label="Logo — Dark Mode URL" value={data.logo_dark_url ?? ""} onChange={setStr("logo_dark_url")} placeholder="/dark_mode_logo.png" />
-          <Field label="Logo — Light Mode URL" value={data.logo_light_url ?? ""} onChange={setStr("logo_light_url")} placeholder="/light_mode_logo.png" />
-          <Field label="Favicon URL" value={data.favicon_url ?? ""} onChange={setStr("favicon_url")} placeholder="/light_mode_logo.png" />
+          <Field label="Logo — Light Mode URL" value={data.logo_light_url ?? ""} onChange={setStr("logo_light_url")} placeholder="/dark_mode_logo.png" />
+          <Field label="Favicon URL" value={data.favicon_url ?? ""} onChange={setStr("favicon_url")} placeholder="/dark_mode_logo.png" />
 
           <SectionLabel icon={Phone} label="Contact Info (Identity)" />
           <p style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 10, lineHeight: 1.5 }}>

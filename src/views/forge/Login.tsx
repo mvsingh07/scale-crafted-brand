@@ -113,22 +113,6 @@ const ForgeLogin = () => {
           onSubmit={onSubmit}
           className="w-full max-w-sm space-y-4 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur"
         >
-          {/* Mode toggle */}
-          <div className="mb-6 flex rounded-xl border border-white/[0.08] bg-white/[0.04] p-1">
-            {(["signin", "signup"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => switchMode(m)}
-                className={`flex-1 rounded-lg py-1.5 font-mono text-[10px] uppercase tracking-widest transition-all duration-200 ${
-                  mode === m ? "bg-white text-black shadow-sm" : "text-white/30 hover:text-white/60"
-                }`}
-              >
-                {m === "signin" ? "Sign in" : "Sign up"}
-              </button>
-            ))}
-          </div>
-
           <div>
             <h1 className="text-lg font-semibold text-white">
               {mode === "signin" ? "Welcome back." : "Create your account."}
@@ -216,16 +200,18 @@ const ForgeLogin = () => {
               : mode === "signin" ? "Sign in" : "Create account"}
           </button>
 
-          <p className="text-center font-mono text-[10px] text-white/20">
-            {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
-            <button
-              type="button"
-              onClick={() => switchMode(mode === "signin" ? "signup" : "signin")}
-              className="text-white/40 underline underline-offset-2 hover:text-white transition-colors"
-            >
-              {mode === "signin" ? "Sign up" : "Sign in"}
-            </button>
-          </p>
+          {mode === "signup" && (
+            <p className="text-center font-mono text-[10px] text-white/20">
+              Already have an account?{" "}
+              <button
+                type="button"
+                onClick={() => switchMode("signin")}
+                className="text-white/40 underline underline-offset-2 hover:text-white transition-colors"
+              >
+                Sign in
+              </button>
+            </p>
+          )}
         </form>
       )}
     </div>

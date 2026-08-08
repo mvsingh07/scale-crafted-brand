@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/site/Navbar";
@@ -91,8 +91,8 @@ function WallScreen({ onDone }: { onDone: () => void }) {
 }
 
 // ── TypeWriter — character-by-character reveal ───────────────────────────────
-function TypeWriter({ text, delay = 0, charDelay = 0.05 }: {
-  text: string; delay?: number; charDelay?: number;
+function TypeWriter({ text, delay = 0, charDelay = 0.05, onComplete }: {
+  text: string; delay?: number; charDelay?: number; onComplete?: () => void;
 }) {
   return (
     <motion.span
@@ -100,6 +100,7 @@ function TypeWriter({ text, delay = 0, charDelay = 0.05 }: {
       initial="hidden"
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: charDelay, delayChildren: delay } } }}
+      onAnimationComplete={() => onComplete?.()}
     >
       {text.split("").map((char, i) => (
         <motion.span
@@ -116,11 +117,26 @@ function TypeWriter({ text, delay = 0, charDelay = 0.05 }: {
   );
 }
 
+// Hero always renders on its dark cinematic palette, independent of the site-wide
+// light/dark toggle — the background video and gold typography need a black stage.
+const HERO_BG      = "#0A0A0A";
+const HERO_GOLD    = "#C9A55A";
+const HERO_GOLD_L  = "#E0C27A";
+const HERO_WHITE   = "#F8FAFC";
+const HERO_MUTED   = "#D1D5DB";
+const HERO_SILVER  = "#C7CDD6";
+
 // ── Hero section — Display Name · Three Motion Texts · Tagline · Scroll ───────
 function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
   const { identity } = useIdentity();
   const [titleIdx, setTitleIdx] = useState(1);
-  const titleFirstShown = useRef(false);
+
+  // Sequential reveal gates — top to bottom: name → cycling title → tagline.
+  // Each line only starts animating once the line above it has finished,
+  // instead of relying on hand-tuned absolute delays that fall out of sync
+  // once display_name/tagline length varies.
+  const [nameDone, setNameDone]   = useState(false);
+  const [titleDone, setTitleDone] = useState(false);
 
   const slides = identity?.hub_text_states?.length
     ? identity.hub_text_states.slice(0, 3)
@@ -132,11 +148,13 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
 
   useEffect(() => { setTitleIdx(1); }, [lang]);
 
+  useEffect(() => { setNameDone(false); setTitleDone(false); }, [ready, displayName]);
+
   useEffect(() => {
-    if (!ready) return;
+    if (!nameDone) return;
     const id = setInterval(() => setTitleIdx(i => (i + 1) % titles.length), 2600);
     return () => clearInterval(id);
-  }, [ready, titles.length]);
+  }, [nameDone, titles.length]);
 
   // ── Mouse parallax ────────────────────────────────────────────────────────
   const reduce = useReducedMotion() ?? false;
@@ -155,9 +173,9 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
       onMouseMove={() => { /* mouse hold / parallax effect disabled */ }}
       style={{
         minHeight: "100svh", display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        padding: "80px clamp(18px, 4vw, 32px)", position: "relative", overflow: "hidden",
-        background: "var(--bg-primary)",
+        alignItems: "flex-start", justifyContent: "center",
+        padding: "80px clamp(18px, 4vw, 32px) 80px clamp(24px, 7vw, 96px)", position: "relative", overflow: "hidden",
+        background: HERO_BG,
       }}
     >
       {/* Mandala backdrop — counter-parallax, very slow rotation — DISABLED
@@ -175,14 +193,30 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
       </div>
       */}
 
-      {/* Floating gold particles */}
-      <HeroParticles ready={ready} />
+      {/* Background illustration — looping video, sits behind the copy.
+          Mobile fills the frame (cover) to avoid huge letterbox bars on tall
+          screens; sm+ shows the full frame uncropped (contain). */}
+      <video
+        aria-hidden
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        className="object-cover sm:object-contain"
+        style={{
+          position: "absolute", inset: 0, zIndex: 0,
+          width: "100%", height: "100%",
+          opacity: 0.35,
+        }}
+      >
+        <source src="/video/black-animation.mp4" type="video/mp4" />
+      </video>
 
-      {/* Ambient glow */}
-      <div aria-hidden style={{
-        position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-        background: `radial-gradient(ellipse 72% 58% at 50% 48%, color-mix(in srgb, ${GOLD} 7%, transparent) 0%, transparent 65%)`,
-      }} />
+      {/* Floating gold particles — above the video */}
+      <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 2 }}>
+        <HeroParticles ready={ready} />
+      </div>
 
       {/* Film grain — cinematic texture — DISABLED (light blink / flicker effect removed)
       <svg aria-hidden style={{
@@ -199,65 +233,64 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
       */}
 
       <motion.div style={{
-        position: "relative", zIndex: 4, textAlign: "center",
-        width: "100%", maxWidth: 860,
-        display: "flex", flexDirection: "column", alignItems: "center",
+        position: "relative", zIndex: 4, textAlign: "left",
+        width: "100%", maxWidth: 640,
+        display: "flex", flexDirection: "column", alignItems: "flex-start",
         x: textX, y: textY,
       }}>
-        {/* ① Display Name — gradient text, typed character by character */}
+        {/* ① Display Name — typed character by character, top line, first to appear */}
         <h1 style={{
           fontFamily: "var(--font-cinzel), Cinzel, system-ui, serif",
           fontSize: "clamp(40px, 9.5vw, 100px)",
           fontWeight: 600, lineHeight: 1.08, margin: 0,
-          background: `linear-gradient(135deg, ${WHITE} 55%, ${GOLD_L} 100%)`,
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
+          color: HERO_WHITE,
         }}>
-          {ready && <TypeWriter text={displayName} delay={0.5} charDelay={0.08} />}
+          {ready && <TypeWriter text={displayName} delay={0.5} charDelay={0.08} onComplete={() => setNameDone(true)} />}
         </h1>
 
-        {/* ② Three Motion Texts — cycling hero slider titles */}
-        <div style={{ height: 52, marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={`${lang}-${titleIdx}`}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -14 }}
-              transition={{ duration: 0.45, delay: titleFirstShown.current ? 0 : 0.5, ease: EASE }}
-              onAnimationStart={() => { titleFirstShown.current = true; }}
-              style={{
-                fontFamily: "var(--font-cinzel), Cinzel, serif",
-                fontSize: "clamp(18px, 2.8vw, 32px)",
-                fontWeight: 400, color: GOLD, letterSpacing: "0.04em",
-              }}
-            >
-              {titles[titleIdx]}
-            </motion.span>
-          </AnimatePresence>
+        {/* ② Three Motion Texts — cycling hero slider titles, starts only once the name has finished typing */}
+        <div style={{ height: 52, marginTop: 20, display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
+          {nameDone && (
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={`${lang}-${titleIdx}`}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -14 }}
+                transition={{ duration: 0.45, ease: EASE }}
+                onAnimationComplete={() => setTitleDone(true)}
+                style={{
+                  fontFamily: "var(--font-cinzel), Cinzel, serif",
+                  fontSize: "clamp(18px, 2.8vw, 32px)",
+                  fontWeight: 400, color: HERO_GOLD, letterSpacing: "0.04em",
+                }}
+              >
+                {titles[titleIdx]}
+              </motion.span>
+            </AnimatePresence>
+          )}
         </div>
 
-        {/* Gold divider */}
+        {/* Gold divider — draws in once the title line above it has appeared */}
         <motion.div
           initial={{ scaleX: 0, opacity: 0 }}
-          animate={ready ? { scaleX: 1, opacity: 1 } : {}}
-          transition={{ duration: 0.65, delay: 1.3, ease: EASE }}
+          animate={titleDone ? { scaleX: 1, opacity: 1 } : {}}
+          transition={{ duration: 0.5, ease: EASE }}
           style={{
-            margin: "32px auto 0", height: 1, width: 80,
-            background: `linear-gradient(to right, transparent, ${GOLD}, transparent)`,
-            transformOrigin: "center",
+            margin: "32px 0 0", height: 1, width: 80,
+            background: `linear-gradient(to right, ${HERO_GOLD}, transparent)`,
+            transformOrigin: "left",
           }}
         />
 
-        {/* ③ Tagline — typed in */}
+        {/* ③ Tagline — typed in last, bottom line */}
         <p style={{
           fontFamily: "var(--font-inter), Inter, sans-serif",
           fontSize: "clamp(15px, 1.7vw, 18px)",
-          color: SILVER, margin: "28px 0 0", lineHeight: 1.7, maxWidth: 520,
+          color: HERO_SILVER, margin: "28px 0 0", lineHeight: 1.7, maxWidth: 480,
           minHeight: "1.7em",
         }}>
-          {ready && <TypeWriter text={tagline} delay={1.4} charDelay={0.018} />}
+          {ready && titleDone && <TypeWriter text={tagline} delay={0.15} charDelay={0.018} />}
         </p>
       </motion.div>
 
@@ -277,13 +310,13 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
           zIndex: 4,
         }}
       >
-        <span style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: MUTED }}>
+        <span style={{ fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: HERO_MUTED }}>
           Scroll
         </span>
         <motion.div
           animate={{ y: [0, 6, 0] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          style={{ width: 1, height: 24, background: `linear-gradient(to bottom, ${GOLD}, transparent)` }}
+          style={{ width: 1, height: 24, background: `linear-gradient(to bottom, ${HERO_GOLD}, transparent)` }}
         />
       </motion.div>
     </section>
@@ -339,20 +372,38 @@ export default function HubPage() {
   const [heroReady, setHeroReady]   = useState(false);
   const [activeHref, setActiveHref] = useState("/");
 
-  // On mount: decide whether to show wall or skip it
+  // On mount: decide whether to show wall or skip it. Both flags flip together
+  // in the same render when skipping, so the hero renders once, fully ready —
+  // no intermediate empty-then-filled frame.
   useEffect(() => {
     if (sessionStorage.getItem(WALL_KEY)) {
       setWallDone(true);
-      setTimeout(() => setHeroReady(true), 50);
+      setHeroReady(true);
     } else {
       setWallDone(false);
     }
   }, []);
 
-  // Scroll lock only while wall is open
+  // Scroll lock only while wall is open — block scroll input directly instead
+  // of toggling `overflow: hidden`, which hides/reshows the native scrollbar
+  // and reflows the layout (causing the hero text to visibly shift once the
+  // wall finishes). This keeps the scrollbar — and page width — constant
+  // from the first frame.
   useEffect(() => {
-    document.body.style.overflow = wallDone === false ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    if (wallDone !== false) return;
+    const preventScroll = (e: Event) => e.preventDefault();
+    const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]);
+    const preventKeyScroll = (e: KeyboardEvent) => {
+      if (SCROLL_KEYS.has(e.key)) e.preventDefault();
+    };
+    window.addEventListener("wheel", preventScroll, { passive: false });
+    window.addEventListener("touchmove", preventScroll, { passive: false });
+    window.addEventListener("keydown", preventKeyScroll);
+    return () => {
+      window.removeEventListener("wheel", preventScroll);
+      window.removeEventListener("touchmove", preventScroll);
+      window.removeEventListener("keydown", preventKeyScroll);
+    };
   }, [wallDone]);
 
   // Keyboard shortcut to forge
@@ -414,7 +465,7 @@ export default function HubPage() {
           <WallScreen onDone={() => {
             sessionStorage.setItem(WALL_KEY, "1");
             setWallDone(true);
-            setTimeout(() => setHeroReady(true), 200);
+            setHeroReady(true);
           }} />
         )}
       </AnimatePresence>
