@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+Crafted by Mv Singh
 
-TODO: Document your project here
+Visit us at www.mvsingh.in
