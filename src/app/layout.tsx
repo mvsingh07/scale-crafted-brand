@@ -47,8 +47,8 @@ const getIdentityProfile = unstable_cache(
 );
 
 const SITE_URL = "https://mvsingh.in";
-const SITE_TITLE = "MV Singh: AI Software Engineer & Consultant";
-const SITE_DESCRIPTION = "MV Singh: AI Software Engineer & Consultant";
+const SITE_TITLE = "MV Singh: Software Engineer & AI Strategist";
+const SITE_DESCRIPTION = "Imagine, Build, Inspire";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
