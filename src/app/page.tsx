@@ -119,7 +119,7 @@ function TypeWriter({ text, delay = 0, charDelay = 0.05, onComplete }: {
 
 // Hero always renders on its dark cinematic palette, independent of the site-wide
 // light/dark toggle — the background video and gold typography need a black stage.
-const HERO_BG      = "#0A0A0A";
+const HERO_BG      = "#000000";
 const HERO_GOLD    = "#C9A55A";
 const HERO_GOLD_L  = "#E0C27A";
 const HERO_WHITE   = "#F8FAFC";
@@ -193,9 +193,10 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
       </div>
       */}
 
-      {/* Background illustration — looping video, sits behind the copy.
-          Mobile fills the frame (cover) to avoid huge letterbox bars on tall
-          screens; sm+ shows the full frame uncropped (contain). */}
+      {/* Background illustration — looping video, layered above the jet-black
+          backdrop with a "screen" blend so its black pixels stay invisible
+          against HERO_BG and only the bright content shows through; the
+          section background itself stays pure black underneath. */}
       <video
         aria-hidden
         autoPlay
@@ -205,12 +206,12 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
         preload="auto"
         className="object-cover sm:object-contain"
         style={{
-          position: "absolute", inset: 0, zIndex: 0,
+          position: "absolute", inset: 0, zIndex: 1,
           width: "100%", height: "100%",
-          opacity: 0.35,
+          mixBlendMode: "screen",
         }}
       >
-        <source src="/video/black-animation.mp4" type="video/mp4" />
+        <source src="/video/final-bg-animation.mp4" type="video/mp4" />
       </video>
 
       {/* Floating gold particles — above the video */}
@@ -319,6 +320,13 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
           style={{ width: 1, height: 24, background: `linear-gradient(to bottom, ${HERO_GOLD}, transparent)` }}
         />
       </motion.div>
+
+      {/* Dark scrim — sits above everything else in the hero, including copy */}
+      <div aria-hidden style={{
+        position: "absolute", inset: 0, zIndex: 5,
+        background: "#000000", opacity: 0.25,
+        pointerEvents: "none",
+      }} />
     </section>
   );
 }
