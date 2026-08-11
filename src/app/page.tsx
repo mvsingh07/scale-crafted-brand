@@ -321,10 +321,10 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
         />
       </motion.div>
 
-      {/* Dark scrim — sits above everything else in the hero, including copy */}
+      {/* Dark scrim — darkens the video/particles only; sits below the copy (zIndex 4) so text stays clear */}
       <div aria-hidden style={{
-        position: "absolute", inset: 0, zIndex: 5,
-        background: "#000000", opacity: 0.25,
+        position: "absolute", inset: 0, zIndex: 3,
+        background: "#000000", opacity: 0.35,
         pointerEvents: "none",
       }} />
     </section>
