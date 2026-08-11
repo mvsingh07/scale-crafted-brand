@@ -320,7 +320,7 @@ function HeroSection({ lang, ready }: { lang: Lang; ready: boolean }) {
           style={{ width: 1, height: 24, background: `linear-gradient(to bottom, ${HERO_GOLD}, transparent)` }}
         />
       </motion.div>
-
+{/* By Mv Singh */}
       {/* Dark scrim — darkens the video/particles only; sits below the copy (zIndex 4) so text stays clear */}
       <div aria-hidden style={{
         position: "absolute", inset: 0, zIndex: 3,
