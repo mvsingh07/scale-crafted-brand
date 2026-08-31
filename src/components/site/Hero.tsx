@@ -7,6 +7,14 @@ import type { Profile } from "@/lib/supabase";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
+// Hero always renders on its fixed black video backdrop, independent of the
+// site-wide light/dark toggle — same fixed palette approach as the landing hero.
+const HERO_TEXT     = "#F8FAFC";
+const HERO_SUBTLE   = "#D1D5DB";
+const HERO_GOLD     = "#C9A55A";
+const HERO_GOLD_L   = "#E0C27A";
+const HERO_SILVER   = "#C7CDD6";
+
 const DEFAULTS = {
   name:             "Manvir Singh",
   identity_stripe:  "Engineer · Builder · Creator",
@@ -41,7 +49,7 @@ function SplitChars({ text, gradient }: { text: string; gradient?: boolean }) {
         }
         const ci = charIdx++;
         const gradStyle: React.CSSProperties = gradient ? {
-          background: "linear-gradient(90deg, var(--gold-primary) 0%, var(--gold-highlight) 55%, var(--silver) 100%)",
+          background: `linear-gradient(90deg, ${HERO_GOLD} 0%, ${HERO_GOLD_L} 55%, ${HERO_SILVER} 100%)`,
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           backgroundClip: "text",
@@ -115,21 +123,61 @@ export const Hero = ({ profile }: HeroProps = {}) => {
         alignItems: "center",
         overflow: "hidden",
         paddingTop: 72,
+        background: "#000000",
       }}
     >
+      {/* Background illustration — same video layering approach as the default hero. */}
+      <video
+        aria-hidden
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        className="object-cover sm:object-contain"
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          width: "100%",
+          height: "100%",
+          mixBlendMode: "screen",
+          pointerEvents: "none",
+        }}
+      >
+        <source src="/video/1080p.mp4" type="video/mp4" />
+      </video>
+
       {/* Ambient glows */}
       <div aria-hidden style={{
-        position: "absolute", inset: 0,
+        position: "absolute", inset: 0, zIndex: 1,
         background: "radial-gradient(ellipse 70% 55% at 60% 40%, color-mix(in srgb, var(--gold-primary) var(--hero-glow-opacity), transparent) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
       <div aria-hidden style={{
-        position: "absolute", inset: 0,
+        position: "absolute", inset: 0, zIndex: 1,
         background: "radial-gradient(ellipse 40% 40% at 15% 70%, color-mix(in srgb, var(--gold-border) var(--hero-glow-opacity-2), transparent) 0%, transparent 65%)",
         pointerEvents: "none",
       }} />
 
-      <div className="container relative" style={{ paddingTop: 48, paddingBottom: 80 }}>
+      {/* Dark scrim — same darkening as the landing hero's scrim over its video/particles. */}
+      <div aria-hidden style={{
+        position: "absolute", inset: 0, zIndex: 2,
+        background: "#000000", opacity: 0.35,
+        pointerEvents: "none",
+      }} />
+
+      <div
+        className="relative"
+        style={{
+          zIndex: 3,
+          width: "100%",
+          maxWidth: "none",
+          marginLeft: 0,
+          marginRight: "auto",
+          padding: "48px clamp(20px, 4vw, 56px) 80px clamp(24px, 6vw, 88px)",
+        }}
+      >
         <div style={{ maxWidth: 860 }}>
 
           {/* Eyebrow — fade up */}
@@ -151,7 +199,7 @@ export const Hero = ({ profile }: HeroProps = {}) => {
               <span style={{
                 fontFamily: "var(--font-inter), Inter, sans-serif",
                 fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase",
-                color: "var(--gold-primary)",
+                color: HERO_GOLD,
               }}>
                 {stripe}
               </span>
@@ -176,7 +224,7 @@ export const Hero = ({ profile }: HeroProps = {}) => {
             fontSize: "clamp(18px, 2.4vw, 28px)",
             fontWeight: 400,
             fontStyle: "italic",
-            color: "hsl(var(--foreground))",
+            color: HERO_TEXT,
             lineHeight: 1.4,
             margin: "0 0 24px",
             maxWidth: 680,
@@ -200,7 +248,7 @@ export const Hero = ({ profile }: HeroProps = {}) => {
           <p style={{
             fontFamily: "var(--font-inter), Inter, sans-serif",
             fontSize: "clamp(14px, 1.5vw, 17px)",
-            lineHeight: 1.8, color: "hsl(var(--muted-foreground))",
+            lineHeight: 1.8, color: HERO_SUBTLE,
             maxWidth: 600, margin: "0 0 40px",
           }}>
             <WordFade text={description} delay={0.95} />
@@ -217,7 +265,7 @@ export const Hero = ({ profile }: HeroProps = {}) => {
               Explore Work <ArrowRight size={14} />
             </Button>
             <Button variant="ghost" size="lg" onClick={() => scrollTo("contact")}
-              className="text-muted-foreground hover:text-foreground gap-2">
+              className="hero-cta-ghost gap-2">
               <Mail size={14} /> Let&apos;s talk
             </Button>
           </motion.div>
@@ -242,14 +290,14 @@ export const Hero = ({ profile }: HeroProps = {}) => {
                   <p style={{
                     fontFamily: "var(--font-cinzel), Cinzel, serif",
                     fontSize: "clamp(22px, 2.8vw, 32px)", fontWeight: 700,
-                    background: "linear-gradient(135deg, var(--gold-primary), var(--gold-highlight))",
+                    background: `linear-gradient(135deg, ${HERO_GOLD}, ${HERO_GOLD_L})`,
                     WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
                     lineHeight: 1, margin: 0,
                   }}>{s.value}</p>
                   <p style={{
                     fontFamily: "var(--font-inter), Inter, sans-serif",
                     fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase",
-                    color: "hsl(var(--muted-foreground))", marginTop: 3,
+                    color: HERO_SUBTLE, marginTop: 3,
                   }}>{s.label}</p>
                 </div>
               </div>
@@ -263,6 +311,8 @@ export const Hero = ({ profile }: HeroProps = {}) => {
         @keyframes ping {
           75%, 100% { transform: scale(2); opacity: 0; }
         }
+        .hero-cta-ghost { color: ${HERO_SUBTLE}; }
+        .hero-cta-ghost:hover { color: ${HERO_TEXT}; }
         @media (max-width: 640px) {
           .hero-stats {
             display: grid !important;

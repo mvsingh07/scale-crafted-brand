@@ -10,12 +10,6 @@ import { Journey } from "./Journey";
 import { Skills } from "./Skills";
 import { Contact } from "./Contact";
 import { SectionScroller } from "@/components/SectionScroller";
-import dynamic from "next/dynamic";
-
-const PortfolioBackground = dynamic(
-  () => import("./PortfolioBackground").then((m) => ({ default: m.PortfolioBackground })),
-  { ssr: false }
-);
 
 interface Props {
   data: FullProfile | null;
@@ -41,7 +35,6 @@ export function PortfolioContent({ data, showNavbar }: Props) {
       <Suspense fallback={null}>
         <SectionScroller />
       </Suspense>
-      <PortfolioBackground />
       <div className="relative z-10">
         <Hero profile={profile} />
         <Personal
