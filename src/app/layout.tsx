@@ -47,13 +47,32 @@ const getIdentityProfile = unstable_cache(
 );
 
 const SITE_URL = "https://mvsingh.in";
-const SITE_TITLE = "MV Singh: Software Engineer & AI Strategist";
-const SITE_DESCRIPTION = "Imagine, Build, Inspire";
+const SITE_TITLE = "Manvir Singh (MV Singh) — Software Engineer & AI Strategist";
+const SITE_DESCRIPTION = "Manvir Singh, known as MV Singh — software engineer and AI strategist building scalable systems, real-time platforms, and AI-native products. Imagine, Build, Inspire.";
+
+const PERSON_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Manvir Singh",
+  alternateName: ["MV Singh", "M V Singh", "mvsingh"],
+  url: SITE_URL,
+  image: `${SITE_URL}/og-image.png`,
+  jobTitle: "Software Engineer & AI Strategist",
+  description: SITE_DESCRIPTION,
+  sameAs: [
+    "https://linkedin.com/in/mvsingh02",
+    "https://github.com/mvsingh07",
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
+  keywords: ["Manvir Singh", "MV Singh", "mvsingh", "software engineer", "AI strategist", "backend engineer", "portfolio"],
+  alternates: {
+    canonical: SITE_URL,
+  },
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -113,6 +132,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {cssVars && <style>{`@layer ecosystem-theme { :root { ${cssVars} } }`}</style>}
         {/* Prevent flash of wrong theme — reads localStorage before first paint */}
         <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('mv-theme')||localStorage.getItem('theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}else if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}else if(t==='system'||!t){var d=window.matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',d?'dark':'light');}}catch(e){}` }} />
+        {/* Person structured data — helps search engines resolve "Manvir Singh" / "MV Singh" / "mvsingh" to this site as one entity */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(PERSON_JSON_LD) }}
+        />
       </head>
       <body>
         <IdentityProvider initial={identity as IdentityProfile | null}>
