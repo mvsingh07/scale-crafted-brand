@@ -49,7 +49,7 @@ export function ProjectCard({ project: p }: { project: EcosystemProject; index?:
               {status.label}
             </span>
             {p.stack_tags.slice(0, 4).map(tag => (
-              <span key={tag} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 6, padding: "2px 8px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, color: MUTED }}>
+              <span key={tag} style={{ background: "color-mix(in srgb, var(--text-primary) 4%, transparent)", border: "1px solid color-mix(in srgb, var(--text-primary) 8%, transparent)", borderRadius: 6, padding: "2px 8px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 10, color: MUTED }}>
                 {tag}
               </span>
             ))}
@@ -63,7 +63,7 @@ export function ProjectCard({ project: p }: { project: EcosystemProject; index?:
             )}
             {p.code_url && (
               <a href={p.code_url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}
-                style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "7px 13px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, color: SILVER, textDecoration: "none" }}>
+                style={{ display: "flex", alignItems: "center", gap: 6, background: "color-mix(in srgb, var(--text-primary) 5%, transparent)", border: "1px solid color-mix(in srgb, var(--text-primary) 10%, transparent)", borderRadius: 8, padding: "7px 13px", fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, color: SILVER, textDecoration: "none" }}>
                 <Github size={12} />Code
               </a>
             )}
@@ -73,7 +73,7 @@ export function ProjectCard({ project: p }: { project: EcosystemProject; index?:
         {/* Row 2: cover image | title + tagline — always side-by-side */}
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           {p.cover_image_url && (
-            <div style={{ width: 80, height: 80, borderRadius: 10, overflow: "hidden", background: "rgba(255,255,255,0.04)", flexShrink: 0 }}>
+            <div style={{ width: 80, height: 80, borderRadius: 10, overflow: "hidden", background: "color-mix(in srgb, var(--text-primary) 4%, transparent)", flexShrink: 0 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={p.cover_image_url} alt={p.title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>

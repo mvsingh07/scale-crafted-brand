@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -20,6 +20,8 @@ import {
   LogOut,
   FolderKanban,
   X,
+  Upload,
+  Image as ImageIcon,
 } from "lucide-react";
 
 const OWNER = "mvsingh";
@@ -98,6 +100,94 @@ function Field({
           style={inputStyle}
         />
       )}
+    </div>
+  );
+}
+
+// Project icon/thumbnail — either upload a file (stored in the public
+// `site-images` bucket) or paste an external URL directly. Both write to the
+// same `cover_image_url` field that ProjectCard renders everywhere projects
+// show up (Studio's Recent Work, the personal site's Work section).
+function IconUploadField({
+  label, value, onChange,
+}: {
+  label: string; value: string | null; onChange: (url: string | null) => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+    const path = `projects/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("site-images").upload(path, file, { contentType: file.type });
+    if (error) {
+      toast.error("Upload failed", { description: error.message });
+    } else {
+      const { data: { publicUrl } } = supabase.storage.from("site-images").getPublicUrl(path);
+      onChange(publicUrl);
+      toast.success("Icon uploaded");
+    }
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={labelStyle}>{label}</label>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 8, overflow: "hidden", flexShrink: 0,
+          background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          {value ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={value} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <ImageIcon size={16} color="rgba(255,255,255,0.2)" />
+          )}
+        </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+          style={{ display: "none" }}
+          onChange={handleFile}
+        />
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            background: "rgba(201,165,90,0.1)", border: "1px solid rgba(201,165,90,0.2)",
+            borderRadius: 8, padding: "7px 12px",
+            fontFamily: "var(--font-inter), Inter, sans-serif", fontSize: 11, color: GOLD,
+            cursor: uploading ? "not-allowed" : "pointer",
+          }}
+        >
+          <Upload size={12} /> {uploading ? "Uploading…" : value ? "Replace" : "Upload"}
+        </button>
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange(null)}
+            style={{ background: "none", border: "none", color: "rgba(255,255,255,0.25)", cursor: "pointer", padding: 4 }}
+          >
+            <X size={13} />
+          </button>
+        )}
+      </div>
+      <input
+        type="text"
+        value={value ?? ""}
+        onChange={e => onChange(e.target.value || null)}
+        placeholder="or paste an image URL"
+        style={inputStyle}
+      />
     </div>
   );
 }
@@ -247,7 +337,7 @@ function ProjectForm({
           <Field label="Description" value={data.description} onChange={v => set("description", v)} placeholder="What are you building and why?" multiline />
           <Field label="Live URL" value={data.live_url ?? ""} onChange={v => set("live_url", v || null)} placeholder="https://" />
           <Field label="Code / Repo URL" value={data.code_url ?? ""} onChange={v => set("code_url", v || null)} placeholder="https://github.com/..." />
-          <Field label="Cover Image URL" value={data.cover_image_url ?? ""} onChange={v => set("cover_image_url", v || null)} placeholder="https://..." />
+          <IconUploadField label="Project Icon" value={data.cover_image_url} onChange={v => set("cover_image_url", v)} />
 
           {/* Status */}
           <div style={{ marginBottom: 14 }}>
@@ -513,6 +603,18 @@ const EditorPage = () => {
                 whileHover={{ backgroundColor: "rgba(255,255,255,0.04)", borderColor: "rgba(201,165,90,0.2)" }}
               >
                 <GripVertical size={14} color="rgba(255,255,255,0.15)" style={{ flexShrink: 0 }} />
+                <div style={{
+                  width: 36, height: 36, borderRadius: 8, overflow: "hidden", flexShrink: 0,
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {p.cover_image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.cover_image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <ImageIcon size={13} color="rgba(255,255,255,0.15)" />
+                  )}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                     <p style={{ fontSize: 14, fontWeight: 600, color: "#F8FAFC", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

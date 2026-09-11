@@ -8,7 +8,6 @@ import { HubFooter } from "@/components/hub/HubFooter";
 import { useIdentity } from "@/context/identity";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { VisionSection } from "@/components/sections/VisionSection";
-import { ServicesSection } from "@/components/sections/ServicesSection";
 import { BlogsSection } from "@/components/sections/BlogsSection";
 import { ContactSection } from "@/components/sections/ContactSection";
 import { DivineBranchWave } from "@/components/site/DivineBranchWave";
@@ -352,13 +351,12 @@ const SECTION_MAP = [
   { id: "eco-home",    href: "/",        Component: null },
   { id: "eco-about",   href: "/about",   Component: AboutSection },
   { id: "eco-vision",  href: "/vision",  Component: VisionSection },
-  { id: "eco-services", href: "/services", Component: ServicesSection },
   { id: "eco-blogs",   href: "/blogs",   Component: BlogsSection },
   { id: "eco-contact", href: "/contact", Component: ContactSection },
 ];
 
 // Hrefs always shown on the hub even when no identity nav_links are configured.
-const FALLBACK_NAV_HREFS = ["/", "/about", "/services", "/blogs", "/contact"];
+const FALLBACK_NAV_HREFS = ["/", "/about", "/blogs", "/contact"];
 
 export default function HubPage() {
   const router = useRouter();
@@ -371,10 +369,7 @@ export default function HubPage() {
       ? identity.nav_links.map(l => l.href)
       : FALLBACK_NAV_HREFS,
   );
-  // Work merged into Services: a legacy "/work" nav entry still surfaces the Services section.
-  const visibleSections = SECTION_MAP.filter(
-    s => s.Component && (navHrefs.has(s.href) || (s.href === "/services" && navHrefs.has("/work"))),
-  );
+  const visibleSections = SECTION_MAP.filter(s => s.Component && navHrefs.has(s.href));
   // null = not yet checked, false = showing wall, true = wall done/skipped
   const [wallDone, setWallDone]     = useState<boolean | null>(null);
   const [heroReady, setHeroReady]   = useState(false);

@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   Globe, Search, Bot, LayoutDashboard, CreditCard, Smartphone, Sparkles,
   Code2, Database, Cloud, GitBranch, Cpu, Mail, Map, BarChart3, HardDrive,
-  ArrowRight, Zap, Check, ChevronDown,
+  ArrowRight, Check, ChevronDown,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import type { EcosystemService, EcosystemProject } from "@/lib/supabase";
-import { ProjectCard } from "@/components/sections/shared/ProjectCard";
+import type { EcosystemService } from "@/lib/supabase";
+import { STUDIO_URL } from "@/lib/utils";
 
 const GOLD   = "var(--gold-primary)";
 const GOLD_L = "var(--gold-highlight)";
@@ -84,7 +84,9 @@ function HeroBand() {
           solutions designed around your business, not unnecessary complexity.
         </p>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 34 }}>
-          <a href="#services-work" style={{
+          {/* Recent-work proof now lives on Studio, not duplicated here — see the
+              note further down about MV Singh Tech Studio owning the business pitch. */}
+          <a href={`${STUDIO_URL}#studio-work`} style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             background: `linear-gradient(135deg, ${GOLD}, ${GOLD_L})`, borderRadius: 10,
             padding: "12px 22px", fontFamily: FONT_B, fontSize: 14, fontWeight: 600,
@@ -114,6 +116,28 @@ function HeroBand() {
           who understands both business and technology, and can design, build, and continuously
           improve solutions using modern tools. <span style={{ color: GOLD }}>That&apos;s exactly where I help.</span>
         </p>
+      </Reveal>
+
+      {/* This page describes the same work MV Singh Tech Studio now exists to sell —
+          point business inquiries there rather than duplicating the full
+          pitch on both sites. Everything below stays as portfolio/proof-of-work
+          context for this personal site, not removed. */}
+      <Reveal delay={0.16} style={{
+        position: "relative", marginTop: 16, maxWidth: 720,
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap",
+        padding: "18px 22px", borderRadius: 14,
+        border: "1px solid color-mix(in srgb, var(--text-primary) 10%, transparent)",
+        background: "color-mix(in srgb, var(--text-primary) 3%, transparent)",
+      }}>
+        <p style={{ fontFamily: FONT_B, fontSize: 13.5, color: SILVER, margin: 0 }}>
+          Looking to hire this as a service for your business, not just read about it?
+        </p>
+        <a href={STUDIO_URL} style={{
+          display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0,
+          fontFamily: FONT_B, fontSize: 13.5, fontWeight: 600, color: GOLD, textDecoration: "none",
+        }}>
+          Visit MV Singh Tech Studio <ArrowRight size={14} />
+        </a>
       </Reveal>
     </div>
   );
@@ -191,40 +215,6 @@ function HowICanHelp({ services, loading }: { services: EcosystemService[]; load
           style={{ display: "grid", gap: 18, gridTemplateColumns: "repeat(auto-fill, minmax(min(300px, 100%), 1fr))" }}
         >
           {services.map((s, i) => <ServiceCard key={s.id} service={s} index={i} />)}
-        </motion.div>
-      )}
-    </div>
-  );
-}
-
-// ── 3 · Featured Projects (existing ecosystem_projects) ───────────────────────
-function FeaturedProjects({ projects, loading }: { projects: EcosystemProject[]; loading: boolean }) {
-  return (
-    <div id="services-work" style={{ maxWidth: 1100, margin: "0 auto", padding: "56px clamp(18px, 4vw, 32px)", scrollMarginTop: 80 }}>
-      <Reveal style={{ marginBottom: 44, maxWidth: 620 }}>
-        <Eyebrow>Featured Projects</Eyebrow>
-        <SectionHeading>Recent work.</SectionHeading>
-        <p style={{ fontFamily: FONT_B, fontSize: "clamp(14px, 1.6vw, 17px)", color: SILVER, lineHeight: 1.7, margin: "16px 0 0" }}>
-          Real projects, built and shipped. This list grows as new work goes live.
-        </p>
-      </Reveal>
-
-      {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", paddingTop: 40 }}>
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-white/40" />
-        </div>
-      ) : projects.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "60px 0", fontFamily: FONT_B, fontSize: 13, color: MUTED }}>
-          <Zap size={26} style={{ margin: "0 auto 14px", opacity: 0.2 }} />
-          Projects loading soon.
-        </div>
-      ) : (
-        <motion.div
-          initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}
-          variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-          style={{ display: "flex", flexDirection: "column", gap: 20 }}
-        >
-          {projects.map((p, i) => <ProjectCard key={p.id} project={p} index={i} />)}
         </motion.div>
       )}
     </div>
@@ -456,9 +446,7 @@ function Divider() {
 // ── Root ──────────────────────────────────────────────────────────────────────
 export function ServicesSection() {
   const [services, setServices] = useState<EcosystemService[]>([]);
-  const [projects, setProjects] = useState<EcosystemProject[]>([]);
   const [servicesLoading, setServicesLoading] = useState(true);
-  const [projectsLoading, setProjectsLoading] = useState(true);
 
   useEffect(() => {
     supabase
@@ -471,17 +459,6 @@ export function ServicesSection() {
         setServices((data as EcosystemService[]) ?? []);
         setServicesLoading(false);
       });
-
-    supabase
-      .from("ecosystem_projects")
-      .select("*")
-      .eq("username", OWNER)
-      .eq("is_public", true)
-      .order("ord", { ascending: true })
-      .then(({ data }) => {
-        setProjects((data as EcosystemProject[]) ?? []);
-        setProjectsLoading(false);
-      });
   }, []);
 
   return (
@@ -489,8 +466,11 @@ export function ServicesSection() {
       <HeroBand />
       <Divider />
       <HowICanHelp services={services} loading={servicesLoading} />
+      {/* Featured Projects moved to MV Singh Tech Studio (#studio-work) — recent-work
+          proof now lives there instead of being duplicated on both sites.
       <Divider />
       <FeaturedProjects projects={projects} loading={projectsLoading} />
+      */}
       {/* How I Work / Why Work With Me / Technology Stack sections commented out
       <Divider />
       <HowIWork />

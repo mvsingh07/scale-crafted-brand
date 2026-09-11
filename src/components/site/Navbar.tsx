@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useIdentity } from "@/context/identity";
+import { STUDIO_URL } from "@/lib/utils";
 
 type Lang = "EN" | "HI" | "PA";
 
@@ -364,6 +365,13 @@ export const Navbar = ({
               </Link>
             );
           })}
+          {/* Fixed outbound link to the sibling business site — not part of
+              `links`, since it's not CMS-editable content or an in-page
+              section, just a cross-property pointer (mirrors StudioNav's own
+              "Personal Site ↗" link back the other way). */}
+          <a href={STUDIO_URL} style={{ ...linkStyle, color: "var(--gold-primary)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+            Studio <ArrowUpRight size={13} />
+          </a>
         </div>
 
         {/* Right: Time+Location | Language (landing only) | Theme */}
@@ -485,6 +493,25 @@ export const Navbar = ({
                   </motion.div>
                 );
               })}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.35, delay: 0.1 + links.length * 0.06, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <a
+                  href={STUDIO_URL}
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    fontFamily: "var(--font-cinzel), Cinzel, serif",
+                    fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 400, letterSpacing: "0.04em",
+                    color: "var(--gold-primary)", textDecoration: "none",
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "10px 0", borderBottom: "1px solid color-mix(in srgb, var(--gold-border) 12%, transparent)",
+                  }}
+                >
+                  Studio <ArrowUpRight size={18} />
+                </a>
+              </motion.div>
             </div>
 
             {/* Bottom: lang + time + theme */}

@@ -20,7 +20,7 @@ const DEFAULT_PARAGRAPHS: AboutParagraph[] = [
   { text: "If you're building something that matters — reach out.", italic: true },
 ];
 const DEFAULT_STATS: AboutStat[] = [
-  { value: "3+",     label: "Years Building" },
+  { value: "4+",     label: "Years Building" },
   { value: "Punjab", label: "India" },
   { value: "AI",     label: "Current Focus" },
   { value: "∞",      label: "Curiosity" },
