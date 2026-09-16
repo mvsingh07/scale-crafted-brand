@@ -1,12 +1,6 @@
-"use client";
-
-import { HubPageLayout } from "@/components/hub/HubPageLayout";
-import { ServicesSection } from "@/components/sections/ServicesSection";
+import { notFound } from "next/navigation";
 
 export default function ServicesPage() {
-  return (
-    <HubPageLayout>
-      <ServicesSection />
-    </HubPageLayout>
-  );
+  // Treat `/services` as a non-existent path — render the Next.js 404 page
+  notFound();
 }

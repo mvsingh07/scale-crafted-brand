@@ -3,7 +3,11 @@ import type { NextRequest } from "next/server";
 
 const DISABLED_PATHS = ["/admin", "/forge/signup"];
 
-const STUDIO_HOSTS = ["studio.mvsingh.in", "studio.localhost:3000"];
+// Keep local dev host for studio rewriting; remove the production
+// host so the live site won't be transparently rewritten to /studio.
+// This prevents requests to /studio from being redirected to the
+// production subdomain (studio.mvsingh.in).
+const STUDIO_HOSTS = ["studio.localhost:3000"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
